@@ -1,0 +1,5 @@
+library(testthat)
+library(flipRevenueMetrics)
+library(flipStandardCharts)
+library(lubridate)
+test_check("flipRevenueMetrics")
