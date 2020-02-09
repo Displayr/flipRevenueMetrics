@@ -34,7 +34,7 @@ test_that("Create subsets",
               expect_equal(names(s)[1], "Australia + MISSING DATA")
           })
 
-by= "quarter"
+# by= "quarter"
 for (by in c("month", "quarter", "year"))
   test_that(paste("Churn consistency", by), {
     # Near-depricated
@@ -61,12 +61,12 @@ for (by in c("month", "quarter", "year"))
 
 
 data(q.invoice.lines.short)
-d <- q.invoice.lines
+d <- q.invoice.lines.short
 
 # This is just checking for errors. Blog projects will be used for checking outputs.
-fun = "RecurringRevenueChurnByCohort"
-out = "Table"#"Table"
-by = "month"
+# fun = "RecurringRevenueChurnByCohort"
+# out = "Table"#"Table"
+# by = "month"
 p.country <- d[, "country", drop = FALSE]
 p.country.salesman <- d[, c("country", "salesman")]
 
@@ -89,7 +89,7 @@ funcs <- c("InitialCustomerChurn",  # Churn
            "MeanRecurringRevenue2Years",
            "MeanRecurringRevenue180Days",
            "MeanRecurringRevenue2Years")
-funcs <- "RecurringRevenueChurnByCohort"
+#funcs <- "RecurringRevenueChurnByCohort"
 # Quick run through checking that the basic function works
 # fun = "RecurringRevenueGrowth"
 for (fun in funcs)
