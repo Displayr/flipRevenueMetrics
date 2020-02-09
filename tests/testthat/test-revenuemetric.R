@@ -109,18 +109,22 @@ for (fun in funcs)
         for (by in c("month", "quarter", "year"))
         {
             descr <- paste("metrics", fun, out, by)
+            
+            # Tests that the function works with a total data set
             test_that(paste("aggregate ", descr),{
               s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by)
               if (is.null(s)) expect_true(TRUE)
               else capture.output(expect_error(print(s), NA))
             })
-
+            
+            # Conducts the analysis split by a profiling variable
             test_that(paste("profiling 1 ", descr),{
                         s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by, profiling = p.country)
                         if (is.null(s)) expect_true(TRUE)
                         else capture.output(expect_error(print(s), NA))
             })
 
+            # Conducts the analysis split by two profiling variables
             test_that(paste("profiling 2 ", descr),{
                       s = RevenueMetric(fun, output = out, d$AUD, d$ValidFrom,d$ValidTo, id = d$name, by = by, profiling = p.country.salesman, )
           if (is.null(s)) expect_true(TRUE)
