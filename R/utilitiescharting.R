@@ -1,6 +1,6 @@
 requiresHeatmap <- function(x)
 {
-    required.for <- c("ChurnByCohort", "RevenuePerSubscriberByCohortByTime")
+    required.for <- c("ChurnByCohort")#, "RevenuePerSubscriberByCohortByTime")
     any(required.for %in% class(x[[1]]))
 }
 
@@ -32,4 +32,34 @@ areaChart <- function(x,  ...)
          fit.ignore.last = TRUE,
          fit.line.type = "solid", fit.line.width = 2, 
          fit.line.colors = "#f5c524", ...)$htmlwidget
+}
+
+
+
+
+#' \code{cohortHeatmap}
+#'
+#' @description Internal heatmap function.
+#' @param x A \code{matrix} 
+#' @param series.hover The description of the value that appears in each cell;
+#' used in the hover tooltips 
+#' @param ... Additional arguments to be passed to lower level functions.
+#' @return A plotly heatmap
+cohortHeatmap <- function(x, series.hover, ...)
+{
+    rn <- matrix(rownames(x), nrow(x), ncol(x), byrow = FALSE)
+    cn <- matrix(colnames(x), nrow(x), ncol(x), byrow = TRUE)
+    hover.text <- matrix(paste0("Customer since: ", rn, "<br>",
+                                properCase(attr(x, "by")), "s since starting: ", cn, "<br>",
+                                series.hover, "<br>",
+                                "Number customers: ", c(attr(x, "n.subscribers"))), nrow(x))
+    plot_ly(x = colnames(x),
+            y = rownames(x),
+            z = x, 
+            colors = colorRamp(max(x, na.rm = TRUE), list(...)$y.max), 
+            text = hover.text,
+            hoverinfo = "text",
+            type = "heatmap", 
+            showscale = FALSE) %>% config(displayModeBar = FALSE)
+    
 }

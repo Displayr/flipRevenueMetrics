@@ -23,8 +23,8 @@ Lifetime <- function(data, end = attr(data, "end"))
     end.numeric <- as.numeric(as.Date(end))
     data$to.as.numeric <- as.numeric(as.Date(data$to))
     data <- subset(data, data$from >= attr(data, "start"))
-    incomplete <- Table(to.as.numeric ~ subscriber.from.period + period.counter, data, FUN = max) < end.numeric
-    total <- Table(value ~ subscriber.from.period + period.counter, data, sum)
+   # incomplete <- Table(to.as.numeric ~ subscriber.from.period + period.counter, data, FUN = max) < end.numeric
+    total <- Table(recurring.value ~ subscriber.from.period + period.counter, data, sum)
     counts <- Table(id ~ subscriber.from.period + period.counter, data, nUnique)
     # Filling in missing row and column totals
     row.names <- CompleteListPeriodNames(rownames(total), subscription.length)
@@ -34,7 +34,7 @@ Lifetime <- function(data, end = attr(data, "end"))
     ns <- FillInVector(ns, row.names, 0)
     total[Triangle(total, position = "lower right")] <- NA
     counts[Triangle(total, position = "lower right")] <- NA
-    names(dimnames(total)) <- c("Commenced", subscription.length)
+    names(dimnames(total)) <- c("Customer since", paste0(properCase(subscription.length), "s since commencing"))
     value <- sweep(total, 1, ns, "/")
     di <- Diagonal(value, off = TRUE)
     names(di) <- rownames(value)
@@ -46,9 +46,12 @@ Lifetime <- function(data, end = attr(data, "end"))
     future.revenue[!is.finite(future.revenue)] <- NA
     lifetime.revenue <- Diagonal(cumulative, off = TRUE) + future.revenue
     lifetime.revenue.per.customer <- sum(lifetime.revenue * prop.table(ns), na.rm = TRUE)
+    revenue.per.subscriber <- total / counts
+    revenue.per.subscriber[total == 0] <- NaN
+    total[is.na(total)] <- 0
     result <- list(total = total,
                    subscribers = counts,
-                   revenue.per.subscriber = total / counts, 
+                   revenue.per.subscriber = revenue.per.subscriber, 
                    mean = value,
                    cumulative = cumulative,
                    index = index,

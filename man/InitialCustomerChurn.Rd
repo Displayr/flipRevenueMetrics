@@ -2,9 +2,28 @@
 % Please edit documentation in R/initialchurn.R
 \name{InitialCustomerChurn}
 \alias{InitialCustomerChurn}
-\title{InitialCustomerChurn}
+\title{#' @importFrom flipTime AsDate Periods 
+selectChurnData <- function(x, subscription.length, by)
+{
+    n.subscribers <- attr(x, "n.subscribers")
+    row.dates <- AsDate(rownames(x))
+    col.dates <- AsDate(colnames(x))
+    initial.possible.renewal <- row.dates + Periods(1, subscription.length) 
+    m <- match(initial.possible.renewal, col.dates)
+    k <- length(row.dates)
+    churn <- rep(NA, k)
+    base <- rep(0, k)
+    names(base) <- names(churn) <- Period(initial.possible.renewal, by)
+    not.missing <-!is.na(m) 
+    lookups <- cbind(1:k, m)[not.missing, , drop = FALSE]
+    churn[not.missing] <- x[lookups]
+    base[not.missing] <- n.subscribers[lookups]
+    attr(churn, "n.subscribers") <- base
+    churn
+}
+InitialCustomerChurn}
 \usage{
-InitialCustomerChurn(data, by, ...)
+InitialCustomerChurn(data, by, remove.last, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
@@ -12,6 +31,8 @@ InitialCustomerChurn(data, by, ...)
 \item{by}{The time period to aggregate the dates by: 
 \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
 and \code{"day"}.}
+
+\item{remove.last}{Remove the final period (as usually is incomplete).}
 
 \item{...}{Additional arguments to be passed to lower level functions.}
 }

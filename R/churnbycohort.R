@@ -1,23 +1,25 @@
 #' \code{CustomerChurnByCohort}
 #'
-#' @description Computes the customer churn by time period and time-based cohort
+#' @description Computes the customer churn by time period and time-based cohort, where the time
+#' periods are determined by the \code{attr(data, "subscription.length")}.
 #' @param data A \code{data.frame} that has the same variables as a \code{RevenueData} object.
-#' @param remove.last Remove the final period (as usually is incomplete).
 #' @param by The time period to aggregate the dates by: 
 #' \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
 #' and \code{"day"}.
+#' @param remove.last Remove the final period (this is useful if it is likely incomplete.).
 #' @param ... Additional arguments to be passed to lower level functions.
 #' @return A \code{\link{matrix}} 
 #' @importFrom flipTime Period
 #' @export
-CustomerChurnByCohort <- function(data, remove.last = FALSE, by, ...)
+CustomerChurnByCohort <- function(data, by, remove.last = FALSE, ...)
 {
-    data <- updateDataForPeriodAndChurn(data, by)
+    data <- prepareDataForChurnByCohort(data, by)
     if (nrow(data) == 0)
         return(NULL)
     n.subscribers <- subscribersByCohortAndPeriod(data, by, remove.last)
     n.churn <- calculateNChurn(data, n.subscribers)
-    rate <- churnRate(data, n.churn, n.subscribers, n.subscribers, by)
+    rate <- churnRate(data, n.churn, n.subscribers, n.subscribers, by, remove.last)
+    #rate <- removeStartEndFromColumnsOfMatrix(rare, attr(data, "start"), attr(data, "end"), remove.last)
     attr(rate, "volume") <- FALSE
     rate
 }
@@ -29,91 +31,82 @@ calculateNChurn <- function(data, n.subscribers)
     if (nrow(churn.data) == 0)
         return(matrix(0, nrow(n.subscribers), ncol(n.subscribers),
                       dimnames = dimnames(n.subscribers)))
-    Table(id ~ subscriber.from.period + to.renewal.period, data = churn.data, FUN = nUnique)
+    Table(id ~ cohort + to.renewal.period.counter, data = churn.data, FUN = nUnique)
 }
 
 #' \code{RecurringRevenueChurnByCohort}
 #'
-#' @description Computes the recurring revenue churn by time period and time-based cohort
+#' @description Computes the recurring revenue churn by time period and time-based cohort, where the time
+#' periods are determined by the \code{attr(data, "subscription.length")}.
 #' @param data A \code{data.frame} that has the same variables as a \code{RevenueData} object.
-#' @param remove.last Remove the final period (as usually is incomplete).
 #' @param by The time period to aggregate the dates by: 
 #' \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
 #' and \code{"day"}.
+#' @param remove.last Remove the final period (this is useful if it is likely incomplete.).
 #' @param ... Additional arguments to be passed to lower level functions.
 #' @return A \code{\link{matrix}} 
 #' @importFrom flipTime Period
 #' @export
-RecurringRevenueChurnByCohort <- function(data, remove.last = FALSE, by, ...)
+RecurringRevenueChurnByCohort <- function(data, by, remove.last = FALSE, ...)
 {
-    data <- updateDataForPeriodAndChurn(data, by)
+    data <- prepareDataForChurnByCohort(data, by)
+#    data <- updateDataForPeriodAndChurn(data, cohort.by, by)
     if (nrow(data) == 0)
         return(NULL)
     n.subscribers <- subscribersByCohortAndPeriod(data, by, remove.last)
-    total <- Table(recurring.value ~ subscriber.from.period + to.renewal.period, 
+    total <- Table(recurring.value ~ cohort + to.renewal.period.counter, 
                    data = data, 
                    FUN = sum)
-    lost <- calculateRecurringRevenueNumeriator(data, n.subscribers)
-    rate <- churnRate(data, lost, total, n.subscribers, by)
+    lost <- calculateRecurringRevenueNumerator(data, n.subscribers)
+    rate <- churnRate(data, lost, total, n.subscribers, by, remove.last)
     attr(rate, "volume") <- TRUE
     rate
 }
 
 
-calculateRecurringRevenueNumeriator <- function(data, n.subscribers)
+calculateRecurringRevenueNumerator <- function(data, n.subscribers)
 {
     churn.data <- data[data$churn, ]
     if (nrow(churn.data) == 0)
         return(matrix(0, nrow(n.subscribers), ncol(n.subscribers),
                       dimnames = dimnames(n.subscribers)))
-    Table(recurring.value ~ subscriber.from.period + to.renewal.period, 
+    Table(recurring.value ~ cohort + to.renewal.period.counter, 
                   data = churn.data, 
                   FUN = sum)
 }
 
-updateDataForPeriodAndChurn <- function(data, by)
-{
-    data <- removeIncompleteSubscriptions(data)
-    updatePeriods(data, by)
-}
-
-#' @importFrom flipTime Period
-updatePeriods <- function(data, by)
-{
-    data$subscriber.from.period <- Period(data$subscriber.from, by)
-    data$to.renewal.period <- Period(data$to.renewal, by)
-    data
-}
 
 #' @importFrom flipTime AsDate
 subscribersByCohortAndPeriod <- function(data, by, remove.last)
 {
-    n.subscribers <- Table(id ~ subscriber.from.period + to.renewal.period, 
+    n.subscribers <- Table(id ~ cohort + to.renewal.period.counter, 
                            data = data, 
                            FUN = nUnique)
-    all.periods <- unique(unlist(dimnames(n.subscribers)))
-    dt <- CompleteListPeriodNames(all.periods, by)
-    n.subscribers <- FillInMatrix(n.subscribers, dt, dt, value = 0)
-    keep <- periodsToKeep(dt, attr(data, "start"), attr(data, "end"), remove.last)
-    n.subscribers <- n.subscribers[, keep, drop = FALSE]
-    names(dimnames(n.subscribers)) <- c("Commenced", properCase(by))
+    # all.periods <- unique(unlist(dimnames(n.subscribers)))
+    # dt <- CompleteListPeriodNames(all.periods, by)
+    # n.subscribers <- FillInMatrix(n.subscribers, dt, dt, value = 0)
+    # keep <- periodsToKeep(dt, attr(data, "start"), attr(data, "end"), remove.last)
+    # n.subscribers <- n.subscribers[, keep, drop = FALSE]
+    # names(dimnames(n.subscribers)) <- c("Commenced", properCase(by))
     n.subscribers
 }
 
 #' @importFrom flipTime AsDate
-churnRate <- function(data, numerator, denominator, n.subscribers, by)
+churnRate <- function(data, numerator, denominator, n.subscribers, by , remove.last)
 {
-    dt <- rownames(n.subscribers)
-    num <- FillInMatrix(numerator, dt, dt, value = 0)
-    den <- FillInMatrix(denominator, dt, dt, value = 0)
-    rate <- num / den
-    names(rate) <- names(n.subscribers)
-    rate <- rate[rownames(n.subscribers), colnames(n.subscribers), drop = FALSE]
+    #dt <- rownames(n.subscribers)
+    #num <- FillInMatrix(numerator, dt, dt, value = 0)
+    num <- FillInMatrix(numerator, rownames(denominator), colnames(denominator), value = 0)
+    rate <- num / denominator
+   # names(rate) <- names(n.subscribers)
+#    rate <- rate[rownames(n.subscribers), colnames(n.subscribers), drop = FALSE]
+    rate <- tidyCohortTable(rate, by, attr(data, "subscription.length"), attr(data, "start"), attr(data, "end"), remove.last, NaN)
+    n.subscribers <- FillInMatrix(n.subscribers, rownames(rate), colnames(rate), NaN)
     detail <- churnByCohortDetail(data, by)
     rate <- addAttributesAndClass(rate, "ChurnByCohort", by, detail)
     attr(rate, "n.subscribers") <- n.subscribers
     attr(rate, "subscription.length") <- attr(data, "subscription.length")
-    dimnames(rate) <- dimnames(n.subscribers)
+    dimnames(n.subscribers) <- dimnames(rate) 
     rate
 }
 
@@ -121,16 +114,11 @@ churnByCohortDetail <- function(data, by)
 {
     if(sum(data$churn) == 0)
         return(NULL)
-    detail <- aggregate(recurring.value ~ subscriber.from.period + period.counter + id, data, sum, subset = data$churn)
-    colnames(detail) <- c("Recurring Revenue", "Commenced", properCase(by))
+    detail <- aggregate(recurring.value ~ cohort + period.counter + id, data, sum, subset = data$churn)
+    colnames(detail) <- c("Recurring Revenue", "Customer since", properCase(by))
     detail
 }
 
-#' @export
-print.ChurnByCohort <- function(x, ...)
-{
-    printWithoutAttributes(x)
-}
 
 
 #' @importFrom plotly plot_ly layout `%>%`
@@ -138,21 +126,7 @@ print.ChurnByCohort <- function(x, ...)
 #' @export
 plot.ChurnByCohort <- function(x, ...)
 {
-    by <- properCase(attr(x, "by"))
     churn.type <- if(attr(x, "volume")) "Recurring Revenue " else "Customer "
-    n <- c(attr(x, "n.subscribers"))
-    hover.text <- matrix(paste0("Commenced: ", rownames(x), "<br>",
-                                by, ": <br>", colnames(x), "<br>",
-                                churn.type, "Churn Rate: ", FormatAsPercent(x, decimals = 1), "<br>",
-                                "Base: ", n), nrow(x))#, "<extra></extra>")
-    plot_ly(
-        x = colnames(x),
-        y = rownames(x),
-        z = x, 
-        colors = colorRamp(max(x), list(...)$y.max), 
-        text = hover.text,
-        hoverinfo = "text",
-        type = "heatmap", 
-        showscale = FALSE
-    ) %>% config(displayModeBar = FALSE)
+    series.hover <-paste0(churn.type, "Churn Rate: ", FormatAsPercent(x, decimals = 1))
+    cohortHeatmap(x, series.hover = series.hover, ...)
 }

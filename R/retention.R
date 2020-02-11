@@ -46,8 +46,8 @@ Retention <- function(data, by, ...)
     n.periods <- length(periods)
     retention.rate.volume <-
         matrix(NA, n.periods, n.periods, dimnames = list(subscriber.from.period = periods, period = periods))
-    names(dimnames(retention.rate.volume)) <- c("Commenced", properCase(by)) 
-    n.subscriptions <- n.retained <- retention.rate <- retention.rate.volume
+    names(dimnames(retention.rate.volume)) <- c("Customer since", properCase(by)) 
+    n.subscribers <- n.retained <- retention.rate <- retention.rate.volume
     total <- 0
     total.lost <- 0
     total.by.period <- rep(0, n.periods)
@@ -91,7 +91,7 @@ Retention <- function(data, by, ...)
                 #     #     #stop(data$id[base])
                 #     #     
                 # }
-                n.subscriptions[cohort, c] <- n.subscribers
+                n.subscribers[cohort, c] <- n.subscribers
                 n.retained[cohort, c] <- retained <- n.subscribers - n.churned
                 retention.rate[cohort, c] <- retained / n.subscribers
                 retention.rate.volume[cohort, c] <- (revenue.base - revenue.lost) / revenue.base
@@ -102,8 +102,8 @@ Retention <- function(data, by, ...)
             }
         }
     }
-    average.retention.rate <- sum(retention.rate * n.subscriptions, na.rm = TRUE) / sum(n.subscriptions, na.rm = TRUE)
-    retention.rate.by.period <- apply(retention.rate * n.subscriptions, 2, sum, na.rm = TRUE) / apply(n.subscriptions, 2, sum, na.rm = TRUE)
+    average.retention.rate <- sum(retention.rate * n.subscribers, na.rm = TRUE) / sum(n.subscribers, na.rm = TRUE)
+    retention.rate.by.period <- apply(retention.rate * n.subscribers, 2, sum, na.rm = TRUE) / apply(n.subscribers, 2, sum, na.rm = TRUE)
     retention.rate.volume.by.period <- 1 - loss.by.period / total.by.period
     churn <- 1 - average.retention.rate
     average.retention.rate.volume = (total - total.lost) / total
@@ -114,7 +114,7 @@ Retention <- function(data, by, ...)
     mean.churn.first.period <- mean(churn.first.period, na.rm = TRUE)
     estimated.volume.churn.by.period <- churn.volume * (churn.first.period / mean.churn.first.period)
     list(detail = detail, 
-         n.subscriptions = n.subscriptions,
+         n.subscribers = n.subscribers,
          n.retained = n.retained,
          retention.rate = retention.rate,
          retention.rate.volume = retention.rate.volume,

@@ -217,6 +217,8 @@ createFilters <- function(profiling, subset, id)
     #if (is.null(subset))
     #    subset <- TRUE
     n.profiling <- nrow(profiling)
+    if (n.profiling != length(subset))
+        stop("Profiling variables have the wrong number of observations.")
     levs <- lapply(profiling, unique)
     combs <- expand.grid(levs)
     n.combinations <- nrow(combs)
@@ -253,7 +255,9 @@ removeAttributesAndClass <- function(x)
                 "by",
                 "subscription.length",
                 "n.subscribers",
-                "y.title"))
+                "y.title",
+                "date.format",
+                "cohort.by"))
         attr(x, a) <- NULL
     class(x) <- class(x)[-1:-2]
     x

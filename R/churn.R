@@ -16,7 +16,7 @@
 #' @export
 Churn <- function(data, volume = FALSE, by = "quarter", error.if.no.data = FALSE)
 {
-    data <- updateDataForPeriodAndChurn(data, by)
+    data <- prepareDataForChurn(data, by)
     if (nrow(data) == 0)
     {
         if (error.if.no.data)

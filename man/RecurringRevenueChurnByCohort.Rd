@@ -4,16 +4,16 @@
 \alias{RecurringRevenueChurnByCohort}
 \title{\code{RecurringRevenueChurnByCohort}}
 \usage{
-RecurringRevenueChurnByCohort(data, remove.last = FALSE, by, ...)
+RecurringRevenueChurnByCohort(data, by, remove.last = FALSE, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
 
-\item{remove.last}{Remove the final period (as usually is incomplete).}
-
 \item{by}{The time period to aggregate the dates by: 
 \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
 and \code{"day"}.}
+
+\item{remove.last}{Remove the final period (this is useful if it is likely incomplete.).}
 
 \item{...}{Additional arguments to be passed to lower level functions.}
 }
@@ -21,5 +21,6 @@ and \code{"day"}.}
 A \code{\link{matrix}}
 }
 \description{
-Computes the recurring revenue churn by time period and time-based cohort
+Computes the recurring revenue churn by time period and time-based cohort, where the time
+periods are determined by the \code{attr(data, "subscription.length")}.
 }

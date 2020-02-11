@@ -4,13 +4,13 @@
 \alias{MeanRecurringRevenue}
 \title{\code{MeanRecurringRevenueByCohort}}
 \usage{
-MeanRecurringRevenue(data, days.to.count, by, ...)
+MeanRecurringRevenue(data, days.to.count = 0, by, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
 
 \item{days.to.count}{The number of days after the initial commencing to include in the Recurring Revenue
-calculation.}
+calculation. Defaults to 0 (i.e., so only the initial period is counted)}
 
 \item{by}{The time period to aggregate the dates by: 
 \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
