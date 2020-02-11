@@ -13,6 +13,10 @@
 #' @export
 InitialChurn <- function(churn.cohort, remove.last = TRUE, volume = FALSE, by, ...)
 {
+    if (is.null(churn.cohort))
+        return(NULL)
+    if (!"1" %in% colnames(churn.cohort))
+        return(NULL)
     churn <- churn.cohort[, "1"]#selectChurnData(churn.cohort, attr(churn.cohort, "subscription.length"), by)#[diag(k)[, k:1] == 1]
     subscription.length <- attr(churn.cohort, "subscription.length")
     names(churn) <- Period(AsDate(names(churn)) + Periods(1, subscription.length), by)
