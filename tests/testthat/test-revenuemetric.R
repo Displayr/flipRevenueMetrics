@@ -96,7 +96,8 @@ funcs <- c("InitialCustomerChurn",  # Churn
            "RecurringRevenue",
            "RecurringRevenueByCohort",
            "RecurringRevenueGrowth",
-           "MeanRecurringRevenue")#,
+           "MeanRecurringRevenue",
+           "GrowthAccounting")#,
            #"MeanRecurringRevenueByCohort")
 #funcs <- "MeanRecurringRevenueByCohort"#, #RecurringRevenueChurnByCohort"
 #fun = "RecurringRevenueChurnByCohort"

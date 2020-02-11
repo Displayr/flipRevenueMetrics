@@ -1,4 +1,4 @@
-#' \code{AnnualNetRecurringRevenueRetention}
+#' \code{NetRecurringRevenueRetention}
 #'
 #' @description Computes recurring revenue, by cohort.
 #' @param data A \code{data.frame} that has the same variables as a \code{RevenueData} object.
@@ -9,7 +9,7 @@
 #' @importFrom flipStatistics Table
 #' @importFrom lubridate floor_date years
 #' @export
-AnnualNetRecurringRevenueRetention <- function(data, by = "year", ...)
+NetRecurringRevenueRetention <- function(data, by = "year", ...)
 {
     
     start <- floor_date(attr(data, "start"), by)
@@ -34,18 +34,18 @@ AnnualNetRecurringRevenueRetention <- function(data, by = "year", ...)
         revenue.retention[i] <- sum(rr[invoice.this.year]) / sum(rr[invoice.year.ago]) - 1
     }
     detail <- data[, c("from", "to", "id", "recurring.value")]
-    revenue.retention <- addAttributesAndClass(revenue.retention, "AnnualNetRecurringRevenueRetention", by, detail)
+    revenue.retention <- addAttributesAndClass(revenue.retention, "NetRecurringRevenueRetention", by, detail)
     revenue.retention
 }
 
 #' @export
-plot.AnnualNetRecurringRevenueRetention <- function(x, ...)
+plot.NetRecurringRevenueRetention <- function(x, ...)
 {
     smooth <- if (length(x) < 4) "None" else "Friedman's super smoother"
     columnChart(x, 
                 fit.type = smooth,
                 fit.ignore.last = TRUE,
-                y.title = "Annual Net Recurring Revenue Retetion", 
+                y.title = "Net Recurring Revenue Retention", 
                 y.tick.format = "%", ...)
 }
 
