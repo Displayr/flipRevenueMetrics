@@ -4,27 +4,18 @@
 \alias{GrowthAccounting}
 \title{\code{GrowthAccounting}}
 \usage{
-GrowthAccounting(data, volume = FALSE, remove.last = TRUE, tol = 1, ...)
+GrowthAccounting(data, by = "year", ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} that has variables: \code{id}, \code{period},
-and \code{value} (e.g., a \code{RevenueData} object).}
+\item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
 
-\item{volume}{Weights the results by volume; doesn't currently work.}
-
-\item{remove.last}{Remove the final period (as usually is incomplete).}
-
-\item{tol}{The tolerance used in calculations of differences. This defaults to 1 (e.g., $1).
-Values or differences less than this amount are treated as being equivalent. E.g., if revenue for
-an entity this period is less than \code{tol} higher than in the previous period, it is treated as being constant.}
+\item{by}{The time period used in defining the cohorts: "year", "quarter", "month", "week", day".}
 
 \item{...}{Additional arguments to be passed to lower level functions.}
 }
-\description{
-Computes statistics for use in growth accounting of a startup.
+\value{
+A matrix
 }
-\details{
-Small differences in the percentages shown here versus those computed by other means may occur, due
-to: (1) how churn is defined (e.g., the point at time when a customer churns, vs, takes a hieateous); (2) the precision
-used to determine whether a subscriber is considered to have contracted/expanded or not.
+\description{
+Computes the growth within accounts
 }

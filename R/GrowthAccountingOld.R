@@ -227,7 +227,7 @@ plot.GrowthAccountingOld <- function(x, ...)
 #' @importFrom scales comma
 #' @importFrom reshape2 melt
 #' @export
-plot.GrowthAccounting <- function(x, ...)
+plot.GrowthAccountingOld <- function(x, ...)
 {
     t <- x$Table[, c(2, 3, 5, 4, 1)]
     x <- rownames(t)
