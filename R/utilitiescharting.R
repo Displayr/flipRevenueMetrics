@@ -30,6 +30,7 @@ areaChart <- function(x,  ...)
     Area(x,  x.tick.angle = 0,
          colors = "#3e7dcc",
          fit.ignore.last = TRUE,
+#         x.tick.format = "%d %b %Y",
          fit.line.type = "solid", fit.line.width = 2, 
          fit.line.colors = "#f5c524", ...)$htmlwidget
 }

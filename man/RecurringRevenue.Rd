@@ -4,14 +4,10 @@
 \alias{RecurringRevenue}
 \title{\code{RecurringRevenue}}
 \usage{
-RecurringRevenue(data, end = Sys.time(), by = "day", ...)
+RecurringRevenue(data, by = "day", ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
-
-\item{end}{The date on and after which which revenue is ignored.
-Note that the default value, \code{Sys.time()} may not be in the same time zone as your other data, and this
-can cause unexpected results.}
 
 \item{by}{The time period to aggregate the dates by: 
 \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 

@@ -204,62 +204,21 @@ plot.GrowthAccountingOld <- function(x, ...)
                         showgrid = FALSE))
 }
 
-#' #' @export
-#' print.GrowthAccountingOld <- function(x, ...)
-#' {
-#'     cat('Growth Accounting calculations\n\n')
-#'     cat(paste0('\nNumber of entities: ', x$n.id, '\n'))
-#'     cat('\nRevenue\n')
-#'     print(x$Revenue)
-#'     cat('\nRevenue Growth\n')
-#'     pre <- x$Revenue[-x$n.periods]
-#'     revenue.growth <- round((x$Revenue[-1] - pre) / pre * 100, 0)
-#'     names(revenue.growth) <- x$periods[-1]
-#'     print(revenue.growth)
-#'     cat('\nGrowth\n')
-#'     print(x$Growth)
-#'     cat('\nTable\n')
-#'     print(x$Table)
-#'     #cat('\n')
-#' }
-
-#' @importFrom ggplot2 ggplot geom_bar aes scale_y_continuous ggtitle theme_bw
-#' @importFrom scales comma
-#' @importFrom reshape2 melt
 #' @export
-plot.GrowthAccountingOld <- function(x, ...)
+print.GrowthAccountingOld <- function(x, ...)
 {
-    t <- x$Table[, c(2, 3, 5, 4, 1)]
-    x <- rownames(t)
-    #numeric.periods <- all(as.character(as.numeric(x)) == x)
-    categories <- colnames(t)
-    y <- t[,"Churned"] + t[,"Contraction"]
-    p <- plot_ly(
-        x = x,
-        y = y,
-        showlegend = TRUE,
-        marker = list(color = "white"),
-        #hoverinfo='none',
-        type = "bar")
-    colors <- c("red", "orange", "teal", "turquoise", "blue")
-    for (i in 1:5)
-        p <- add_trace(#evaluate = TRUE,
-            p,
-            x = x,
-            y = abs(t[, i]),
-            marker = list(color = colors[i]),
-            name = categories[eval(i)],
-            type = "bar")
-    p <- config(p, displayModeBar = FALSE)
-    layout(p, barmode = "stack", showlegend = TRUE,
-           xaxis = list(title = "",
-                        zeroline = FALSE,
-                        showticklabels = TRUE,
-                        #range = if(numeric.periods) range(as.numeric(x) + c(-.5, .5)) else NULL
-                        showgrid = FALSE),
-           yaxis = list(title = "Change in revenue ($)",
-                        zeroline = FALSE,
-                        showticklabels = TRUE,
-                        showgrid = FALSE))
+    cat('Growth Accounting calculations\n\n')
+    cat(paste0('\nNumber of entities: ', x$n.id, '\n'))
+    cat('\nRevenue\n')
+    print(x$Revenue)
+    cat('\nRevenue Growth\n')
+    pre <- x$Revenue[-x$n.periods]
+    revenue.growth <- round((x$Revenue[-1] - pre) / pre * 100, 0)
+    names(revenue.growth) <- x$periods[-1]
+    print(revenue.growth)
+    cat('\nGrowth\n')
+    print(x$Growth)
+    cat('\nTable\n')
+    print(x$Table)
+    #cat('\n')
 }
-

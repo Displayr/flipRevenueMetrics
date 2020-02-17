@@ -4,13 +4,13 @@
 \alias{Revenue}
 \title{\code{Revenue}}
 \usage{
-Revenue(data, end = Sys.time(), by, ...)
+Revenue(data, end = Sys.Date(), by, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
 
 \item{end}{The time past which revenue is ignored (where its \code{from} data is greater than this value.
-Note that the default value, \code{Sys.time()} may not be in the same time zone as your other data, and this
+Note that the default value, \code{Sys.Date()} may not be in the same time zone as your other data, and this
 can cause unexpected results.}
 
 \item{by}{The time period to aggregate the dates by: 

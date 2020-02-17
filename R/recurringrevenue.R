@@ -2,9 +2,6 @@
 #'
 #' @description Computes recurring revenue, by cohort.
 #' @param data A \code{data.frame} that has the same variables as a \code{RevenueData} object.
-#' @param end The date on and after which which revenue is ignored.
-#' Note that the default value, \code{Sys.time()} may not be in the same time zone as your other data, and this
-#' can cause unexpected results.
 #' @param by The time period to aggregate the dates by: 
 #' \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
 #' and \code{"day"}.
@@ -16,12 +13,14 @@
 #' @return A vector showing the recurring revenue by time points.
 #'
 #' @export
-RecurringRevenue <- function(data, end = Sys.time(), by = "day", ...)
+RecurringRevenue <- function(data, by = "day", ...)
 {
+    end <- attr(data, "end")
     x <- Subscribers(data, end = end, by = by, volume = TRUE, recurring = TRUE)
     keep <- periodsToKeep(names(x), attr(data, "start"), attr(data, "end"), FALSE)
     x <- x[keep]
-    detail <- data[ , c("id", "value", "from", "to")]
+    detail <- data[ , c("id", "value", "recurring.value","from", "to")]
+    colnames(detail) <- c("Name", "Revenue", "Recurring Revenue", "From", "To")
     out <- addAttributesAndClass(x, "RecurringRevenue", by, detail)
     attr(out, "subscription.length") <- attr(data, "subscription.length")
     out

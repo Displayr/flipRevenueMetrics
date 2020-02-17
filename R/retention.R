@@ -76,8 +76,8 @@ Retention <- function(data, by, ...)
                 detail$ID[(cohort - 1) * n.periods + c] <- paste(ids[churn], collapse = ", ")
             revenue.base <- sum(revenue, na.rm = TRUE)
             revenue.lost <- sum(revenue[churn], na.rm = TRUE)
-            n.subscribers <- length(unique(ids))
-            if (n.subscribers > 0)
+            n.subs <- length(unique(ids))
+            if (n.subs > 0)
             {
                 n.churned <- length(unique(ids[churn]))
                 # if (period == "2010-01")
@@ -91,9 +91,9 @@ Retention <- function(data, by, ...)
                 #     #     #stop(data$id[base])
                 #     #     
                 # }
-                n.subscribers[cohort, c] <- n.subscribers
-                n.retained[cohort, c] <- retained <- n.subscribers - n.churned
-                retention.rate[cohort, c] <- retained / n.subscribers
+                n.subscribers[cohort, c] <- n.subs
+                n.retained[cohort, c] <- retained <- n.subs - n.churned
+                retention.rate[cohort, c] <- retained / n.subs
                 retention.rate.volume[cohort, c] <- (revenue.base - revenue.lost) / revenue.base
                 total <- total + revenue.base
                 total.lost <- total.lost + revenue.lost

@@ -97,6 +97,7 @@ A \code{\link{data.frame}}  where the rows represent
 \description{
 Cleans and tidies data for use in growth accounting
     computations for a startup. Turns all dates with 29th of Feb into the 28th.
+    Times are converted to dates.
 }
 \details{
 The Start parameter is not passed through to RevenueData, as instead it

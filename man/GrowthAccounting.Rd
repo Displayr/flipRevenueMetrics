@@ -4,12 +4,17 @@
 \alias{GrowthAccounting}
 \title{\code{GrowthAccounting}}
 \usage{
-GrowthAccounting(data, by = "year", ...)
+GrowthAccounting(data, by = "year", small = 0.1, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
 
-\item{by}{The time period used in defining the cohorts: "year", "quarter", "month", "week", day".}
+\item{by}{The time period to aggregate the dates by: 
+\code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
+and \code{"day"}.}
+
+\item{small}{A proportion. Expansion less than or equal to this  is classified as minor expansion (e.g., price rises) or
+an increase in license sales in a larger company.}
 
 \item{...}{Additional arguments to be passed to lower level functions.}
 }

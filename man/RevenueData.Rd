@@ -8,8 +8,8 @@ RevenueData(
   value,
   from,
   to,
-  start = min(from),
-  end = max(from),
+  start = as.Date(min(from)),
+  end = as.Date(max(from)),
   id,
   subscription.length = "year",
   subset = rep(TRUE, length(id)),
@@ -100,4 +100,5 @@ A \code{\link{data.frame}}  where the rows represent
 \description{
 Cleans and tidies data for use in growth accounting
     computations for a startup. Turns all dates with 29th of Feb into the 28th.
+    Times are converted to dates.
 }

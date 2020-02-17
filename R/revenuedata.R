@@ -2,6 +2,7 @@
 #'
 #' @description Cleans and tidies data for use in growth accounting
 #'     computations for a startup. Turns all dates with 29th of Feb into the 28th.
+#'     Times are converted to dates.
 #' @param value A vector of containing the revenue per transaction.
 #' @param from A vector of class \code{POSIXct} or \code{POSIXt},
 #'     recording the date and time each subscription commences.
@@ -76,8 +77,8 @@
 RevenueData <- function(value, 
                         from, 
                         to, 
-                        start = min(from),
-                        end = max(from), 
+                        start = as.Date(min(from)),
+                        end = as.Date(max(from)), 
                         id,
                         subscription.length = "year",
                         subset = rep(TRUE, length(id)),
@@ -292,7 +293,7 @@ revenueDataForRevenueMetrics <- function(value,
                         trim.id)
     if (is.null(data))
         return(data)
-    attr(data, "start") <- start
+    attr(data, "start") <- as.Date(start)
     data
 }
   

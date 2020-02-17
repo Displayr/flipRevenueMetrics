@@ -6,7 +6,7 @@
 \usage{
 Subscribers(
   data,
-  end = Sys.time(),
+  end = Sys.Date(),
   by = "month",
   volume = FALSE,
   recurring = FALSE

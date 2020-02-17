@@ -21,7 +21,14 @@ FillInMatrix <- function(x, row.names, col.names, value = 0)
     new.x
 }
 
-
+ensureDatesArentInFuture <- function(dates, end)
+{
+    future.dates <- dates > end
+    if (sum(future.dates) > 1) # We permit 1, due to incomplete time periods
+        stop("The specified end date is in the future.")
+    dates[future.dates] <- end # Should just fix end
+    dates
+}
 
 
 nUnique <- function(x)

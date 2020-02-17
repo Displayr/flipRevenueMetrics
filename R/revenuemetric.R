@@ -71,14 +71,27 @@ createTable <- function(x)
     if (sd(sapply(x, NCOL)) > 0) # Inconsistent output sizes
         return(x)
     is.m <- is.matrix(x[[1]])
-    rng <- if (is.m) sapply(x, function(x) colnames(x)[c(1, ncol(x))])
-         else sapply(x, function(x) names(x)[c(1, length(x))])
-    mn <- minDate(rng[1,])
-    mx <- maxDate(rng[2,])
-    dates <- Period(seq.Date(mn, mx, by = by), by)
+    dates <- if (any(class(x[[1]]) %in% c("RecurringRevenue", "Revenue")))
+        names(x[[1]])
+    else {
+        rng <- if (is.m) sapply(x, function(x) colnames(x)[c(1, ncol(x))])
+             else sapply(x, function(x) names(x)[c(1, length(x))])
+        mn <- minDate(rng[1,])
+        mx <- maxDate(rng[2,])
+        Period(seq.Date(mn, mx, by = by), by)
+    }
     if (is.m) stackMatrices(x, dates) else spliceVectors(x, dates)
 }
 
+datesAreSame <- function(x)
+{
+    if (sd(sapply, nms) == 0)
+        return(FALSE)
+    nms <- lapply(x, names)
+    
+    
+    
+}
 
 spliceVectors <- function(x, dates)
 {
@@ -107,6 +120,7 @@ stackMatrices <- function(x, dates)
 
 createPlots <- function(x, start, end, y.min, y.max)
 {
+    
     if (requiresHeatmap(x))
     {
         plotSubGroups(x, y.max)
@@ -140,6 +154,7 @@ plotSubGroups <- function(x, ...)
     if (length(x) == 1)
         return(print(plot(x[[1]])))
     plots <- lapply(x, FUN = plot, ...)
+    plots <- plots[sapply(plots, FUN = function(x) !is.null(x))]
     n.plots <- length(plots)
     pp <- if (n.plots == 1) plots[[1]] else 
     {
@@ -237,7 +252,7 @@ createFilters <- function(profiling, subset, id)
     subsets[sapply(subsets, function(x) length(x) > 0)]
 }
 
-
+#' @export
 print.RevenueMetric <- function(x, ...)
 {
     printWithoutAttributes(x)

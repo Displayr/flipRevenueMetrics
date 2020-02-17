@@ -1,12 +1,12 @@
 #Sys.setenv(TZ='GMT')
 q.invoice.lines <- foreign::read.spss(system.file("extdata", "invoiceLines.sav", package = "flipRevenueMetrics"), to.data.frame = TRUE)
 q.invoice.lines <- q.invoice.lines[, !(names(q.invoice.lines) %in% c("InvoiceID", "orgID","Edition"))]
-q.invoice.lines$ValidFrom <- ISOdate(1582,10,14)  +  q.invoice.lines$ValidFrom
-q.invoice.lines$ValidTo <- ISOdate(1582,10,14)  +  q.invoice.lines$ValidTo - lubridate::seconds(1)
+q.invoice.lines$ValidFrom <- as.Date(ISOdate(1582,10,14)  +  q.invoice.lines$ValidFrom)
+q.invoice.lines$ValidTo <- as.Date(ISOdate(1582,10,14)  +  q.invoice.lines$ValidTo)# - lubridate::seconds(1)
 exchangeRates <- c(AUD = 1, CNY = 4.84, EUR = 0.66, GBP = 0.52, NZD = 1.05, USD = .74) #11 June 2016
 q.invoice.lines$AUD <- q.invoice.lines$Amount / exchangeRates[q.invoice.lines$currency]
-q.invoice.lines$ValidTo <- q.invoice.lines$ValidTo - lubridate::seconds(1)
-end <- ISOdate(2016, 6, 14)
+q.invoice.lines$ValidTo <- q.invoice.lines$ValidTo #- lubridate::seconds(1)
+end <- as.Date(ISOdate(2016, 6, 14))
 d <- q.invoice.lines[q.invoice.lines$ValidFrom < end, ]
 
 # Cleaning out some poor data

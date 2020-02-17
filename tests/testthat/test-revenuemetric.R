@@ -59,7 +59,7 @@ test_that("Create subsets",
 #                  1 - r$retention.rate.volume[rownames(rrcc), colnames(rrcc)])
 #   })
 
- by= "year"
+by= "year"
   test_that(paste("Mean recurrent revenue consistency"), {
     # Near-depricated
     rdd <- RevenueData(d$AUD,d$ValidFrom,d$ValidTo, id = d$name, subscription.length = by)
@@ -74,6 +74,15 @@ test_that("Create subsets",
 
   })
 
+for (by in c("week", "month", "quarter", "year"))
+test_that(paste("RecurringRevenue and GrowthAccounting are consistent", by),{
+    rr = RevenueMetric("RecurringRevenue", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+    ga  = RevenueMetric("GrowthAccounting", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+    aga = cumsum(colSums(ga))
+    expect_equal(as.numeric(rr), as.numeric(aga))
+})
+  
+
 data(q.invoice.lines.short)
 d <- q.invoice.lines.short
 
@@ -84,7 +93,8 @@ out = "Table"#"Table"
 p.country <- d[, "country", drop = FALSE]
 p.country.salesman <- d[, c("country", "salesman")]
 
-funcs <- c("InitialCustomerChurn",  # Churn
+funcs <- c("GrowthAccounting",
+           "InitialCustomerChurn",  # Churn
            "CustomerChurn",
            "RecurringRevenueChurn",
            "RecurringRevenueChurnByCohort",
@@ -92,10 +102,10 @@ funcs <- c("InitialCustomerChurn",  # Churn
            "Customers", # Customers
            "NewCustomers",
            "CustomerGrowth",
-           "Revenue",                  # Revenue
+           #"Revenue",                  # Revenue
            "RecurringRevenue",
            "RecurringRevenueByCohort",
-           "RecurringRevenueGrowth",
+          # "RecurringRevenueGrowth",
            "MeanRecurringRevenue",
            "GrowthAccounting")#,
            #"MeanRecurringRevenueByCohort")
@@ -117,6 +127,8 @@ for (fun in funcs)
 # out = "Detail"
 # by = "year"
 #funcs = c("MeanRecurringRevenueByCohort")
+#funcs = c("RecurringRevenueByCohort")
+
 for (fun in funcs)
     for (out in c("Table", "Plot", "Detail"))
         for (by in c("month", "quarter", "year"))

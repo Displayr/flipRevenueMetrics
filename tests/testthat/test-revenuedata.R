@@ -3,8 +3,8 @@ data(q.invoice.lines)
 d <- q.invoice.lines
 library(lubridate)
 #Sys.setenv(TZ='GMT')
-end <-  ISOdate(2016,2,15)
-start <-  ISOdate(2012,7,1)
+end <-  as.Date(ISOdate(2016,2,15))
+start <-  as.Date(ISOdate(2012,7,1))
 by = "quarter"
 # Checking data frame versus vector inputs
 for (by in c("week", "month", "quarter", "year"))
