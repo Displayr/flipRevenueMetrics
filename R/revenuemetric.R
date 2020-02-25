@@ -31,6 +31,8 @@ RevenueMetric <- function(FUN = "Acquisition",
     {
         # The start parameter is used after 
         rd <- revenueDataForRevenueMetrics(value, from, to, start, end ,id, subscription.length, subset = filters[[i]], profiling = NULL, trim.id)
+        print(names(filters)[i])
+        print(nrow(rd))
         if (!is.null(rd))
         {
             metric <- do.call(FUN, list(rd, ...))
@@ -160,7 +162,7 @@ plotSubGroups <- function(x, ...)
     {
         nr <- floor(sqrt(n.plots - 1))
         nc <- ceiling(n.plots/nr)
-        pp <- subplot(plots, nrows = nr, shareY = nc > 1, shareX = nr > 1)#, shareX = TRUE, )
+        pp <- subplot(plots, nrows = nr, shareY = nc > 1)# Bug in shareX, causes re-arrangement of series#, shareX = nr > 1)#, shareX = TRUE, )
         # Adding titles
         annotations <- list()
         titles.ypos <- rep((nr:1)/nr, each = nc)[1:n.plots]
