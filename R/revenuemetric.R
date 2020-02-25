@@ -31,8 +31,6 @@ RevenueMetric <- function(FUN = "Acquisition",
     {
         # The start parameter is used after 
         rd <- revenueDataForRevenueMetrics(value, from, to, start, end ,id, subscription.length, subset = filters[[i]], profiling = NULL, trim.id)
-        print(names(filters)[i])
-        print(nrow(rd))
         if (!is.null(rd))
         {
             metric <- do.call(FUN, list(rd, ...))
