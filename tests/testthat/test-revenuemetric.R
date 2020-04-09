@@ -2,9 +2,8 @@ context("Revenue Metric")
 data(q.invoice.lines)
 d <- q.invoice.lines
 library(lubridate)
-#Sys.setenv(TZ='GMT')
-end <-  ISOdate(2016,2,15)
-start <-  ISOdate(2012,7,1)
+end <- ISOdate(2016, 2, 15, tz = tz(q.invoice.lines$ValidFrom))
+start <- ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom))
 
 
 

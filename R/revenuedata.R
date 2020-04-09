@@ -69,7 +69,7 @@
 #'        inconsistencies in how people enter data)}.
 #'    }
 #' @importFrom lubridate period year years quarter month week weeks
-#' day days interval floor_date as.duration 
+#' day days interval floor_date as.duration tz
 #' @importFrom flipTime Period Periods AsDate DiffPeriod Change29FebTo28th 
 #' @importFrom stats ave
 #' @importFrom plyr mapvalues
@@ -244,8 +244,8 @@ RevenueData <- function(value,
     to0 <- AsDate(data$to.period, on.parse.failure = "silent")
     
     # ignore hour/timezone which has been unreliable since calling aggregate in line 192
-    from <- ISOdate(year(from0), month(from0), day(from0))
-    to <- ISOdate(year(to0), month(to0), day(to0))
+    from <- ISOdate(year(from0), month(from0), day(from0), tz = tz(from0))
+    to <- ISOdate(year(to0), month(to0), day(to0), tz = tz(to0))
     data <- data[to %within% window | from %within% window | from < start & to > end, ]
     if (detail)
     {

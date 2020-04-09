@@ -2,9 +2,8 @@ context("lifetime")
 data(q.invoice.lines)
 d <- q.invoice.lines
 library(lubridate)
-#Sys.setenv(TZ='GMT')
-end <-  ISOdate(2016,6,30)
-start <-  ISOdate(2012,7,1)
+end <-  ISOdate(2016, 6, 30, tz = tz(q.invoice.lines$ValidFrom))
+start <-  ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom))
 by = "year"
 for (by in c("month", "year"))
     test_that(paste("Creating RevenueData", by),

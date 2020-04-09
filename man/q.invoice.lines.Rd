@@ -4,7 +4,11 @@
 \name{q.invoice.lines}
 \alias{q.invoice.lines}
 \title{Variables from a companies table of invoice lines.}
-\format{data.frame}
+\format{
+data.frame
+
+data.frame
+}
 \description{
 Variables from a companies table of invoice lines.
 

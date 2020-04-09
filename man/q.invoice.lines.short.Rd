@@ -4,7 +4,9 @@
 \name{q.invoice.lines.short}
 \alias{q.invoice.lines.short}
 \title{Variables from a companies table of invoice lines.}
-\format{data.frame}
+\format{
+data.frame
+}
 \description{
 Variables from a companies table of invoice lines.
 A sub-sample of q.invoice.lines

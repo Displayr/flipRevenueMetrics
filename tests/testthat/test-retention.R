@@ -2,8 +2,7 @@ context("retention")
 data(q.invoice.lines)
 d <- q.invoice.lines
 library(lubridate)
-#Sys.setenv(TZ='GMT')
-end <-  ISOdate(2015,12,31)
+end <-  ISOdate(2015, 12, 31, tz = tz(q.invoice.lines$ValidFrom))
 by = "year"
 for (by in c("week", "month", "quarter", "year"))
     test_that(paste("Creating RevenueData", by),

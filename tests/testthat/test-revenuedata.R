@@ -2,9 +2,8 @@ context("Revenue data")
 data(q.invoice.lines)
 d <- q.invoice.lines
 library(lubridate)
-#Sys.setenv(TZ='GMT')
-end <-  as.Date(ISOdate(2016,2,15))
-start <-  as.Date(ISOdate(2012,7,1))
+end <- as.Date(ISOdate(2016, 2, 15, tz = tz(q.invoice.lines$ValidFrom)))
+start <- as.Date(ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom)))
 by = "quarter"
 # Checking data frame versus vector inputs
 for (by in c("week", "month", "quarter", "year"))
@@ -55,18 +54,18 @@ for (by in c("week", "month", "quarter", "year"))
             expect_error(capture.output(GrowthAccounting(rd)), NA)
 
             # Adding profiling variables of the wrong dimension
-            expect_error(capture.output(rd <- RevenueData(d$AUD, d$ValidFrom, d$ValidTo, end = ISOdate(2016,06,14), id = d$name, subscription.length = by, subset = d$validInvoice == 1, profiling = d)))
+            expect_error(capture.output(rd <- RevenueData(d$AUD, d$ValidFrom, d$ValidTo, end = ISOdate(2016,06,14,tz="UTC"), id = d$name, subscription.length = by, subset = d$validInvoice == 1, profiling = d)))
             expect_error(capture.output(GrowthAccounting(rd)), NA)
 
             # Adding profiling variables of the correct dimension
             unique.names <- sort(unique(d$name))
             zprofiling <- d[match(unique.names, as.character(d$name)), ]
-            expect_error(capture.output(rd <- RevenueData(d$AUD, d$ValidFrom, d$ValidTo, end = ISOdate(2016,06,14), id = d$name, subscription.length = by, subset = d$validInvoice == 1, profiling = zprofiling)))
+            expect_error(capture.output(rd <- RevenueData(d$AUD, d$ValidFrom, d$ValidTo, end = ISOdate(2016,06,14,tz="UTC"), id = d$name, subscription.length = by, subset = d$validInvoice == 1, profiling = zprofiling)))
             expect_error(capture.output(GrowthAccounting(rd)), NA)
 
             # Adding profiling variables with id shown in row names
             rownames(zprofiling) <- unique.names
-            capture.output(rd <- RevenueData(d$AUD, d$ValidFrom, d$ValidTo, id = d$name, end = ISOdate(2016,11,1), subscription.length = by, subset = d$validInvoice == 1, profiling = zprofiling))
+            capture.output(rd <- RevenueData(d$AUD, d$ValidFrom, d$ValidTo, id = d$name, end = ISOdate(2016,11,1,tz="UTC"), subscription.length = by, subset = d$validInvoice == 1, profiling = zprofiling))
             expect_error(capture.output(GrowthAccounting(rd)), NA)
 })
 
@@ -312,3 +311,4 @@ NA, NA, NA, NA, NA, 7998), questiontype = "Number", name = "TotalAnnualLicenceVa
     
 
 })
+
