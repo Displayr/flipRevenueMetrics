@@ -190,7 +190,7 @@ RevenueData <- function(value,
   }
   # Creating time-based metrics.
   id.data$last.from <- aggregate(from ~ id, data, max)[, 2]
-  id.data$last.from.period <- Period(floor_date(aggregate(from ~ id, data, max)[, 2], subscription.length), subscription.length)
+  id.data$last.from.period <- Period(floor_date(id.data$last.from, subscription.length), subscription.length)
   if (detail)
     cat(paste0(nrow(id.data), " subscribers.\n"))
   id.data$subscription.to <- aggregate(to ~ id, data, max)$to
@@ -209,13 +209,18 @@ RevenueData <- function(value,
   from.renewal <- mapvalues(data$id.to.period, fr[, 1], as.character(fr[,2]))
   data$from.renewal <- AsDate(from.renewal)
   data$from.renewal.period <- Period(data$from.renewal, subscription.length)
+  
+  tmp <- aggregate(from.renewal ~ id, data, max)
+  data$last.from.renewal <- tmp[match(as.character(data$id), as.character(tmp[, 1])), 2]
+  data$last.from.renewal.period <- Period(floor_date(data$last.from.renewal, subscription.length), subscription.length)
+  
   t <- aggregate(to ~ id.to.period, data = data, FUN = max)
   to.renewal <- mapvalues(data$id.to.period, t[, 1], as.character(t[,2]))
   data$to.renewal <- AsDate(to.renewal)
   data$to.renewal.period <- Period(data$to.renewal, subscription.length)
   data$id.to.period <- NULL
   
-  data$churn <- data$churned & data$from.renewal.period == data$last.from.period
+  data$churn <- data$churned & data$from.renewal.period == data$last.from.renewal.period 
   data$period.counter <- interval(data$subscriber.from, data$from) %/% units
   # Sorting.
   data <- data[order(data$id, data$from),]
