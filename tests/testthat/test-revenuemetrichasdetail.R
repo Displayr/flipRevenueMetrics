@@ -22,11 +22,15 @@ funcs <- c("GrowthAccounting",
            "MeanRecurringRevenue",
            "GrowthAccounting")#,
 
+
+          
 for (fun in funcs)
-{
-    tbl = RevenueMetric(FUN = fun, output = "Table", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = "quarter")#, cohort.by = cohort.by)#, days.to.count = day)
-    plt = RevenueMetric(FUN = fun, output = "Plot", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = "quarter")#, cohort.by = cohort.by, days.to.count = day)
-    expect_true(any(class(plot) %in% c("htmlwidget")))
-    dtl = RevenueMetric(FUN = fun, output = "Detail", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = "quarter")#, cohort.by = cohort.by, days.to.count = day)
-    expect_true(NROW(dtl) > NROW(tbl))
-}    
+    test_that(paste("Checking that Table, Plot, Detail, exist and are of the right classes",
+                    fun),
+    {
+        tbl = RevenueMetric(FUN = fun, output = "Table", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = "quarter")#, cohort.by = cohort.by)#, days.to.count = day)
+        plt = RevenueMetric(FUN = fun, output = "Plot", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = "quarter")#, cohort.by = cohort.by, days.to.count = day)
+        expect_true(any(class(plt) %in% c("htmlwidget")))
+        dtl = RevenueMetric(FUN = fun, output = "Detail", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = "quarter")#, cohort.by = cohort.by, days.to.count = day)
+        expect_false(class(tbl)[1] == class(dtl)[1])
+    }) 
