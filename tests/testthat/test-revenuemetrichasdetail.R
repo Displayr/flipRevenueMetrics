@@ -1,4 +1,4 @@
-context("Revenue Metric")
+context("Revenue Metric - Detail different to table")
 data(q.invoice.lines)
 d <- q.invoice.lines
 library(lubridate)
