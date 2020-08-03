@@ -16,8 +16,7 @@ funcs <- c("GrowthAccounting",
            "RecurringRevenue",
            "RecurringRevenueByCohort",
            # "RecurringRevenueGrowth",
-           "MeanRecurringRevenue",
-           "GrowthAccounting")#,
+           "MeanRecurringRevenue")#,
 #"MeanRecurringRevenueByCohort")
 
 # Checking that start parameter is taken into account 

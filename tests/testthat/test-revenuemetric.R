@@ -43,8 +43,7 @@ funcs <- c("GrowthAccounting",
            "RecurringRevenue",
            "RecurringRevenueByCohort",
           # "RecurringRevenueGrowth",
-           "MeanRecurringRevenue",
-           "GrowthAccounting")#,
+           "MeanRecurringRevenue")#,
            #"MeanRecurringRevenueByCohort")
 
 # Quick run through checking that the basic function works
