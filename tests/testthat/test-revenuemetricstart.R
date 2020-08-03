@@ -23,7 +23,7 @@ funcs <- c("GrowthAccounting",
 # Checking that start parameter is taken into account 
 library(flipTime)
 strt = as.Date("2013-01-01")
-nd = as.Date("2014-01-01")
+nd = as.Date("2015-01-01")
 
 for (fun in funcs)
     for (out in c("Table"))#
@@ -41,6 +41,7 @@ for (fun in funcs)
                         #print(fun)
                         s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, 
                                           start = strt,
+                                          end = nd,
                                           id = d$name, by = by, cohort.by = cohort.by, days.to.count = day)
                         
                         dts = if (any(grepl("Cohort", class(s)))) rownames(s) else 

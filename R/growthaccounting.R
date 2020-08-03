@@ -22,8 +22,6 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
     subscription.length <- attr(data, "subscription.length")
     subscription.unit <- Periods(1, subscription.length)
     
-    #data <- prepareDataForChurn(data, by)
-  
     previous.date <- start - unit
     dts <- seq.Date(start, end, by)
     n.dates <- length(dts)

@@ -17,6 +17,7 @@
 Churn <- function(data, volume = FALSE, by = "quarter", error.if.no.data = FALSE)
 {
     data <- prepareDataForChurn(data, by)
+    data <- data[data$from >= attr(data, "start"), ]
     if (nrow(data) == 0)
     {
         if (error.if.no.data)
