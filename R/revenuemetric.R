@@ -60,6 +60,8 @@ RevenueMetric <- function(FUN = "Acquisition",
 
 filterRange <- function(x, start, end)
 {
+    if(is.null(x))
+        return(x)
     atr <- attributes(x)
     if (any(grepl("Cohort", class(x))))
     {
