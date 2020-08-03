@@ -3,14 +3,14 @@
 #' @description Creates a small multiple plot by sub-groups
 #' @inherit RevenueData
 #' @param FUN A function that calculates a metric
-#' @param output Whether to output as a Plot, Table, or List. 
+#' @param output Whether to output as a Plot, Table, or Detail 
 #' @param profiling Separate analyses are conducted among each unique combination of these variables.
 #' @param ... Additional arguments to be passed to lower level functions.
 #' @importFrom plotly add_annotations subplot
 #' @return A plotly plot#?
 #' @export
 RevenueMetric <- function(FUN = "Acquisition",
-                          output = c("Plot", "Table", "List")[1],
+                          output = c("Plot", "Table", "Detail")[1],
                           # parameters from RevenueData
                           value, 
                           from, 
@@ -105,9 +105,10 @@ changeRangeOfAttribute <- function(filtered, original)
 
 createDetails <- function(x, start, end)
 {
-    if (length(x) == 1)
-        return(x[[1]])
-    lapply(x, function(x) attr(x, "detail"))
+    out = lapply(x, function(x) attr(x, "detail"))
+    if (length(out) == 1)
+        return(out[[1]])
+    out
 }
 
 #' @importFrom flipTime AsDate Period
