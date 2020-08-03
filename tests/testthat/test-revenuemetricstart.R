@@ -43,15 +43,21 @@ for (fun in funcs)
                                           start = strt,
                                           end = nd,
                                           id = d$name, by = by, cohort.by = cohort.by, days.to.count = day)
-                        
-                        dts = if (any(grepl("Cohort", class(s)))) rownames(s) else 
-                        {
-                            if (is.matrix(s)) colnames(s) else names(s) 
+                        #print(s)
+                        if (is.null(s))
+                            expect_true(TRUE) # avoiding empty test
+                        else {
+                            
+                            dts = if (any(grepl("Cohort", class(s)))) rownames(s) else 
+                            {
+                                if (is.matrix(s)) colnames(s) else names(s) 
+                            }
+                            #print(dts[1:4])
+                            dts = AsDate(dts)
+                            expect_true(all(dts >= strt))
+                            expect_true(all(dts <= nd))
+                            #  print(dts)
                         }
-                        #print(dts[1:4])
-                        dts = AsDate(dts)
-                        expect_true(all(dts >= strt) & all(dts <= nd))
-                      #  print(dts)
                     })
                 }
             }

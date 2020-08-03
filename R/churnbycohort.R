@@ -59,6 +59,8 @@ RecurringRevenueChurnByCohort <- function(data, by, remove.last = FALSE, ...)
                    FUN = sum)
     lost <- calculateRecurringRevenueNumerator(data, n.subscribers)
     rate <- churnRate(data, lost, total, n.subscribers, by, remove.last)
+    #rate <- addAttributesAndClass(rate, "RecurringRevenueChurnByCohort", by, data[, c("recurring.value", "cohort", "to.renewal.period")])
+    
     attr(rate, "volume") <- TRUE
     rate
 }
@@ -114,7 +116,8 @@ churnByCohortDetail <- function(data, by)
 {
     if(sum(data$churn) == 0)
         return(NULL)
-    detail <- aggregate(recurring.value ~ cohort + period.counter + id, data, sum, subset = data$churn)
+    detail <- aggregate(recurring.value ~ cohort + period.counter + id, data, sum,
+                        subset = data$churn & as.Date(data$to) >= attr(data, "start") & as.Date(data$to) <= attr(data, "end"))
     colnames(detail) <- c("Recurring Revenue", "Customer since", properCase(by))
     detail
 }

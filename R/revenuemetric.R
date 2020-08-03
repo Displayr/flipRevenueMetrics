@@ -29,7 +29,7 @@ RevenueMetric <- function(FUN = "Acquisition",
     y.min <- 0
     for (i in 1:n.filters)
     {
-        # The start parameter is used after 
+        # The start parameter is used later, so the data set isn't filted
         rd <- revenueDataForRevenueMetrics(value, from, to, start, end ,id, subscription.length, subset = filters[[i]], profiling = NULL, trim.id)
         if (!is.null(rd))
         {
@@ -47,14 +47,61 @@ RevenueMetric <- function(FUN = "Acquisition",
         }
     }
     names(out) <- names(filters)
+    out <- lapply(out, filterRange, start, end)
     out <- out[sapply(out, function(x) NROW(x) > 0 )] # Removing any empty strings
-    switch(output,
+    if (length(out) == 0)
+        return(NULL)
+    out <- switch(output,
            Plot = createPlots(out, start, end, y.min, y.max),
-           Table = createTable(out),
-           Detail = createDetails(out))
+           Table = createTable(out, start, end),
+           Detail = createDetails(out, start, end))
 }
 
-createDetails <- function(x)
+
+filterRange <- function(x, start, end)
+{
+    atr <- attributes(x)
+    if (any(grepl("Cohort", class(x))))
+    {
+        sbs <- datesWithinRange(rownames(x), start, end)
+        out <- x[sbs, , drop = FALSE]
+    }   
+    else if (is.matrix(x)) {
+        sbs <- datesWithinRange(colnames(x), start, end)
+        out <- x[, sbs, drop = FALSE]
+    } else {
+        sbs <- datesWithinRange(names(x), start, end)
+        out <- x[sbs]
+    }
+    # Re-appending class information
+    to.replace <- names(atr)
+    to.replace <- to.replace[!to.replace %in% c("class", "dim", "dimnames", "names")]
+    for (a in to.replace)
+        attr(out, a) <- changeRangeOfAttribute(out, atr[[a]])
+    class(out) <- atr[["class"]]
+    out
+}    
+
+changeRangeOfAttribute <- function(filtered, original)
+{
+    if (length(original) == 1)
+        return(original)
+    if (is.character(original) | is.logical(original))
+        return(original)
+    if(is.vector(original) & !is.list(original))
+        if (all(names(filtered) %in% names(original)))
+            return(original[names(filtered)])
+    if(is.matrix(original))
+    {
+        rn <- rownames(filtered)
+        cn <- colnames(filtered)
+       if(all(rn %in% rownames(original)) & all(cn %in% colnames(original)))
+           return(original[rn, cn])
+    }
+    original
+}
+
+createDetails <- function(x, start, end)
 {
     if (length(x) == 1)
         return(x[[1]])
@@ -63,8 +110,9 @@ createDetails <- function(x)
 
 #' @importFrom flipTime AsDate Period
 #' @importFrom stats sd
-createTable <- function(x)
+createTable <- function(x, start, end)
 {
+    
     if (length(x) == 1)
         return(x[[1]])
     by <- attr(x[[1]], "by")
@@ -83,6 +131,14 @@ createTable <- function(x)
     if (is.m) stackMatrices(x, dates) else spliceVectors(x, dates)
 }
 
+#' @importFrom flipTime AsDate
+datesWithinRange <- function(dt.as.character, start, end)
+{
+    dts <- AsDate(dt.as.character)
+    dts >= start & dts <= end    
+}    
+    
+    
 datesAreSame <- function(x)
 {
     if (sd(sapply, nms) == 0)
@@ -285,3 +341,4 @@ addAttributesAndClass <- function(x, class.name, by, detail)
     class(x) <- c(class.name, "RevenueMetric", class(x))
     x    
 }    
+

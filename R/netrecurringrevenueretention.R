@@ -34,6 +34,7 @@ NetRecurringRevenueRetention <- function(data, by = "year", ...)
         revenue.retention[i] <- sum(rr[invoice.this.year]) / sum(rr[invoice.year.ago]) - 1
     }
     detail <- data[, c("from", "to", "id", "recurring.value")]
+    detail <- detail$from >= attr(data, "start") & detail$from <= attr(data, "end")
     revenue.retention <- addAttributesAndClass(revenue.retention, "NetRecurringRevenueRetention", by, detail)
     revenue.retention
 }
