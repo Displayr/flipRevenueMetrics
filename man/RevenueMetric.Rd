@@ -6,7 +6,7 @@
 \usage{
 RevenueMetric(
   FUN = "Acquisition",
-  output = c("Plot", "Table", "List")[1],
+  output = c("Plot", "Table", "Detail")[1],
   value,
   from,
   to,
@@ -23,7 +23,7 @@ RevenueMetric(
 \arguments{
 \item{FUN}{A function that calculates a metric}
 
-\item{output}{Whether to output as a Plot, Table, or List.}
+\item{output}{Whether to output as a Plot, Table, or Detail}
 
 \item{value}{A vector of containing the revenue per transaction.}
 
