@@ -165,6 +165,7 @@ changeRangeOfAttribute <- function(filtered, original)
 
 createDetails <- function(x, start, end)
 {
+
     out = lapply(x, function(x) attr(x, "detail"))
     if (length(out) == 1)
         return(out[[1]])
