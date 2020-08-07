@@ -45,11 +45,68 @@ Churn <- function(data, volume = FALSE, by = "quarter", error.if.no.data = FALSE
 #' @return A named vector showing churn.
 #' @importFrom flipTime AsDate
 #' @export
-CustomerChurn <- function(data, by = "quarter", ...)
+CustomerChurn <- function(data)
 {
-    Churn(data, volume = FALSE, by = by, error.if.no.data = FALSE)
+    dts <- attr(data, "date.sequence")
+    n <- length(dts)
+    dts <- c(dts[-n], attr(data, "end"))
+    id <- data$id
+    to <- data$to
+    from <- data$from
+    recurring.value<- data$recurring.value
+    #to.floor <- floor_date(to, attr(data, "by"))
+    rr.to.renew <- vector("numeric", n - 1)
+    id.to.renew <- vector("list", n - 1)
+    names(id.renewed) <- names(rr.to.renew) <- dts[-1]
+    n.renewed <- n.to.renew <- rr.renewed <- rr.to.renew
+    id.renewed <- id.to.renew
+    for (i in 1:(n - 1))
+    {
+        dt <- dts[i]
+        next.dt <- ts[i + 1]
+        # The denominator is people that are customers
+        # at the beginning of the period who 
+        # must renew in the period
+        available.for.renewal <- to >= dt & to < next.dt
+        id.available.for.renewal <- unique(id[available.for.renewal])
+
+        
+        purchased.next.period <- to >= dt & to < next.dt
+        id.available.for.renewal <- unique(id[available.for.renewal])
+
+                
+        renewed <- from < next.dt & to >= next.dt
+        id.renewed <- unique(id[renewed])
+        
+        
+        
+        # Excluding any within-window renewals
+        renewed <- renewed & !to.renew
+        
+        rr.to.renew <- sum(rr[to.renew])
+        rr.renewed <- sum(rr[renewed])
+    }
+    n.to.renew <- sapply(id.to.renew, length)
+    n.renewed <- sapply(id.renewed, length)
+    churn <- 1 - n.renewed / n.to.renew
+    net.churn <- rr.renewed / rr.to.renew
+    print(net.churn)
+    print(n.renewed)
+#    out <- rep(NA, n)
+#    for (i in 1:n)
+#    ids.by.dts <- aggregate()
+#    print(dts)
+   # Churn(data, volume = FALSE, by = by, error.if.no.data = FALSE)
 }
 
+#' #' @importFrom flipTime AsDate Period
+#' #' @importFrom flipTime AsDate Period
+#' prepareDataForChurnCalculation <- function(data)
+#' {
+#'     data$to.floor <- floor_date(data$to, attr(data, "by"))
+#'     
+#'     
+#}    
 
 
 #' \code{RecurringRevenueChurn}

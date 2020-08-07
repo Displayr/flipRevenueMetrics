@@ -5,8 +5,13 @@
 #' @param FUN A function that calculates a metric
 #' @param output Whether to output as a Plot, Table, or Detail 
 #' @param profiling Separate analyses are conducted among each unique combination of these variables.
+#' @param id.merges A data frame with two variables 'id' and 'id.to'. 
+#' 'id' contains the ids of companies that appeara, based on their data,
+#' to have churned, but have in fact merged with the corresponding 'id.to'.
+#' @param by The unit of time to report on ("day", "month", "quarter", "year").
 #' @param ... Additional arguments to be passed to lower level functions.
 #' @importFrom plotly add_annotations subplot
+#' @importFrom lubridate floor_date ceiling_date
 #' @return A plotly plot#?
 #' @export
 RevenueMetric <- function(FUN = "Acquisition",
@@ -20,8 +25,15 @@ RevenueMetric <- function(FUN = "Acquisition",
                           id,
                           subscription.length = "year", 
                           subset = rep(TRUE, length(id)),
-                          profiling = NULL, trim.id = 50, ...)
+                          by  = c("day", "month", "quarter", "year")[1],
+                          profiling = NULL, 
+                          trim.id = 50,
+                          id.merges = NULL, ...)
 {
+    start <- floor_date(start, by)
+    #end <- floor_date(end, by)
+    
+    checkIDmerges(id, id.merges)
     filters <- createFilters(profiling, subset = subset, id)
     n.filters <- length(filters)
     out <- vector("list", n.filters)
@@ -30,7 +42,17 @@ RevenueMetric <- function(FUN = "Acquisition",
     for (i in 1:n.filters)
     {
         # The start parameter is used later, so the data set isn't filted
-        rd <- revenueDataForRevenueMetrics(value, from, to, start, end ,id, subscription.length, subset = filters[[i]], profiling = NULL, trim.id)
+        #rd <- revenueDataForRevenueMetrics(value, from, to, start, end ,id, subscription.length, subset = filters[[i]], profiling = NULL, trim.id)
+        rd <- MetricData(value, 
+                          from, 
+                          to, 
+                          start,
+                          end, 
+                          id,
+                          subscription.length,
+                         by,
+                         id.merges,
+                          trim.id)
         if (!is.null(rd))
         {
             metric <- do.call(FUN, list(rd, ...))
@@ -55,9 +77,47 @@ RevenueMetric <- function(FUN = "Acquisition",
            Plot = createPlots(out, start, end, y.min, y.max),
            Table = createTable(out, start, end),
            Detail = createDetails(out, start, end))
+    out
 }
 
+#' @importFrom flipStatistics Table
+checkIDmerges <- function(id, id.merges)
+{
+    if (is.null(id.merges))
+        return();
+    
+    if (!is.data.frame(id.merges))
+        stop("'id.merges' needs to be a data frame")
 
+    if (any(is.na(id.merges)))
+        stop("id.merges contains missing values")
+    
+    if (!(all(c("id", "id.to") %in% names(id.merges))))
+        stop("'id.merges' must be a data.frame containing 'id' and 'id.to'")
+
+    ids.are.same <- as.character(id.merges$id) == as.character(id.merges$id.to)
+    if (any(ids.are.same))
+        stop("id.merges$id.to contains same values as id.merges$id:", 
+             paste(id.merges$id[ids.are.same], collapse = ", "))
+    
+    ids.known <- id.merges$id %in% id
+    if (any(!ids.known))
+        stop("id.merges$id contains ids not in 'id':", 
+             paste(id.merges$id[ids.known], collapse = ", "))
+    
+    ids.known <- id.merges$id.to %in% id
+    if (any(!ids.known))
+        stop("id.merges$id contains ids not in 'id':", 
+             paste(id.merges$id[ids.known], collapse = ", "))
+    
+    ids.dup <- duplicated(id.merges$id)
+    if (any(ids.dup))
+        stop("id.merges$id contains duplicates:", 
+             paste(id.merges$id[ids.dup], collapse = ", "))
+    
+    # Checking to see if id.to has churned at the same time as id.from
+    
+}    
 filterRange <- function(x, start, end)
 {
     if(is.null(x))

@@ -20,12 +20,23 @@ updatePeriod <- function(data, by)
 #' @importFrom flipTime Period
 prepareDataForChurn <- function(data, by)
 {
-    start <- attr(data, "start")
-    end <- attr(data, "end")
+    attr <- getAttributes(data)
     data <- removeIncompleteSubscriptions(data)
     data$to.renewal.period <- Period(data$to.renewal, by)
-    attr(data, "start") <- start
-    attr(data, "end") <- end 
+    data <- setAttributes(data, attr)
+    data
+}
+
+getAttributes <- function(x)
+{
+    attributes(x)[c("start", "end", "id.merges")]
+}
+    
+setAttributes <- function(data, attr)
+{
+    attr(data, "start") <- attr[["start"]]
+    attr(data, "end") <- attr[["end"]]
+    attr(data, "id.merges") <- attr[["id.merges"]]
     data
 }
 
@@ -33,13 +44,11 @@ prepareDataForChurn <- function(data, by)
 #' @importFrom lubridate interval
 prepareDataForChurnByCohort <- function(data, by)
 {
-    start <- attr(data, "start")
-    end <- attr(data, "end")
+    attr <- getAttributes(data)
     data <- removeIncompleteSubscriptions(data)
     data <- setCohortPeriod(data, by)
     units <- Periods(1, attr(data, "subscription.length"))
     data$to.renewal.period.counter <- interval(data$subscriber.from, data$to.renewal) %/% units
-    attr(data, "start") <- start
-    attr(data, "end") <- end 
+    data <- setAttributes(data, attr)
     data
 }

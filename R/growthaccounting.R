@@ -15,17 +15,13 @@
 #' @export
 GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
 {
-    unit <- Periods(1, by)
     true.end <- attr(data, "end")
     start <- floor_date(attr(data, "start"), by)# + unit
     end <- as.Date(ceiling_date(true.end, by, change_on_boundary = NULL))
-    subscription.length <- attr(data, "subscription.length")
-    subscription.unit <- Periods(1, subscription.length)
-    
-    previous.date <- start - unit
-    dts <- seq.Date(start, end, by)
+    previous.date <- attr(data, "previous.date")
+    dts <- attr(data, "date.sequence")
     n.dates <- length(dts)
-    periods <- Period(c(previous.date, dts[-length(dts)]), by)
+    periods <- attr(data, "period.sequence")
     
     # Ensuring dates used in calculations don't go past the 'end'
     dts <- ensureDatesArentInFuture(dts, true.end + 1) # +1 due to the < operator below
@@ -40,7 +36,7 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
     ids.ever.customers <- unique(id[from <= previous.date])
     invoice.previous <- from <= previous.date & to > previous.date 
     ids.previous <- unique(id[invoice.previous])
-    rr.by.id.previous <- tapply(rr[invoice.previous], list(id[invoice.previous]), sum)
+    rr.by.id.previous <- if(sum(invoice.previous) == 0) rep(0, 0) else tapply(rr[invoice.previous], list(id[invoice.previous]), sum)
     
     # Storing results of loop
     metrics <- c("New", "Resurrection", "Major Expansion", "Minor Expansion", "Contraction", "Churn")
@@ -61,13 +57,6 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
         ids.new <- ids[!ids %in% ids.ever.customers]
         ids.resurrection <- ids[ids %in% ids.ever.customers & !ids %in% ids.previous]
         ids.churn <- ids.previous[!ids.previous %in% ids]
-        # Deakug 
-        # if (true.end - subscription.unit < dt)
-        # {
-        #     f <- data$subscriber.to > true.end
-        #     ids.not.churned <- unique(data$id[f])
-        #     ids.churn <- setdiff(ids.churn, ids.not.churned)
-        # }
         ids.existing <- ids[ids %in% ids.previous]
         
         rr.previous.by.id <- rr.by.id.previous[ids.existing]
