@@ -23,7 +23,7 @@ test_that(paste("RecurringRevenue and GrowthAccounting are consistent", by),{
     rr = RevenueMetric("RecurringRevenue", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
     ga  = RevenueMetric("GrowthAccounting", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
     aga = cumsum(colSums(ga))
-    expect_equal(as.numeric(rr), as.numeric(aga))
+    expect_equal(as.numeric(rr)[-1], as.numeric(aga))
 })
   
 

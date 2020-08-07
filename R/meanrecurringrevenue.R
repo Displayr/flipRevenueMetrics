@@ -14,6 +14,7 @@
 #' @export
 MeanRecurringRevenue <- function(data, days.to.count = 0, by, ...)
 {
+    
     start <- attr(data, "start")
     end <- attr(data, "end") - days.to.count
     data <- data[data$from <= data$subscriber.from + days.to.count, ]
@@ -24,6 +25,7 @@ MeanRecurringRevenue <- function(data, days.to.count = 0, by, ...)
     dates <- AsDate(names(out))
     out <- out[dates >= start & dates <= end]
     detail <- data[, c("subscriber.from", "from", "id", "recurring.value")]
+    detail <- detail$from >= attr(data, "start") & detail$from <= attr(data, "end")
     out <- addAttributesAndClass(out, "MeanRecurringRevenue", by, detail)
     attr(out, "days.to.count") <- days.to.count
     out

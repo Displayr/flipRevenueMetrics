@@ -17,6 +17,7 @@
 Churn <- function(data, volume = FALSE, by = "quarter", error.if.no.data = FALSE)
 {
     data <- prepareDataForChurn(data, by)
+    #data <- data[data$from >= attr(data, "start"), ]
     if (nrow(data) == 0)
     {
         if (error.if.no.data)
@@ -27,7 +28,8 @@ Churn <- function(data, volume = FALSE, by = "quarter", error.if.no.data = FALSE
     out <-  prop.table(counts, 2)[2, ]
     if (length(out) == 1) # Dealing with scalars losing names
         names(out) <- colnames(counts)
-    dat <- data[data$churn,, drop = FALSE]
+    to <- as.Date(data$to)
+    dat <- data[data$churn & to >= attr(data, "start") & to <= attr(data, "end"),, drop = FALSE]
     detail <- idByPeriod(dat, time = "to.renewal.period")#sapply(id, paste, collapse = ",")
     out <- addAttributesAndClass(out, "Churn", by, detail)
     attr(out, "volume") <- volume

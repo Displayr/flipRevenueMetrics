@@ -22,8 +22,6 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
     subscription.length <- attr(data, "subscription.length")
     subscription.unit <- Periods(1, subscription.length)
     
-    #data <- prepareDataForChurn(data, by)
-  
     previous.date <- start - unit
     dts <- seq.Date(start, end, by)
     n.dates <- length(dts)
@@ -108,6 +106,8 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
     # Dropping the first period
     detail <- detail[1:counter, ] #Right-sizing the data frame
     detail <- detail[detail$Date != colnames(accounting)[1], ]
+    detail <- detail[AsDate(detail$Date) >= attr(data, "start") & AsDate(detail$Date) <= attr(data, "end"), ]
+    
     accounting <- accounting[, -1, drop = FALSE]
     counts <- counts[, -1, drop = FALSE]
     accounting <- addAttributesAndClass(accounting, "GrowthAccounting", by, detail)
@@ -142,67 +142,65 @@ plot.GrowthAccounting <- function(x, ...)
     colors <- growthColors()
     metrics <- names(colors)
     
-    #
     # Sorting based on biggest to smallest
     detail <- detail[order(abs(detail$Change), decreasing = TRUE), ] 
     detail$Name <- paste0("$", FormatAsReal(detail$Change), " ", detail$Name)
 
   #numeric.periods <- all(as.character(as.numeric(x)) == x)
-  y <- t["Churn",] + t["Contraction",]
-  p <- plot_ly(
+    y <- t["Churn",] + t["Contraction",]
+    p <- plot_ly(
     x = x.periods,
     y = y,
     showlegend = TRUE,
     marker = list(color = "white"),
     #hoverinfo='none',
     type = "bar")
-  #colors <- c("red", "orange", "teal", "turquoise", "blue")
-  for (i in 1:6)
-  {
-    y.values <- abs(t[i, ])
-    m <- metrics[i]
-#    hover.text = paste("$", FormatAsReal(y.values))
-    det <- detail[detail$Metric == m, ]
-    dd <- tapply(det$Name, list(det$Date), function(x) {
-      l <- length(x)
-      if (l== 0)
-        out <- ""
-      else {
-        out <- paste(x[1:min(l, 5)], collapse = "<br>")
-        if (l > 5)
-          out <- paste0(out, "<br>+ ",  l - 5, " more")
-      }
-      out})
-    d <- rep("", length(periods))
-    names(d) <- periods
-    d[names(dd)] <- dd
-  ##  print(d)
-#d <- "dog"
-    p <- add_trace(#evaluate = TRUE,
-      p,
-      text = paste0("Number of accounts: ", ct[i,]),
-      #hoverinfo = "text",
-      x = x.periods,
-      y = y.values,
-      #hoverlabel.align = "left",
-      hovertemplate = paste(
-        " %{xaxis.title.text}: %{x}<br>",
-        "%{yaxis.title.text}: %{y:$,.0f}<br>",
-        "%{text}",
-        "<extra>", d, "</extra>"
-      ),      
-      marker = list(color = colors[i]),
-      name = metrics[eval(i)],
-      type = "bar")
-  }
-
-  p <- config(p, displayModeBar = FALSE)
-  x.title <- switch(by,
+    for (i in 1:6)
+    {
+        y.values <- abs(t[i, ])
+        m <- metrics[i]
+        #    hover.text = paste("$", FormatAsReal(y.values))
+        det <- detail[detail$Metric == m, ]
+        dd <- tapply(det$Name, list(det$Date), function(x) 
+        {
+            l <- length(x)
+            if (l== 0)
+                out <- ""
+            else
+            {
+                out <- paste(x[1:min(l, 5)], collapse = "<br>")
+                if (l > 5)
+                    out <- paste0(out, "<br>+ ",  l - 5, " more")
+            }
+            out
+        })
+        d <- rep("", length(periods))
+        names(d) <- periods
+        d[names(dd)] <- dd
+        p <- add_trace(#evaluate = TRUE,
+            p,
+            text = paste0("Number of accounts: ", ct[i,]),
+            #hoverinfo = "text",
+            x = x.periods,
+            y = y.values,
+            #hoverlabel.align = "left",
+            hovertemplate = paste(
+              " %{xaxis.title.text}: %{x}<br>",
+              "%{yaxis.title.text}: %{y:$,.0f}<br>",
+              "%{text}",
+              "<extra>", d, "</extra>"
+            ),      
+            marker = list(color = colors[i]),
+            name = metrics[eval(i)],
+            type = "bar")
+    }
+    p <- config(p, displayModeBar = FALSE)
+    x.title <- switch(by,
                     day = "Day",
                     week = "Week Commencing",
                     quarter = "Quarter Commencing",
                     year = "Year")
-  layout(p, barmode = "stack",
+    layout(p, barmode = "stack",
          showlegend = TRUE,
          hoverlabel = list(align = "left"),
          xaxis = list(title = x.title,

@@ -21,7 +21,8 @@ RecurringRevenueByCohort <- function(data, cohort.by = "year", by = "year", remo
     data <- setPeriodCounter(data, by)
     table <- Table(recurring.value ~ cohort + period.counter, data = data, FUN = sum)
     table <- tidyCohortTable(table, cohort.by, by, attr(data, "start"), attr(data, "end"), remove.last, 0)
-    detail <- data[, c("cohort", "period.counter", "id", "value", "recurring.value")]
+    detail <- data[data$from >= attr(data, "start") & data$from <= attr(data, "end"),
+                   c("cohort", "period.counter", "id", "value", "recurring.value")]
     colnames(detail) <- c(names(dimnames(table)), "Name", "Value", "Recurring Value")
     table <- addAttributesAndClass(table, "RecurringRevenueByCohort", by, detail)
     attr(table, "date.format") <- switch(attr(data, "subscription.length"),

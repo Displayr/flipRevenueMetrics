@@ -20,7 +20,7 @@ Customers <- function(data, by = "quarter", ...)
     m <- sweep(m, 1, as.numeric(as.Date(data$from)), ">=") & sweep(m, 1, as.numeric(as.Date(data$to)), "<")  
     out <- apply(m, 2, function(x) nUnique(data$id[x]))
     names(out) <- Period(dts, by)
-    detail <- data[data$observation == 0, 
+    detail <- data[data$observation == 0 &  data$to >= attr(data, "start") & data$to <= attr(data, "end"), 
                    c("id", "subscriber.from.period", "subscriber.to.period")]
     addAttributesAndClass(out, "Customers", by, detail)
 }

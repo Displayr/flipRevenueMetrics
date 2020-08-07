@@ -16,7 +16,8 @@
 Revenue <- function(data, end = Sys.Date(), by, ...)
 {
     out <- Subscribers(data, by = by, end = end, volume = TRUE, recurring = FALSE)
-    detail <- data[c("id", "value", "from", "to")]
+    detail <- data[data$from >= attr(data, "start") & data$from <= attr(data, "end"),
+                   c("id", "value", "from", "to")]
     addAttributesAndClass(out, "Revenue", by, detail)
 }
 
