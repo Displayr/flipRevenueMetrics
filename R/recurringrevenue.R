@@ -8,21 +8,21 @@
 #' from 1 February to 1 February of the next year, and a second license which starts on 1 January of the last year
 #' with a prorated price of $1000/12, then the recurring revenue is $2,000.
 #' @return A vector showing the recurring revenue by time points.
-#'
+#' @importFrom lubridate as_datetime
 #' @export
 RecurringRevenue <- function(data)
 {
-    dts <- attr(data, "by.sequence")[-1]
+    dts <- attr(data, "by.sequence")#[-1]
     n <- length(dts)
     rr <- data$recurring.value
     from <- data$from
     to <- data$to
     out <- rep(0, n)
-    names(out) <- attr(data, "by.period.sequence")[1:n]
+    names(out) <- c(attr(data, "previous.period"), attr(data, "by.period.sequence")[-n])#[1:n]
     for (i in 1:n)
     {
-        dt <- dts[i]
-        out[i] <- sum(rr[dt >= from  & dt < to])
+        dt <- as_datetime(dts[i]) - 0.00001
+        out[i] <- sum(rr[from <= dt & dt <= to])
     }
     detail <- data[from >= attr(data, "start") & from <= attr(data, "end"),
                    c("id", "value", "recurring.value","from", "to")]

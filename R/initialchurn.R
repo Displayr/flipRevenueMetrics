@@ -69,13 +69,15 @@ initialDetail <- function(x, subscription.length)
 #' @importFrom lubridate floor_date
 diagRectangular <- function(x, by, subscription.length)
 {
-    rows <- floor_date(AsDate(rownames(x)), subscription.length) + Periods(1, subscription.length)
+    unit <- Periods(1, subscription.length)
+    row.dts <- AsDate(rownames(x))
+    rows <- floor_date(row.dts, subscription.length) + unit
     rowm <- matrix(rows, nrow(x), ncol(x))                   
     cols <- AsDate(colnames(x))
     colm <- matrix(cols, nrow(x), ncol(x), byrow = TRUE)    
     m <- colm == rowm
     out <- x[m]
-    names(out) <- colnames(x)[rowSums(m) != 0]
+    names(out) <- Period(row.dts [rowSums(m) != 0] + unit, by)
     out
 }   
 

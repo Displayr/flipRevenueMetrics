@@ -2,19 +2,16 @@
 #'
 #' @description Computes the growth within accounts
 #' @param data A \code{data.frame} that has the same variables as a \code{RevenueData} object.
-#' @param by The time period to aggregate the dates by: 
-#' \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
-#' and \code{"day"}.
 #' @param small A proportion. Expansion less than or equal to this  is classified as minor expansion (e.g., price rises) or
 #' an increase in license sales in a larger company.
-#' @param ... Additional arguments to be passed to lower level functions.
 #' @return A matrix
 #' @importFrom flipTime AsDate Period
 #' @importFrom flipStatistics Table
 #' @importFrom lubridate floor_date years ceiling_date
 #' @export
-GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
+GrowthAccounting <- function(data, small = 0.1)
 {
+  by <- attr(data, "by")
     true.end <- attr(data, "end")
     start <- floor_date(attr(data, "start"), by)# + unit
     end <- as.Date(ceiling_date(true.end, by, change_on_boundary = NULL))

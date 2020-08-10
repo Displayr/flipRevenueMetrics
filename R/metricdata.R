@@ -87,7 +87,8 @@ MetricData <- function(value,
     unit <- Periods(1, by)
     start <- floor_date(attr(data, "start"), by)# + unit
     ceil.end <- as.Date(ceiling_date(end, by, change_on_boundary = NULL))
-    attr(data, "previous.date") <- previous.date <- start - unit
+    attr(data, "previous.date") <- previous.date <- start - unit # Used in growth accounting
+    attr(data, "previous.period") <- Period(previous.date, by)
     
     dts <- seq.Date(start, ceil.end, by)
     attr(data, "by.period.sequence") <- Period(dts, by)
@@ -96,10 +97,9 @@ MetricData <- function(value,
     
     start <- floor_date(attr(data, "start"), subscription.length)# + unit
     ceil.end <- as.Date(ceiling_date(end, subscription.length, change_on_boundary = NULL))
-    attr(data, "subscription.sequence") <- dts <- seq.Date(start, ceil.end, subscription.length)
-    attr(data, "subscription.period.sequence") <- unique(Period(c(previous.date, dts[-length(dts)]), subscription.length))
-    
-    
+    dts <- seq.Date(start, by = subscription.length, length.out = length(dts))
+    attr(data, "subscription.period.sequence") <- Period(dts, subscription.length)
+    attr(data, "subscription.sequence") <- c(dts[-length(dts)], end)
     
     class(data) <- c(class(data), "MetricData")
     data

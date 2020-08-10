@@ -25,7 +25,7 @@ RevenueMetric <- function(FUN = "Acquisition",
                           id,
                           subscription.length = "year", 
                           subset = rep(TRUE, length(id)),
-                          by  = c("day", "month", "quarter", "year")[1],
+                          by  = c("day", "month", "quarter", "year")[4],
                           profiling = NULL, 
                           trim.id = 50,
                           id.merges = NULL, ...)

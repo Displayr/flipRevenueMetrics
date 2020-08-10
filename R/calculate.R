@@ -14,7 +14,7 @@
 #' @return A named vector showing churn.
 #' @importFrom flipTime Period
 #' @export
-calculate <- function(data, initial.only = FALSE, by.period = FALSE, volume = TRUE)
+calculate <- function(data, initial.only = FALSE, by.period = FALSE, volume = TRUE, components = c("churn"))
 {
 
     id <- data$id
@@ -28,10 +28,14 @@ calculate <- function(data, initial.only = FALSE, by.period = FALSE, volume = TR
     subscription.dts <- attr(data, "subscription.sequence")
     n.subscription.dates <- length(subscription.dts)
     subscription.dts <- c(subscription.dts[-n.subscription.dates], attr(data, "end"))
-    subscription.periods <- if (!by.period) "All" else attr(data, "subscription.period.sequence")[-1]#[-n.subscription.dates]
+    subscription.periods <- if (!by.period) "All" 
+    else {
+        seq <- attr(data, "subscription.period.sequence")
+        seq[-length(seq)]
+    }
     n.subscription.periods <- length(subscription.periods)
     unit <- Periods(1, s.l)
-    
+
     cohort.dts <- attr(data, "by.sequence")
     cohorts <- attr(data, "by.period.sequence")
     #if (!volume)
@@ -55,13 +59,14 @@ calculate <- function(data, initial.only = FALSE, by.period = FALSE, volume = TR
         if (!volume)
             id.cohort <- if(by.period) ids.by.cohort[[cohort]] else unlist(ids.by.cohort[1:cohort])
         
-        iterate.through <- if (by.period) 2:n.subscription.periods else 1
+        iterate.through <- if (by.period) 1:n.subscription.periods else 1
         for (i in iterate.through) # The initial part of the sequence can be set a bit smarter
         {
             start.dt <- if (by.period) subscription.dts[i] else cohort.dt# + unit
             if (start.dt >= cohort.dt)
             {
-                if (!initial.only | floor_date(cohort.dts[cohort], s.l) + Periods(1, s.l) == start.dt)
+                if (!initial.only | start.dt > cohort.dt & cohort.dt + unit >= start.dt)
+                {
                     if (volume)
                     {
                         start.dt <- min(start.dt + unit, end.date)
@@ -74,12 +79,36 @@ calculate <- function(data, initial.only = FALSE, by.period = FALSE, volume = TR
                         den[cohort, i] <- sum(rr[previous])
     
                         current <- start.dt >= from  & start.dt < to# & id %in% id.cohort
-                        id.churned <- setdiff(id.cohort, id[current])
-                        m <- previous & id %in% id.churned
-                        rr.by.id <- tapply(rr[m], list(id[m]), sum)
-                        
-                        num[cohort, i] <- sum(rr.by.id)
-                        id.num.matrix[[cohort]][[i]] <- rr.by.id
+                        if (any(c("contraction", "expansion") %in% components) & 
+                            !"churn" %in% components)
+                        {
+                            id.retained <- intersect(id.cohort, id[current])
+                            id.m <- id %in% id.retained
+                            m <- previous & id.m
+                            rr.prev.by.id <- tapply(rr[m], list(id[m]), sum)
+                            m <- current & id.m
+                            rr.curr.by.id <- tapply(rr[m], list(id[m]), sum)
+                            rr.change.by.id <- rr.curr.by.id - rr.prev.by.id
+                            det <- if (components == "contraction") 
+                                 -rr.change.by.id[rr.change.by.id < 0]
+                            else 
+                                rr.change.by.id[rr.change.by.id > 0]
+                        }
+                        else
+                        {
+                            m <- if (all(c("churn", "contraction", "expansion") %in% components))
+                            {   # Net Recurring Revenue Churn
+                                current & id %in% id.cohort
+                            } 
+                            else 
+                            {
+                                id.churned <- setdiff(id.cohort, id[current])
+                                previous & id %in% id.churned
+                            }                            
+                            det <- tapply(rr[m], list(id[m]), sum)
+                        }
+                        id.num.matrix[[cohort]][[i]] <- dt
+                        num[cohort, i] <- sum(det)
                     }
                     else 
                     {
@@ -94,6 +123,7 @@ calculate <- function(data, initial.only = FALSE, by.period = FALSE, volume = TR
                         id.num.matrix[[cohort]][[i]] <- churned <- setdiff(id.to.renew, id.subscribed.in.period)
                         num[cohort, i] <- length(churned)
                     }    
+                }
             }
         }
     }
