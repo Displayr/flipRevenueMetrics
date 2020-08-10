@@ -19,9 +19,10 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
     start <- floor_date(attr(data, "start"), by)# + unit
     end <- as.Date(ceiling_date(true.end, by, change_on_boundary = NULL))
     previous.date <- attr(data, "previous.date")
-    dts <- attr(data, "date.sequence")
+    dts <- attr(data, "by.sequence")[-1]
+    
     n.dates <- length(dts)
-    periods <- attr(data, "period.sequence")
+    periods <- attr(data, "by.period.sequence")[1:n.dates]
     
     # Ensuring dates used in calculations don't go past the 'end'
     dts <- ensureDatesArentInFuture(dts, true.end + 1) # +1 due to the < operator below
@@ -50,7 +51,7 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
     for (i in 1:n.dates)
     {
         dt <- dts[i]
-        invoice <- from < dt & to >= dt 
+        invoice <- dt >= from  & dt < to#from < dt & to >= dt 
         rr.by.id <- tapply(rr[invoice], list(id[invoice]), sum)
         
         ids <- names(rr.by.id)

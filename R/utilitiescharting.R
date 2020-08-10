@@ -45,6 +45,7 @@ areaChart <- function(x,  ...)
 #' @param series.hover The description of the value that appears in each cell;
 #' used in the hover tooltips 
 #' @param ... Additional arguments to be passed to lower level functions.
+#' @importFrom plotly plot_ly layout
 #' @return A plotly heatmap
 cohortHeatmap <- function(x, series.hover, ...)
 {
@@ -53,14 +54,19 @@ cohortHeatmap <- function(x, series.hover, ...)
     hover.text <- matrix(paste0("Customer since: ", rn, "<br>",
                                 properCase(attr(x, "by")), "s since starting: ", cn, "<br>",
                                 series.hover, "<br>",
-                                "Number customers: ", c(attr(x, "n.subscribers"))), nrow(x))
+                                "Cohort size: ", c(attr(x, "cohort.size"))), nrow(x))
     plot_ly(x = colnames(x),
             y = rownames(x),
             z = x, 
+            zauto = FALSE,
+            zmin = 0, 
+            zmax = max(x),
             colors = colorRamp(max(x, na.rm = TRUE), list(...)$y.max), 
             text = hover.text,
             hoverinfo = "text",
             type = "heatmap", 
-            showscale = FALSE) %>% config(displayModeBar = FALSE)
+            showscale = FALSE) %>% config(displayModeBar = FALSE) %>% 
+        layout("Hello", xaxis = list(title = "Period"), yaxis = list(title = "Cohort")) 
+    
     
 }

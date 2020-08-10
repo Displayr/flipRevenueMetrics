@@ -4,18 +4,10 @@
 \alias{InitialRecurringRevenueChurn}
 \title{InitialRecurringRevenueChurn}
 \usage{
-InitialRecurringRevenueChurn(data, by, remove.last, ...)
+InitialRecurringRevenueChurn(data)
 }
 \arguments{
 \item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
-
-\item{by}{The time period to aggregate the dates by: 
-\code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
-and \code{"day"}.}
-
-\item{remove.last}{Remove the final period (as usually is incomplete).}
-
-\item{...}{Additional arguments to be passed to lower level functions.}
 }
 \description{
 Computes the recurrent revenue churn rate for people in their first completed

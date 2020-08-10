@@ -2,31 +2,17 @@
 % Please edit documentation in R/initialchurn.R
 \name{InitialCustomerChurn}
 \alias{InitialCustomerChurn}
-\title{InitialCustomerChurn}
+\title{\code{InitialCustomerChurn}}
 \usage{
-InitialCustomerChurn(data, by, remove.last, ...)
+InitialCustomerChurn(data)
 }
 \arguments{
-\item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
-
-\item{by}{The time period to aggregate the dates by: 
-\code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
-and \code{"day"}.}
-
-\item{remove.last}{Remove the final period (as usually is incomplete).}
-
-\item{...}{Additional arguments to be passed to lower level functions.}
+\item{data}{A \code{MetricData} object.}
+}
+\value{
+A named vector showing churn.
 }
 \description{
-Computes the churn rate for people in their first completed
-renewal period.
-}
-\details{
-For example, if the subscriptions are annual, computes 
-proportion of people in 2012 that churned in 2013. Customers that had
-an incomplete year that falls within a calendar year will be excluded
-from this metric (e.g., a license from 1 January to 1 December 2012  will
-not appear in this calculation, but their renewal year may instead). 
-This calculation is taken from the one-off diagonal of 
-\code{CustomerChurnByCohort}.
+The percentage of customers in their first period of a subscription who don't renew for a 
+second subscription. See \code{CustomerChurn}.
 }

@@ -388,8 +388,12 @@ removeAttributesAndClass <- function(x)
     for (a in c("detail", 
                 "volume",
                 "by",
+                "numerator",
+                "denominator",
+                "n.retained",
+                "n.churned",
+                "cohort.size",
                 "subscription.length",
-                "n.subscribers",
                 "y.title",
                 "date.format",
                 "cohort.by"))

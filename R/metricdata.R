@@ -81,16 +81,23 @@ MetricData <- function(value,
     attr(data, "id.merges") <- id.merges
     attr(data, "start") <- start
     attr(data, "end") <- end
-    attr(data, "by") <- by
     attr(data, "subscription.length") <- subscription.length
+    attr(data, "by") <- by
     
     unit <- Periods(1, by)
     start <- floor_date(attr(data, "start"), by)# + unit
     ceil.end <- as.Date(ceiling_date(end, by, change_on_boundary = NULL))
     attr(data, "previous.date") <- previous.date <- start - unit
     
-    attr(data, "date.sequence") <- dts <- seq.Date(start, ceil.end, by)
-    attr(data, "period.sequence") <- Period(c(previous.date, dts[-length(dts)]), by)
+    dts <- seq.Date(start, ceil.end, by)
+    attr(data, "by.period.sequence") <- Period(dts, by)
+    dts[length(dts)] <- end
+    attr(data, "by.sequence") <- dts
+    
+    start <- floor_date(attr(data, "start"), subscription.length)# + unit
+    ceil.end <- as.Date(ceiling_date(end, subscription.length, change_on_boundary = NULL))
+    attr(data, "subscription.sequence") <- dts <- seq.Date(start, ceil.end, subscription.length)
+    attr(data, "subscription.period.sequence") <- unique(Period(c(previous.date, dts[-length(dts)]), subscription.length))
     
     
     
@@ -101,7 +108,7 @@ MetricData <- function(value,
 # Computing recurring.revenue
 
 #' @importFrom lubridate as.duration
-#' @importFrom flipTime  Periods
+#' @importFrom flipTime Periods
 recurringValue <- function(value, from, to, subscription.length)
 {
     units <- Periods(1, subscription.length)
@@ -118,4 +125,51 @@ checkVariableForLengthAndMissingData <- function(x, n)
         stop("'", deparse(substitute(x)), "' contains missing values.")
     if (length(x) != n)
         stop("'" , deparse(substitute(x)), "' contains ", deparse(substitute(x)), " observations, but 'value' contains ", n, ".")
+}
+
+
+filterMetricData <- function(metric.data, subset)
+{
+    
+    atr <- attributes(metric.data)
+    out <- subset(metric.data, subset)
+    
+    # Re-appending attributes
+    to.replace <- names(atr)
+    to.replace <- to.replace[!to.replace %in% c("row.names", "class", "dim", "dimnames", "names")]
+    for (a in to.replace)
+        attr(out, a) <- atr[[a]]
+    class(out) <- atr[["class"]]
+    out
+}    
+    
+#' @importFrom flipStatistics Table
+#' @importFrom flipTime Periods AsDate
+#' @importFrom plyr mapvalues
+filterMetricDataByRelationshipLength <- function(metric.data, n.subscriptions)
+{
+    start.by.id <- aggregate(from ~ id, data = metric.data, FUN = min)
+    #start.by.id <- ag[, 2]
+    #names(start.by.id) <- ag[, 1]
+    time.to.add <- Periods(n.subscriptions + 0, attr(metric.data, "subscription.length"))
+    start.by.case <- mapvalues(metric.data$id, 
+                               start.by.id[,1], as.character(start.by.id[, 2]))#(start.by.id + time.to.add)[metric.data$id]
+    cutoff <- AsDate(start.by.case) + time.to.add
+    subset <- metric.data$from < cutoff
+    out <- filterMetricData(metric.data, subset)
+    out
+}    
+
+
+#' @importFrom flipTime Period AsDate
+idsByFirstPeriod <- function(data)
+{
+    start.by.id <- aggregate(from ~ id, data = data, FUN = min)
+    period <- Period(start.by.id[, 2], attr(data, "by"))
+    r <- tapply(start.by.id[, 1], list(period), c)
+    periods <- attr(data, "by.period.sequence")
+    out <- vector("list", length(periods))
+    names(out) <- periods
+    out[names(r)] <- r
+    out
 }
