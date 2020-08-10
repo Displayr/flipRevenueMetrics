@@ -12,17 +12,18 @@
 #' @export
 RecurringRevenue <- function(data)
 {
-    dts <- attr(data, "by.sequence")#[-1]
-    n <- length(dts)
+    a.dts <- attr(data, "by.sequence")
+    n <- length(a.dts)
     rr <- data$recurring.value
     from <- data$from
     to <- data$to
     out <- rep(0, n)
-    names(out) <- c(attr(data, "previous.period"), attr(data, "by.period.sequence")[-n])#[1:n]
+    names(out) <- c(attr(data, "previous.period"),
+                    attr(data, "by.period.sequence")[-n])
     for (i in 1:n)
     {
-        dt <- as_datetime(dts[i]) - 0.00001
-        out[i] <- sum(rr[from <= dt & dt <= to])
+        a.dt <- as_datetime(a.dts[i]) - 0.00001
+        out[i] <- sum(rr[from <= a.dt & a.dt <= to])
     }
     detail <- data[from >= attr(data, "start") & from <= attr(data, "end"),
                    c("id", "value", "recurring.value","from", "to")]
@@ -30,19 +31,6 @@ RecurringRevenue <- function(data)
     out <- addAttributesAndClass(out, "RecurringRevenue", by, detail)
     attr(out, "subscription.length") <- attr(data, "subscription.length")
     out
-    
-#     
-#     
-#     end <- attr(data, "end")
-#     x <- Subscribers(data, end = attr(data, "end"), by = attr(data, "by"), volume = TRUE, recurring = TRUE)
-# #    keep <- periodsToKeep(names(x), attr(data, "start"), attr(data, "end"), FALSE)
-# #    x <- x[keep]
-#     detail <- data[data$from >= attr(data, "start") & data$from <= attr(data, "end"),
-#                    c("id", "value", "recurring.value","from", "to")]
-#     colnames(detail) <- c("Name", "Revenue", "Recurring Revenue", "From", "To")
-#     out <- addAttributesAndClass(x, "RecurringRevenue", by, detail)
-#     attr(out, "subscription.length") <- attr(data, "subscription.length")
-#     out
 }
 
 

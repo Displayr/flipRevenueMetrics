@@ -19,6 +19,11 @@ calculate(
 renewal}
 
 \item{by.period}{If TRUE, calculates one figure for each cohort (rather than by period)}
+
+\item{volume}{If TRUE, recurring revenue rather than customers is used in calculations.}
+
+\item{component}{A vector of characters indicating the components of churn to use.
+Contains any of 'churn', 'expansion', and 'contraction'.}
 }
 \value{
 A named vector showing churn.

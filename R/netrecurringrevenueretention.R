@@ -24,13 +24,13 @@
 #'     rr <- data$recurring.value
 #'     for (i in seq_along(dts))
 #'     {
-#'         dt <- dts[i]
-#'         dt.year.ago <- dt - years(1)
-#'         invoice.year.ago <- from <= dt.year.ago & to >= dt.year.ago
+#'         a.dt <- dts[i]
+#'         a.dt.year.ago <- a.dt - years(1)
+#'         invoice.year.ago <- from <= a.dt.year.ago & to >= a.dt.year.ago
 #'         ids.year.ago <- unique(id[invoice.year.ago])
-#'         invoice.this.year <- from <= dt & to >= dt & id %in% ids.year.ago
+#'         invoice.this.year <- from <= a.dt & to >= a.dt & id %in% ids.year.ago
 #'         #print(c(sum(rr[invoice.this.year]),sum(rr[invoice.year.ago])))
-#'         #print(dt)
+#'         #print(a.dt)
 #'         revenue.retention[i] <- sum(rr[invoice.this.year]) / sum(rr[invoice.year.ago]) - 1
 #'     }
 #'     detail <- data[, c("from", "to", "id", "recurring.value")]

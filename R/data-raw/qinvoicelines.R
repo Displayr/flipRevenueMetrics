@@ -232,7 +232,7 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 #
 #
 # data(qApril2016)
-# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$dt), qApril2016$name, "year")
+# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$a.dt), qApril2016$name, "year")
 #
 #
 #
@@ -285,7 +285,7 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 # #RevenueGrowth(d$name, d$year, d$inc_amt)
 #
 # # library(lubridate)
-# # d$year <- year(floor_date(dmy_hms(d$dt), "year"))
+# # d$year <- year(floor_date(dmy_hms(d$a.dt), "year"))
 # # d$Steve <- "d7e7ee3a-97f3-461a-a4fe-38ce02ccdc20" == d$person
 # #
 # #
@@ -362,15 +362,15 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 #
 #
 #
-# qApril2016$year <- strftime(as.Date(qApril2016$dt), "%Y")
+# qApril2016$year <- strftime(as.Date(qApril2016$a.dt), "%Y")
 #
-# dau <- aggregate(inc_amt ~ name + dt, FUN = sum, data = dau)
-# dau$month.of.year <- strftime(dau$dt, "%m")
-# dau$year <- strftime(dau$dt, "%Y")
-# dau$day.of.month <- strftime(dau$dt, "%d")
+# dau <- aggregate(inc_amt ~ name + a.dt, FUN = sum, data = dau)
+# dau$month.of.year <- strftime(dau$a.dt, "%m")
+# dau$year <- strftime(dau$a.dt, "%Y")
+# dau$day.of.month <- strftime(dau$a.dt, "%d")
 # library(lubridate)
-# dau$week = floor_date(dau$dt, "week")
-# dau$month = floor_date(dau$dt, "month")
+# dau$week = floor_date(dau$a.dt, "week")
+# dau$month = floor_date(dau$a.dt, "month")
 # dau
 #
 #
@@ -818,7 +818,7 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 #
 #
 # data(qApril2016)
-# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$dt), qApril2016$name, "year")
+# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$a.dt), qApril2016$name, "year")
 #
 #
 #
@@ -951,7 +951,7 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 # data(qApril2016)
 # d <- qApril2016
 # # Magic ratio stuff.
-# d$year <- lubridate::year(floor_date(dmy_hms(d$dt), "year"))
+# d$year <- lubridate::year(floor_date(dmy_hms(d$a.dt), "year"))
 # rg <- RevenueGrowthAccounting(d$name, d$year, d$inc_amt)
 # rg
 # plot(rg)
@@ -966,7 +966,7 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 # ####  Retention                  ####
 # #####################################
 #
-# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$dt), qApril2016$name, "year")
+# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$a.dt), qApril2016$name, "year")
 #
 # # Number of firms
 # n.by.start.period <- Table(id ~ start.period, data = dat, FUN = function(x) length(unique(x)))
@@ -1105,7 +1105,7 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 #
 #
 # data(qApril2016)
-# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$dt), qApril2016$name, "year")
+# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$a.dt), qApril2016$name, "year")
 #
 #
 #
@@ -1158,7 +1158,7 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 # #RevenueGrowth(d$name, d$year, d$inc_amt)
 #
 # # library(lubridate)
-# # d$year <- year(floor_date(dmy_hms(d$dt), "year"))
+# # d$year <- year(floor_date(dmy_hms(d$a.dt), "year"))
 # # d$Steve <- "d7e7ee3a-97f3-461a-a4fe-38ce02ccdc20" == d$person
 # #
 # #
@@ -1235,15 +1235,15 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 #
 #
 #
-# qApril2016$year <- strftime(as.Date(qApril2016$dt), "%Y")
+# qApril2016$year <- strftime(as.Date(qApril2016$a.dt), "%Y")
 #
-# dau <- aggregate(inc_amt ~ name + dt, FUN = sum, data = dau)
-# dau$month.of.year <- strftime(dau$dt, "%m")
-# dau$year <- strftime(dau$dt, "%Y")
-# dau$day.of.month <- strftime(dau$dt, "%d")
+# dau <- aggregate(inc_amt ~ name + a.dt, FUN = sum, data = dau)
+# dau$month.of.year <- strftime(dau$a.dt, "%m")
+# dau$year <- strftime(dau$a.dt, "%Y")
+# dau$day.of.month <- strftime(dau$a.dt, "%d")
 # library(lubridate)
-# dau$week = floor_date(dau$dt, "week")
-# dau$month = floor_date(dau$dt, "month")
+# dau$week = floor_date(dau$a.dt, "week")
+# dau$month = floor_date(dau$a.dt, "month")
 # dau
 #
 #
@@ -1691,7 +1691,7 @@ use_data(q.invoice.lines.short, internal = FALSE, overwrite = TRUE)
 #
 #
 # data(qApril2016)
-# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$dt), qApril2016$name, "year")
+# dat <- TidyRevenueData(qApril2016$inc_amt, lubridate::dmy_hms(qApril2016$a.dt), qApril2016$name, "year")
 #
 #
 #

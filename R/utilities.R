@@ -65,8 +65,8 @@ FillInVector <- function(x, element.names, value = 0)
 #' @importFrom flipTime AsDate Period
 FillInDateVector <- function(x, by, value = 0)
 {
-    dt <- CompleteListPeriodNames(names(x), by)
-    FillInVector(x, dt)
+    a.dt <- CompleteListPeriodNames(names(x), by)
+    FillInVector(x, a.dt)
 }
 
 

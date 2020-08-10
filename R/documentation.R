@@ -27,3 +27,12 @@ NULL
 #' @docType data
 #' @keywords data
 NULL
+
+#' fake.invoice.lines
+#' 
+#' @description Fake data for testing
+#' @format data.frame
+#' @name fake.invoice.lines
+#' @docType data
+#' @keywords data
+NULL

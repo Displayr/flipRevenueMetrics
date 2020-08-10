@@ -47,8 +47,8 @@ GrowthAccounting <- function(data, small = 0.1)
     
     for (i in 1:n.dates)
     {
-        dt <- dts[i]
-        invoice <- dt >= from  & dt < to#from < dt & to >= dt 
+        a.a.dt <- dts[i]
+        invoice <- a.a.dt >= from  & a.a.dt < to#from < a.a.dt & to >= a.a.dt 
         rr.by.id <- tapply(rr[invoice], list(id[invoice]), sum)
         
         ids <- names(rr.by.id)

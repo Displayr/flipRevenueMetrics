@@ -4,20 +4,15 @@ data(q.invoice.lines.short)
 d <- q.invoice.lines.short
 
 funcs <- c("GrowthAccounting",
-           "InitialCustomerChurn",  # Churn
+           "Expansion",
+           "Contraction",
+           "InitialCustomerChurn",  
            "CustomerChurn",
-           "RecurringRevenueChurn",
-           "RecurringRevenueChurnByCohort",
-           "CustomerChurnByCohort",
-           "Customers", # Customers
-           "NewCustomers",
-           "CustomerGrowth",
-           #"Revenue",                  # Revenue
+           "CustomerRetentionByCohort",
            "RecurringRevenue",
-           "RecurringRevenueByCohort",
-           # "RecurringRevenueGrowth",
-           "MeanRecurringRevenue")#,
-#"MeanRecurringRevenueByCohort")
+           "InitialRecurringRevenueChurn",
+           "RecurringRevenueChurn",
+           "RecurringRevenueRetentionByCohort")#,
 
 # Checking that start parameter is taken into account 
 library(flipTime)
@@ -28,20 +23,19 @@ for (fun in funcs)
     for (out in c("Table"))#
         for (by in c("month", "quarter", "year"))
         {
-            cohort.bys <- if (fun %in%  c("RecurringRevenueByCohort", "MeanRecurringRevenueByCohort")) c("month", "quarter", "year") else NA
-            for (cohort.by in cohort.bys)
+            for (subscription.length in "year")
             {
-                days <- if (fun %in%  c("MeanRecurringRevenue", "MeanRecurringRevenueByCohort")) c(0, 30, 90, 180, 365, 365 * 2) else NA
-                for (day in days)
-                {
-                    descr <- paste("metrics", fun, out, by, cohort.by, "days", day)
+                # days <- if (fun %in%  c("MeanRecurringRevenue", "MeanRecurringRevenueByCohort")) c(0, 30, 90, 180, 365, 365 * 2) else NA
+                # for (day in days)
+                # {
+                    descr <- paste("metrics", fun, out, by, subscription.length)#cohort.by, "days", day)
                     # Tests that the function works with a total data set
                     test_that(paste("Start and end ", descr),{
                         #print(fun)
                         s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, 
                                           start = strt,
                                           end = nd,
-                                          id = d$name, by = by, cohort.by = cohort.by, days.to.count = day)
+                                          id = d$name, by = by, subscription.length = subscription.length)#cohort.by = cohort.by, days.to.count = day)
                         #print(s)
                         if (is.null(s))
                             expect_true(TRUE) # avoiding empty test
@@ -60,4 +54,4 @@ for (fun in funcs)
                     })
                 }
             }
-        }
+#        }

@@ -11,6 +11,9 @@
 #' @param initial.only If TRUE, only calculates retention for the first opportunity for
 #' renewal
 #' @param by.period If TRUE, calculates one figure for each cohort (rather than by period)
+#' @param volume If TRUE, recurring revenue rather than customers is used in calculations.
+#' @param component A vector of characters indicating the components of churn to use.
+#' Contains any of 'churn', 'expansion', and 'contraction'.
 #' @return A named vector showing churn.
 #' @importFrom flipTime Period
 #' @export
