@@ -9,8 +9,8 @@
 #' @importFrom flipTime AsDate Period CompleteListPeriodNames
 FillInDateRowsInMatrix <- function(x, by, value = 0)
 {
-    dt <- CompleteListPeriodNames(rownames(x), by)
-    FillInMatrix(x, dt, colnames(x))
+    a.dt <- CompleteListPeriodNames(rownames(x), by)
+    FillInMatrix(x, a.dt, colnames(x))
 }
 
 

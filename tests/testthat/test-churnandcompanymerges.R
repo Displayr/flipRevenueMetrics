@@ -82,13 +82,12 @@ test_that("Checking calculations",
               # Nothing
               s0 = RevenueMetric(FUN = "CustomerChurn", output = out, d$Value ,d$From, d$To, 
                                          id = d$Name, by = by)
-              RevenueMetric(FUN = "GrowthAccounting", output = out, d$Value ,d$From, d$To, 
-                                 id = d$Name, by = by)
-              
-              id.m <- data.frame(id = d$name[c(1)],
-                                 id.to = d$name[c(2)])
-warning("Turn test back on!!!")              
-              # s1 <- RevenueMetric(FUN = fun, output = out, d$AUD, from = d$ValidFrom, to = d$ValidTo, 
-              #                            id = d$name, by = by, id.merges = id.m)
+              # RevenueMetric(FUN = "GrowthAccounting", output = out, d$Value ,d$From, d$To, 
+              #                    id = d$Name, by = by)
+              # 
+              id.m <- data.frame(id = d$Name[c(1)],
+                                 id.to = d$Name[c(7)])
+              s1 <- RevenueMetric(FUN = "CustomerChurn", output = out, d$Value, from = d$From, to = d$To, 
+                                         id = d$Name, by = by, id.merges = id.m)
           })
 
