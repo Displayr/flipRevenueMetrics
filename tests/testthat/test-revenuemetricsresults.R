@@ -32,17 +32,17 @@ test_that("Recurring Revenue",
 test_that("Recurring Revenue Churn",
           {
               by = "year"
-              s = RevenueMetric("RecurringRevenueChurn", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+              s = RevenueMetric("RecurringRevenueChurn", use = "aggregate", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               expect_equal(as.numeric(s), c(0, 0.00503686058558867, 0.131272190442014, 0.0736629537422645, 
                                             0.0513783929950982, 0.0859822919426476, 0.142475132527322, 0.031811626))
               expect_equal(as.numeric(sy[2:(length(sy) - 2)]), as.numeric(attr(s, "denominator")[-length(s)]))
 
-              s = RevenueMetric("RecurringRevenueRetentionByCohort", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+              s = RevenueMetric("RecurringRevenueChurn", use = "cohort", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               expect_equal(s[2, ], c(`2009` = NaN, `2010` = 0.994963139414411, `2011` = 0.947369370000059, 
                                      `2012` = 0.895820705115493, `2013` = 0.889920696404257, `2014` = 0.889920696404257, 
                                      `2015` = 0.818929400709358, `2016` = 0.829851138508574))
               
-              sr = RevenueMetric("InitialRecurringRevenueChurn", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+              sr = RevenueMetric("RecurringRevenueChurn", use = "initial", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               expect_equal(as.numeric(sr),c(0.0373773458628039, 0.0526306299999406, 0.199106589341175, 
                                            0.115138533321218, 0.162709152884027, 0.178098968441071, 0.157996829606064))                                 
           }
@@ -64,23 +64,23 @@ test_that("GrowthAccounting",
 test_that("Customer Churn",
           {
               by = "year"
-              s = RevenueMetric("CustomerChurn", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+              s = RevenueMetric("CustomerChurn", use = "aggregate", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               expect_equal(as.numeric(s), c(0, 0.0344827586206896, 0.0973451327433629, 0.118343195266272, 
                                             0.118421052631579, 0.130718954248366, 0.241299303944316, 0.123076923076923))
               
-              s = RevenueMetric("CustomerRetentionByCohort", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+              s = RevenueMetric("CustomerChurn", use = "cohort", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               expect_equal(s[2, ], c(`2009` = 1, `2010` = 0.978260869565217, `2011` = 0.891304347826087, 
                                      `2012` = 0.923076923076923, `2013` = 0.945945945945946, `2014` = 1, 
                                      `2015` = 0.916666666666667, `2016` = 1))
               
               
-              ss = RevenueMetric("InitialCustomerChurn", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+              ss = RevenueMetric("CustomerChurn", use = "initial", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               expect_equal(as.numeric(ss),c(0, 0.0217391304347826, 0.111111111111111, 0.123287671232877, 
                                            0.111111111111111, 0.09, 0.389221556886228, 0.0666666666666667))                                 
               expect_equal(1 - as.numeric(diag(s)), as.numeric(ss))
               
               by = "quarter"
-              s = RevenueMetric("InitialCustomerChurn", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+              s = RevenueMetric("CustomerChurn", use = "initial", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               attr(ss, "denominator")
               attr(s, "denominator")
               

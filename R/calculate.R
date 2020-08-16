@@ -10,7 +10,7 @@
 #' @param data A \code{MetricData} object.
 #' @param components A vector of characters indicating the components of churn to use.
 #' Contains any of 'churn', 'expansion', and 'contraction'.
-#' @param use The data to be used in the calculation: 'aggregate, "first period', or 'chort'.
+#' @param use The data to be used in the calculation: 'aggregate, "initial', or 'chort'.
 #' @param volume If TRUE, recurring revenue rather than customers is used in calculations.
 #' @return A named vector showing churn.
 #' @importFrom flipTime Period

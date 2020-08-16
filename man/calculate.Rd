@@ -19,7 +19,7 @@ Contains any of 'churn', 'expansion', and 'contraction'.}
 
 \item{volume}{If TRUE, recurring revenue rather than customers is used in calculations.}
 
-\item{use}{The data to be used in the calculation: 'aggregate, "first period', or 'chort'.}
+\item{use}{The data to be used in the calculation: 'aggregate, "initial', or 'chort'.}
 }
 \value{
 A named vector showing churn.
