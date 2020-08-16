@@ -13,7 +13,7 @@ MetricData(
   id,
   subscription.length,
   by,
-  id.merges,
+  mergers,
   trim.id
 )
 }
@@ -50,7 +50,7 @@ subscription length: \code{year} to view the data by year,
 billing period when determining if subscribers have churned or
 not.}
 
-\item{id.merges}{A data frame with two variables 'id' and 'id.to'. 
+\item{mergers}{A data frame with two variables 'id' and 'id.to'. 
 'id' contains the ids of companies that appeara, based on their data,
 to have churned, but have in fact merged with the corresponding 'id.to'.}
 

@@ -25,7 +25,7 @@
 #'     \code{quarter}, and \code{month}. This is assumed to be the
 #'     billing period when determining if subscribers have churned or
 #'     not.
-#' @param id.merges A data frame with two variables 'id' and 'id.to'. 
+#' @param mergers A data frame with two variables 'id' and 'id.to'. 
 #' 'id' contains the ids of companies that appeara, based on their data,
 #' to have churned, but have in fact merged with the corresponding 'id.to'.
 #' @param trim.id The maximum length of the strings to be used showing
@@ -44,6 +44,7 @@
 #'    Additional information is included in attributes
 #' @importFrom lubridate floor_date
 #' @importFrom stats aggregate
+#' @importFrom flipTime AsDate
 #' @export
 MetricData <- function(value, 
                         from, 
@@ -53,12 +54,14 @@ MetricData <- function(value,
                         id,
                         subscription.length,
                        by,
-                        id.merges,
+                        mergers,
                         trim.id) #, tolerance = .01)
 {
     id <- as.character(id)
     # Checking the input variables.
     n <- length(value)
+    from <- AsDate(from)
+    to <- AsDate(to)
     checkVariableForLengthAndMissingData(value, n)
     checkVariableForLengthAndMissingData(from, n)
     checkVariableForLengthAndMissingData(to, n)
@@ -78,7 +81,7 @@ MetricData <- function(value,
     
     # appending other info
     data$recurring.value <- recurringValue(data$value, data$from, data$to, subscription.length)
-    attr(data, "id.merges") <- id.merges
+    attr(data, "mergers") <- mergers
     attr(data, "start") <- start
     attr(data, "end") <- end
     attr(data, "subscription.length") <- subscription.length
@@ -160,16 +163,3 @@ filterMetricDataByRelationshipLength <- function(metric.data, n.subscriptions)
     out
 }    
 
-
-#' @importFrom flipTime Period AsDate
-idsByFirstPeriod <- function(data)
-{
-    start.by.id <- aggregate(from ~ id, data = data, FUN = min)
-    period <- Period(start.by.id[, 2], attr(data, "by"))
-    r <- tapply(start.by.id[, 1], list(period), c)
-    periods <- attr(data, "by.period.sequence")
-    out <- vector("list", length(periods))
-    names(out) <- periods
-    out[names(r)] <- r
-    out
-}

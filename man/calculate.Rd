@@ -6,24 +6,20 @@
 \usage{
 calculate(
   data,
-  initial.only = FALSE,
-  by.period = FALSE,
+  components = c("current", "expansion", "contraction", "churn")[3],
   volume = TRUE,
-  components = c("churn")
+  use = c("aggregate", "initial", "cohort")[1]
 )
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
 
-\item{initial.only}{If TRUE, only calculates retention for the first opportunity for
-renewal}
-
-\item{by.period}{If TRUE, calculates one figure for each cohort (rather than by period)}
+\item{components}{A vector of characters indicating the components of churn to use.
+Contains any of 'churn', 'expansion', and 'contraction'.}
 
 \item{volume}{If TRUE, recurring revenue rather than customers is used in calculations.}
 
-\item{components}{A vector of characters indicating the components of churn to use.
-Contains any of 'churn', 'expansion', and 'contraction'.}
+\item{use}{The data to be used in the calculation: 'aggregate, "first period', or 'chort'.}
 }
 \value{
 A named vector showing churn.

@@ -12,27 +12,35 @@
 #' @export
 RecurringRevenue <- function(data)
 {
-    a.dts <- attr(data, "by.sequence")
-    n <- length(a.dts)
+    calculateRecurringRevenueOrCustomers(data, recurring.revenue = TRUE)
+}
+
+calculateRecurringRevenueOrCustomers <- function(data, recurring.revenue)
+{
+    # r <- calculate(data, components = "current", volume = recurring.revenue, use = "aggregate")
+    # r
+    dts <- attr(data, "by.sequence")
+    n <- length(dts)
     rr <- data$recurring.value
-    from <- data$from
-    to <- data$to
-    out <- rep(0, n)
-    names(out) <- c(attr(data, "previous.period"),
-                    attr(data, "by.period.sequence")[-n])
+    out <- setNames(rep(0, n), c(attr(data, "previous.period"), attr(data, "by.period.sequence")[-n]))
     for (i in 1:n)
     {
-        a.dt <- as_datetime(a.dts[i]) - 0.00001
-        out[i] <- sum(rr[from <= a.dt & a.dt <= to])
+#        dt #<- as_datetime(dts[i]) - 0.00001
+        #f <- from <= a.dt & a.dt <= to
+        f <- customerAtPeriodEnd(data, dts[i])
+        out[i] <- if (recurring.revenue)
+            sum(rr[f])
+        else
+            nUnique(data$id[rr > 0 & f])
+
     }
-    detail <- data[from >= attr(data, "start") & from <= attr(data, "end"),
+    detail <- data[data$from >= attr(data, "start") & data$from <= attr(data, "end"),
                    c("id", "value", "recurring.value","from", "to")]
     colnames(detail) <- c("Name", "Revenue", "Recurring Revenue", "From", "To")
-    out <- addAttributesAndClass(out, "RecurringRevenue", by, detail)
+    out <- addAttributesAndClass(out, if (recurring.revenue) "RecurringRevenue" else "Customers", by, detail)
     attr(out, "subscription.length") <- attr(data, "subscription.length")
     out
 }
-
 
 
 #' @export

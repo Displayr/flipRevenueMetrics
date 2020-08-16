@@ -64,7 +64,7 @@ RecurringRevenueGrowth <- function(data, by, ...)
 #' @export
 CustomerGrowth <- function(data, by, ...)
 {
-    x <- Customers(data,  by)
+    x <- Customers(datay)
     g <- Growth(x, attr(data, "start"), attr(data, "start"), by, remove.last = TRUE)
     attr(g, "y.title") <- "Growth in Customers"
     g

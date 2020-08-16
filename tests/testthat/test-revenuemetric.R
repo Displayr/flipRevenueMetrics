@@ -6,28 +6,28 @@ end <- ISOdate(2016, 2, 15, tz = tz(q.invoice.lines$ValidFrom))
 start <- ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom))
 
 
-  # test_that(paste("Mean recurrent revenue consistency"), {
-  #   by= "year"
-  #   # Near-depricated
-  #   rdd <- RevenueData(d$AUD,d$ValidFrom,d$ValidTo, id = d$name, subscription.length = by)
-  #   r <- Lifetime(rdd)
-  #   # These tests are checking that numer methods of computing churn give the same
-  #   # answer as depricated methods
-warning("Test that need to add back in")    
-  #   rr = RevenueMetric("RecurringRevenueByCohort", output = "Table", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by, subscription.length = by)
-  #   expect_equal(flipRevenueMetrics:::removeAttributesAndClass(rr)[rownames(r$total), ], r$total[, colnames(rr)])
-  # 
-  # })
+  test_that(paste("Mean recurrent revenue consistency"), {
+    by= "year"
+    # Near-depricated
+    rdd <- RevenueData(d$AUD,d$ValidFrom,d$ValidTo, id = d$name, subscription.length = by)
+    r <- Lifetime(rdd)
+    # These tests are checking that numer methods of computing churn give the same
+    # answer as depricated methods
+#warning("Test that need to add back in")
+    rr = RevenueMetric("RecurringRevenueByCohort", output = "Table", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by, subscription.length = by)
+    expect_equal(flipRevenueMetrics:::removeAttributesAndClass(rr)[rownames(r$total), ], r$total[, colnames(rr)])
 
-# for (by in c("week", "month", "quarter", "year"))
-# test_that(paste("RecurringRevenue and GrowthAccounting are consistent", by),{
-#     rr = RevenueMetric("RecurringRevenue", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
-warning("Test that need to add back in")    
-#     ga  = RevenueMetric("GrowthAccounting", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
-#     aga = cumsum(colSums(ga))
-#     expect_equal(as.numeric(rr[-1]), as.numeric(aga))
-# })
-#   
+  })
+
+for (by in c("week", "month", "quarter", "year"))
+test_that(paste("RecurringRevenue and GrowthAccounting are consistent", by),{
+    rr = RevenueMetric("RecurringRevenue", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+#warning("Test that need to add back in")
+    ga  = RevenueMetric("GrowthAccounting", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+    aga = cumsum(colSums(ga))
+    expect_equal(as.numeric(rr[-1]), as.numeric(aga))
+})
+
 
 data(q.invoice.lines.short)
 d <- q.invoice.lines.short

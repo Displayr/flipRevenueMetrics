@@ -13,14 +13,14 @@
 #' @export
 CustomerRetentionByCohort <- function(data)
 {
-    calculate(data, initial.only = FALSE, by.period = TRUE, volume = FALSE)
+    calculateChurn(data, components = "churn", use = "cohort", volume = FALSE)
 }
-
-zeroRowsAtTopAndBottom <- function(x)
-{
-    rs <- rowSums(x)
-    cumsum(rs) > 0 & rev(cumsum(rev(rs))) > 0
-}
+# 
+# zeroRowsAtTopAndBottom <- function(x)
+# {
+#     rs <- rowSums(x)
+#     cumsum(rs) > 0 & rev(cumsum(rev(rs))) > 0
+# }
 
 #' \code{RecurringRevenueChurn}
 #' 
@@ -31,9 +31,9 @@ zeroRowsAtTopAndBottom <- function(x)
 #' @export
 RecurringRevenueRetentionByCohort <- function(data)
 {
-    calculate(data, initial.only = FALSE, by.period = TRUE, volume = TRUE)
-    
+    calculateChurn(data, components = "churn", use = "cohort", volume = TRUE)
 }
+
 
 #' @importFrom flipTables Cbind
 asMatrix <- function(list.of.lists, FUN, fill.with = 0)

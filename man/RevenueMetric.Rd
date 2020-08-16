@@ -10,15 +10,15 @@ RevenueMetric(
   value,
   from,
   to,
-  start = min(from),
-  end = max(from),
+  start = as.Date(min(from)),
+  end = as.Date(max(from)),
   id,
   subscription.length = "year",
   subset = rep(TRUE, length(id)),
   by = c("day", "month", "quarter", "year")[4],
   profiling = NULL,
   trim.id = 50,
-  id.merges = NULL,
+  mergers = NULL,
   ...
 )
 }
@@ -64,7 +64,7 @@ observations to be used in the calculations}
 ID names (used to avoid situations where string names are so
 long as to make reading of tables impossible.}
 
-\item{id.merges}{A data frame with two variables 'id' and 'id.to'. 
+\item{mergers}{A data frame with two variables 'id' and 'id.to'. 
 'id' contains the ids of companies that appeara, based on their data,
 to have churned, but have in fact merged with the corresponding 'id.to'.}
 

@@ -10,10 +10,9 @@ by = "year"
 sy = RevenueMetric("RecurringRevenue", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
 test_that("Recurring Revenue",
           {
-              warning("Test that need to add back in")    
-              # expect_equal(as.numeric(sy), c(0, 36990.3305564501, 274498.441101142, 658860.463058424, 
-              #                1013237.11072707, 1209960.17791254, 1804608.88256603, 2705382.99216918, 
-              #                3683135.01015347, 4250767.85))
+              expect_equal(as.numeric(sy), c(0, 36990.3305564501, 274498.441101142, 658860.463058424,
+                             1013237.11072707, 1209960.17791254, 1804608.88256603, 2705382.99216918,
+                             3683135.01015347, 4250767.85))
               # Checking that daily data matches yearly data
               by = "day"
               s = RevenueMetric("RecurringRevenue", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
@@ -36,32 +35,31 @@ test_that("Recurring Revenue Churn",
               s = RevenueMetric("RecurringRevenueChurn", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               expect_equal(as.numeric(s), c(0, 0.00503686058558867, 0.131272190442014, 0.0736629537422645, 
                                             0.0513783929950982, 0.0859822919426476, 0.142475132527322, 0.031811626))
+              expect_equal(as.numeric(sy[2:(length(sy) - 2)]), as.numeric(attr(s, "denominator")[-length(s)]))
 
               s = RevenueMetric("RecurringRevenueRetentionByCohort", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               expect_equal(s[2, ], c(`2009` = NaN, `2010` = 0.994963139414411, `2011` = 0.947369370000059, 
                                      `2012` = 0.895820705115493, `2013` = 0.889920696404257, `2014` = 0.889920696404257, 
                                      `2015` = 0.818929400709358, `2016` = 0.829851138508574))
               
-              
-              s = RevenueMetric("InitialRecurringRevenueChurn", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
-              expect_equal(as.numeric(s),c(0.0373773458628039, 0.0526306299999406, 0.199106589341175, 
+              sr = RevenueMetric("InitialRecurringRevenueChurn", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+              expect_equal(as.numeric(sr),c(0.0373773458628039, 0.0526306299999406, 0.199106589341175, 
                                            0.115138533321218, 0.162709152884027, 0.178098968441071, 0.157996829606064))                                 
           }
 )
 
-warning("Test that need to add back in")    
-# test_that("GrowthAccounting",
-#           {
-#               by = "year"
-#               g = RevenueMetric("GrowthAccounting", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
-#               expect_equal(g[, "2016"], c(New = 451755.598424439, Resurrection = 27522.7272727273, `Major Expansion` = 524883.685489852, 
-#                                           `Minor Expansion` = 19607.1464753758, Contraction = -404788.339449469, 
-#                                           Churn = -51347.9735579736))
-#               # Checkingt that matches yearly recurring revenue data
-#               sum.g <- cumsum(colSums(g))
-#               expect_equal(sy[-1], sum.g)
-#           }
-# )
+test_that("GrowthAccounting",
+          {
+              by = "year"
+              g = RevenueMetric("GrowthAccounting", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+              expect_equal(g[, "2016"], c(New = 451755.598424439, Resurrection = 27522.7272727273, `Major Expansion` = 524883.685489852,
+                                          `Minor Expansion` = 19607.1464753758, Contraction = -404788.339449469,
+                                          Churn = -51347.9735579736))
+              # Checkingt that matches yearly recurring revenue data
+              sum.g <- cumsum(colSums(g))
+              expect_equal(sy[-1], sum.g)
+          }
+)
 
 test_that("Customer Churn",
           {
@@ -132,4 +130,26 @@ test_that("Customer Churn",
 # 
 # RevenueMetric("NetRecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
 # RevenueMetric("Expansion", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# RevenueMetric("Contraction", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
+# # RevenueMetric("Contraction", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
+# 
+# q = displayr.2020aug14
+# 
+# dputt <- function(x)
+# { out <- as.numeric(x)
+# names(out) <- names(x)
+# dput(out)}    
+# 
+# s = RevenueMetric("InitialRecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# dputt(s)
+# 
+# 
+# RevenueMetric("NetRecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# 
+# RevenueMetric("InitialRecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# RevenueMetric("RecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# RevenueMetric("Expansion", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# s = RevenueMetric("RecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# #RevenueMetric("RecurringRevenue", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
+# RevenueMetric("RecurringRevenue", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = q$parent,  by = "month", end = Sys.Date())

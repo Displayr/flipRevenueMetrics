@@ -8,7 +8,7 @@
 #' @export
 InitialCustomerChurn <- function(data)
 {
-    calcInitialChurn(data, FALSE)
+    calculateChurn(data, components = "churn", volume = FALSE, use = "initial")
 }
 
 #' InitialRecurringRevenueChurn
@@ -26,33 +26,35 @@ InitialCustomerChurn <- function(data)
 #' @export
 InitialRecurringRevenueChurn <- function(data)
 {
+    calculateChurn(data, components = "churn", volume = TRUE, use = "initial")
+        
     # churn.cohort <- RecurringRevenueChurnByCohort(data, by, remove.last, ...)
     # if (is.null(churn.cohort))
     #     return(NULL)
     # InitialChurn(churn.cohort, remove.last = remove.last, volume = TRUE, by = by, ...)
-    calcInitialChurn(data, TRUE)
+#    calcInitialChurn(data, TRUE)
 }
 
 
-calcInitialChurn <- function(data, volume)
-{
-    r <- calculate(data, initial.only = TRUE, by.period = TRUE, volume = volume)
-    by <- attr(data, "by")
-    s.l <- attr(data, "subscription.length")
-    n.churned <- diagRectangular(attr(r, "numerator"), by, s.l)
-    cohort.size <- diagRectangular(attr(r, "denominator"), by, s.l)
-    churn <- n.churned / cohort.size
-    detail <- attr(r, "detail")
-    detail <- if (!volume)
-        initialDetail(detail, s.l)
-    out <- addAttributesAndClass(churn, "InitialChurn", by, detail)
-    attr(out, "volume") <- FALSE
-    attr(out, "numerator") <- n.churned
-    attr(out, "denominator") <- cohort.size
-    attr(out, ("by")) <- attr(data, ("by"))
-    out
-    
-}    
+# calcInitialChurn <- function(data, volume)
+# {
+#     r <- calculate(data, use = "first period", volume = volume, components = "churn")
+#     by <- attr(data, "by")
+#     s.l <- attr(data, "subscription.length")
+#     n.churned <- diagRectangular(attr(r, "numerator"), by, s.l)
+#     cohort.size <- diagRectangular(attr(r, "denominator"), by, s.l)
+#     churn <- n.churned / cohort.size
+#     detail <- attr(r, "detail")
+#     detail <- if (!volume)
+#         initialDetail(detail, s.l)
+#     out <- addAttributesAndClass(churn, "InitialChurn", by, detail)
+#     attr(out, "volume") <- FALSE
+#     attr(out, "numerator") <- n.churned
+#     attr(out, "denominator") <- cohort.size
+#     attr(out, ("by")) <- attr(data, ("by"))
+#     out
+#     
+# }    
 #' @importFrom flipTime AsDate Periods
 #' @importFrom lubridate floor_date
 initialDetail <- function(x, subscription.length)
@@ -64,22 +66,6 @@ initialDetail <- function(x, subscription.length)
     x[f, ]    
 }    
 
-
-#' @importFrom flipTime AsDate Period Periods
-#' @importFrom lubridate floor_date
-diagRectangular <- function(x, by, subscription.length)
-{
-    unit <- Periods(1, subscription.length)
-    row.dts <- AsDate(rownames(x))
-    rows <- floor_date(row.dts, subscription.length) + unit
-    rowm <- matrix(rows, nrow(x), ncol(x))                   
-    cols <- AsDate(colnames(x))
-    colm <- matrix(cols, nrow(x), ncol(x), byrow = TRUE)    
-    m <- colm == rowm
-    out <- x[m]
-    names(out) <- Period(row.dts [rowSums(m) != 0] + unit, by)
-    out
-}   
 
 
 

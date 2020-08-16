@@ -5,7 +5,7 @@
 #' @param FUN A function that calculates a metric
 #' @param output Whether to output as a Plot, Table, or Detail 
 #' @param profiling Separate analyses are conducted among each unique combination of these variables.
-#' @param id.merges A data frame with two variables 'id' and 'id.to'. 
+#' @param mergers A data frame with two variables 'id' and 'id.to'. 
 #' 'id' contains the ids of companies that appeara, based on their data,
 #' to have churned, but have in fact merged with the corresponding 'id.to'.
 #' @param by The unit of time to report on ("day", "month", "quarter", "year").
@@ -20,20 +20,20 @@ RevenueMetric <- function(FUN = "Acquisition",
                           value, 
                           from, 
                           to, 
-                          start = min(from),
-                          end = max(from), 
+                          start = as.Date(min(from)),
+                          end = as.Date(max(from)), 
                           id,
                           subscription.length = "year", 
                           subset = rep(TRUE, length(id)),
                           by  = c("day", "month", "quarter", "year")[4],
                           profiling = NULL, 
                           trim.id = 50,
-                          id.merges = NULL, ...)
+                          mergers = NULL, ...)
 {
     start <- floor_date(start, by)
     #end <- floor_date(end, by)
     
-    checkIDmerges(id, id.merges)
+    checkIDmerges(id, mergers)
     filters <- createFilters(profiling, subset = subset, id)
     n.filters <- length(filters)
     out <- vector("list", n.filters)
@@ -51,7 +51,7 @@ RevenueMetric <- function(FUN = "Acquisition",
                           id,
                           subscription.length,
                          by,
-                         id.merges,
+                         mergers,
                           trim.id)
         if (!is.null(rd))
         {
@@ -81,39 +81,39 @@ RevenueMetric <- function(FUN = "Acquisition",
 }
 
 #' @importFrom flipStatistics Table
-checkIDmerges <- function(id, id.merges)
+checkIDmerges <- function(id, mergers)
 {
-    if (is.null(id.merges))
+    if (is.null(mergers))
         return();
     
-    if (!is.data.frame(id.merges))
-        stop("'id.merges' needs to be a data frame")
+    if (!is.data.frame(mergers))
+        stop("'mergers' needs to be a data frame")
 
-    if (any(is.na(id.merges)))
-        stop("id.merges contains missing values")
+    if (any(is.na(mergers)))
+        stop("mergers contains missing values")
     
-    if (!(all(c("id", "id.to") %in% names(id.merges))))
-        stop("'id.merges' must be a data.frame containing 'id' and 'id.to'")
+    if (!(all(c("id", "id.to") %in% names(mergers))))
+        stop("'mergers' must be a data.frame containing 'id' and 'id.to'")
 
-    ids.are.same <- as.character(id.merges$id) == as.character(id.merges$id.to)
+    ids.are.same <- as.character(mergers$id) == as.character(mergers$id.to)
     if (any(ids.are.same))
-        stop("id.merges$id.to contains same values as id.merges$id:", 
-             paste(id.merges$id[ids.are.same], collapse = ", "))
+        stop("mergers$id.to contains same values as mergers$id:", 
+             paste(mergers$id[ids.are.same], collapse = ", "))
     
-    ids.known <- id.merges$id %in% id
+    ids.known <- mergers$id %in% id
     if (any(!ids.known))
-        stop("id.merges$id contains ids not in 'id':", 
-             paste(id.merges$id[ids.known], collapse = ", "))
+        stop("mergers$id contains ids not in 'id':", 
+             paste(mergers$id[ids.known], collapse = ", "))
     
-    ids.known <- id.merges$id.to %in% id
+    ids.known <- mergers$id.to %in% id
     if (any(!ids.known))
-        stop("id.merges$id contains ids not in 'id':", 
-             paste(id.merges$id[ids.known], collapse = ", "))
+        stop("mergers$id contains ids not in 'id':", 
+             paste(mergers$id[ids.known], collapse = ", "))
     
-    ids.dup <- duplicated(id.merges$id)
+    ids.dup <- duplicated(mergers$id)
     if (any(ids.dup))
-        stop("id.merges$id contains duplicates:", 
-             paste(id.merges$id[ids.dup], collapse = ", "))
+        stop("mergers$id contains duplicates:", 
+             paste(mergers$id[ids.dup], collapse = ", "))
     
     # Checking to see if id.to has churned at the same time as id.from
     
@@ -410,3 +410,20 @@ addAttributesAndClass <- function(x, class.name, by, detail)
     x    
 }    
 
+createOutput <- function(x, class.name, calculation)
+{
+    attr(x, "by") <- calculation$by
+    attr(x, "volume") <- calculation$volume
+    attr(x, "detail") <- calculation$detail
+    attr(x, "numerator") <- calculation$numerator
+    attr(x, "denominator") <- calculation$denominator
+    class(x) <- c(class.name, "RevenueMetric", class(x))
+    x    
+}    
+
+
+# licensed <- function(window.start, license.end.date, window.end)
+# {
+#     license.end.date >= window.start & license.end.date < window.end
+# }
+    

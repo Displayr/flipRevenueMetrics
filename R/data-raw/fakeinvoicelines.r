@@ -9,7 +9,7 @@ company.1 <- data.frame(From = company.1.from,
                         To = company.1.from + years(1),
                         Value = 1000,
                         Name = "A")                                 
-company.2.from <- seq.Date(as.Date("2010/06/30"), by = "year", length.out = 10)
+company.2.from <- seq.Date(as.Date("2010/06/30"), by = "year", length.out = 12)
 company.2 <- data.frame(From = company.2.from,
                         To = company.2.from + years(1),
                         Value = 10000,

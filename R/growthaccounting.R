@@ -167,10 +167,8 @@ plot.GrowthAccounting <- function(x, ...)
         p <- add_trace(#evaluate = TRUE,
             p,
             text = paste0("Number of accounts: ", ct[i,]),
-            #hoverinfo = "text",
             x = x.periods,
             y = y.values,
-            #hoverlabel.align = "left",
             hovertemplate = paste(
               " %{xaxis.title.text}: %{x}<br>",
               "%{yaxis.title.text}: %{y:$,.0f}<br>",

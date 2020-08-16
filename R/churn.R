@@ -13,7 +13,7 @@
 #' @export
 CustomerChurn <- function(data)
 {
-    calculateChurn(data, volume = FALSE, components = "churn")
+    calculateChurn(data, components = "churn", volume = FALSE, use = "aggregate")
 }
 
 
@@ -27,9 +27,8 @@ CustomerChurn <- function(data)
 #' @export
 RecurringRevenueChurn <- function(data)
 {
-    calculateChurn(data, volume = TRUE, components = "churn")
+    calculateChurn(data, components = "churn", volume = TRUE, use = "aggregate")
 }
-
 #' \code{NetRecurringRevenueChurn}
 #' 
 #' The percentage of customers who could churn in a period that did churn.
@@ -45,7 +44,7 @@ RecurringRevenueChurn <- function(data)
 #' @export
 NetRecurringRevenueChurn <- function(data)
 {
-    calculateChurn(data, volume = TRUE, components = c("expansion", "contraction", "churn"))
+    calculateChurn(data, use = "aggregate", volume = TRUE, components = c("expansion", "contraction", "churn"))
 }
 
 #' \code{Contraction}
@@ -57,7 +56,7 @@ NetRecurringRevenueChurn <- function(data)
 #' @export
 Contraction <- function(data)
 {
-    calculateChurn(data, volume = TRUE, components = c("contraction"))
+    calculateChurn(data, use = "aggregate", volume = TRUE, components = c("contraction"))
 }
 
 
@@ -70,7 +69,7 @@ Contraction <- function(data)
 #' @export
 Expansion <- function(data)
 {
-    calculateChurn(data, volume = TRUE, components = c("expansion"))
+    calculateChurn(data, use = "aggregate", volume = TRUE, components = c("expansion"))
 }
 
 
@@ -86,33 +85,25 @@ plot.Churn <- function(x, ...)
                 y.tick.format = "%", ...)
 }
 
-calculateChurn <- function(data, volume = FALSE,  components = "churn")
+calculateChurn <- function(data, components, volume, use)
 {
-    r <- calculate(data, initial.only = FALSE, by.period = FALSE, volume = volume, components = components)
-    subscription.length <- attr(data, "subscription.length")
-    by <- attr(data, "by")
-    churn <- calcChurn(r, subscription.length, by, components)
-    detail <- attr(r, "detail")
-    if (!volume)
-        detail <- tidyingDetailForCustomerChurn(detail, subscription.length, by)
-    out <- addAttributesAndClass(churn, "Churn", by, detail)
-    attr(out, "numerator") <- attr(r, "numerator")[, 1]
-    attr(out, "denominator") <- attr(r, "denominator")[, 1]
-    attr(out, "volume") <- FALSE
-    out
+    calc <- calculate(data, components, volume, use)
+    stat <- calc$numerator / calc$denominator
+    if (asRetention(components, use))
+        stat <- 1 - stat
+    class.name <- paste0("Churn", if (use == "cohort") "ByCohort" else "")
+    createOutput(stat, class.name, calc)
 }    
 
-calcChurn <- function(r, subscription.length, by, components)
+
+
+
+asRetention <- function(components, use)
 {
-    churn <- 1 - r[, 1]
-    if (all(c("churn", "expansion", "contraction") %in% components))
-        churn <- churn - 1
-    churn
-    # names(churn) <- addSubscriptionLengthToName(names(churn), 
-    #                                             subscription.length, 
-    #                                             by)
-    churn    
-}    
+    if (use == "cohort")
+        return(TRUE)
+    all(c("churn", "expansion", "contraction") %in% components)
+}
 
 tidyingDetailForCustomerChurn <- function(detail, subscription.length, by)
 {

@@ -4,14 +4,10 @@
 \alias{Customers}
 \title{\code{Customers}}
 \usage{
-Customers(data, by = "quarter", ...)
+Customers(data)
 }
 \arguments{
-\item{data}{A \code{data.frame} that has the same variables as a \code{RevenueData} object.}
-
-\item{by}{The time period to aggregate the dates by: 
-\code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
-and \code{"day"}.}
+\item{data}{A ...}
 
 \item{...}{Additional arguments to be passed to lower level functions.}
 }
@@ -19,5 +15,5 @@ and \code{"day"}.}
 A named vector showing the number of customers.
 }
 \description{
-The number of customers.
+The number of customers (i.e., unique values of data$id, with positive value at a given pont in time).
 }

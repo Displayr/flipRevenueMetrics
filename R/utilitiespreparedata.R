@@ -29,14 +29,14 @@ prepareDataForChurn <- function(data, by)
 
 getAttributes <- function(x)
 {
-    attributes(x)[c("start", "end", "id.merges")]
+    attributes(x)[c("start", "end", "mergers")]
 }
     
 setAttributes <- function(data, attr)
 {
     attr(data, "start") <- attr[["start"]]
     attr(data, "end") <- attr[["end"]]
-    attr(data, "id.merges") <- attr[["id.merges"]]
+    attr(data, "mergers") <- attr[["mergers"]]
     data
 }
 
