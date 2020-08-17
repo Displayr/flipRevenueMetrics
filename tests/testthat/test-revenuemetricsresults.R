@@ -168,3 +168,20 @@ test_that("Customer Churn and Retention",
 # RevenueMetric("RecurringRevenue", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
 # RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
 # RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = q$parent,  by = "month", end = Sys.Date())
+
+
+q = displayr.2020.aug.17
+q = q[q$Product == "Q",]
+ID = q$id
+RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = ID,  by = "month", end = Sys.Date())
+
+q = displayr.2020.aug.17
+q = q[q$Product == "Displayr",]
+ID = q$id
+RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = ID,  by = "month", end = Sys.Date())
+
+q = displayr.2020.aug.17
+#q = q[q$Product == "Displayr",]
+ID = q$id
+prof = q[, "Product", drop = FALSE]
+RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = ID,  by = "month", end = Sys.Date(), profiling = prof)

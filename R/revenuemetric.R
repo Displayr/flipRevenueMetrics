@@ -42,20 +42,20 @@ RevenueMetric <- function(FUN = "Acquisition",
     for (i in 1:n.filters)
     {
         # The start parameter is used later, so the data set isn't filted
-        #rd <- revenueDataForRevenueMetrics(value, from, to, start, end ,id, subscription.length, subset = filters[[i]], profiling = NULL, trim.id)
-        rd <- MetricData(value, 
-                         from, 
-                         to, 
+        f <- filters[[i]]
+        data <- MetricData(value[f], 
+                         from[f], 
+                         to[f], 
                          start,
                          end, 
-                         id,
+                         id[f],
                          subscription.length,
                          by,
                          mergers,
                          trim.id)
-        if (!is.null(rd))
+        if (!is.null(data))
         {
-            metric <- do.call(FUN, list(rd, ...))
+            metric <- do.call(FUN, list(data, ...))
             if (!is.null(metric))
             {
                 out[[i]] <- metric
