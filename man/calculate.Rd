@@ -20,11 +20,5 @@ of 'churn', 'expansion', 'contraction', 'retention', and 'net retention'.}
 A named vector showing churn.
 }
 \description{
-The percentage of customers who could churn in a period that did churn.
-Note that this is not the most widely used definition. A more common definition
-is the proportion of customers that churned. These two measures differ in some  situations:
-1. Multi-year contracts.
-2. Incomplete periods (e.g., the conventional metric can't be used in a quarter until it
-has been completed.
-3. Where a customer joins and churns withhin a single period (ignored in the traditional definition)
+Calculates main metrics
 }

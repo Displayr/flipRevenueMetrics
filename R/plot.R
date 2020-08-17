@@ -3,52 +3,44 @@ addSubscriptionLengthToName <- function(x, subscription.length, by)
     Period(AsDate(x) + Periods(1, subscription.length), by)
 }    
 
-
-#' @export
-plot.Churn <- function(x, ...)
-{
-    smooth <- if (length(x) < 4) "None" else "Friedman's super smoother"
-    y.title <- if (attr(x, "volume")) "Recurring Revenue Churn Rate" else "Customer Churn Rate"
-    columnChart(x, 
-                fit.type = smooth,
-                fit.ignore.last = TRUE,
-                y.title = y.title, 
-                y.tick.format = "%", ...)
-}
-
-
-
-
 #' @export
 plot.MetricRatio <- function(x, ...)
 {
     smooth <- if (length(x) < 4) "None" else "Friedman's super smoother"
-    y.title <- if (attr(x, "volume")) "Recurring Revenue Churn Rate" else "Customer Churn Rate"
     columnChart(x, 
                 fit.type = smooth,
                 fit.ignore.last = TRUE,
-                y.title = y.title, 
+                y.title = attr(x, "y.title"), 
                 y.tick.format = "%", ...)
 }
 
 
 #' @export
-plot.MetricUniveriate <- function(x, ...)
+plot.MetricUnivariate <- function(x, ...)
 {
-    title <- switch(attr(x, "subscription.length"),
-                    week = "Weekly Recurring Revenue",
-                    month = "Monthly Recurring Revenue",
-                    quarter = "Quarterly Recurring Revenue",
-                    year = "Annual Recurring Revenue")
+    y.title <- attr(x, "y.title")
     if (length(x) < 20)
-        areaChart(x, y.title = title, ...)
+        areaChart(x, y.title = y.title, ...)
     else
-        plot.MetricRatio(x, y.title = title, ...)
+        plot.MetricRatio(x, ...)
 }
+
+
+
+#' @importFrom plotly plot_ly layout `%>%`
+#' @importFrom flipFormat FormatAsPercent
+#' @export
+plot.MetricCohort <- function(x, ...)
+{
+    churn.type <- if(attr(x, "volume")) "Recurring Revenue " else "Customer "
+    series.hover <-paste0(churn.type, "Churn Rate: ", FormatAsPercent(x, decimals = 1))
+    cohortHeatmap(x, series.hover = series.hover, ...)
+}
+
 
 requiresHeatmap <- function(x)
 {
-    required.for <- c("ChurnByCohort")#, "RevenuePerSubscriberByCohortByTime")
+    required.for <- c("Cohort")#, "RevenuePerSubscriberByCohortByTime")
     any(required.for %in% class(x[[1]]))
 }
 
@@ -78,7 +70,7 @@ areaChart <- function(x,  ...)
     Area(x,  x.tick.angle = 0,
          colors = "#3e7dcc",
          fit.ignore.last = TRUE,
-#         x.tick.format = "%d %b %Y",
+         #         x.tick.format = "%d %b %Y",
          fit.line.type = "solid", fit.line.width = 2, 
          fit.line.colors = "#f5c524", ...)$htmlwidget
 }

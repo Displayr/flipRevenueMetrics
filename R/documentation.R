@@ -1,3 +1,14 @@
+#' Vector of the metric functions
+#'
+#' @description Variables from a companies table of invoice lines.
+#' @format vector
+#' @name metric.functions
+#' @docType data
+#' @keywords data
+NULL
+
+
+
 #' Variables from a companies table of invoice lines.
 #'
 #' @description Variables from a companies table of invoice lines.

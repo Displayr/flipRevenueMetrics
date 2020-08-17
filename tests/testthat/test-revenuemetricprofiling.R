@@ -6,22 +6,12 @@ end <- ISOdate(2016, 2, 15, tz = tz(q.invoice.lines$ValidFrom))
 start <- ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom))
 
 
-funcs <- c("GrowthAccounting",
-           "Expansion",
-           "Contraction",
-           "InitialCustomerChurn",  
-           "CustomerChurn",
-#           "CustomerRetentionByCohort",
-           "RecurringRevenue",
-           "InitialRecurringRevenueChurn",
-           "RecurringRevenueChurn")#,
- #          "RecurringRevenueRetentionByCohort")#,
+data(metric.functions)
 
-warning("Get cohort stuff woring")
 p.country <- d[, "country", drop = FALSE]
 p.country.salesman <- d[, c("country", "salesman")]
 # Splitting by profiling variables
-for (fun in funcs)
+for (fun in metric.functions)
     for (out in c("Table", "Plot"))
         for (by in c("quarter"))
         {
@@ -31,10 +21,10 @@ for (fun in funcs)
                 # for (day in days)
                 # {
                 #     
-                    descr <- paste("metrics", fun, out, by, subscription.length)#, "days", day)
-                    
-                    # # Tests that the function works with a total data set
-                    # test_that(paste("aggregate ", descr),{
+                descr <- paste("metrics", fun, out, by, subscription.length)#, "days", day)
+                
+                # # Tests that the function works with a total data set
+                # test_that(paste("aggregate ", descr),{
                     #     s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by, cohort.by = cohort.by, days.to.count = day)
                     #     if (is.null(s)) expect_true(TRUE)
                     #     else capture.output(expect_error(print(s), NA))

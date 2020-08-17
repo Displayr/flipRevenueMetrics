@@ -6,20 +6,9 @@ end <- ISOdate(2016, 2, 15, tz = tz(q.invoice.lines$ValidFrom))
 start <- ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom))
 
 
-funcs <- c("GrowthAccounting",
-           "Expansion",
-           "Contraction",
-           "InitialCustomerChurn",  
-           "CustomerChurn",
-           "CustomerRetentionByCohort",
-           "RecurringRevenue",
-           "InitialRecurringRevenueChurn",
-           "RecurringRevenueChurn",
-           "RecurringRevenueRetentionByCohort")#,
+data(metric.functions)
 
-
-          
-for (fun in funcs)
+for (fun in metric.functions)
     test_that(paste("Checking that Table, Plot, Detail, exist and are of the right classes",
                     fun),
     {

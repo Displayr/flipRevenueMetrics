@@ -40,7 +40,8 @@
 #' @export
 CustomerChurn <- function(data, use = "Aggregate", ratio = TRUE)
 {
-    calculateChurn(data, use = use, ratio = ratio, volume = FALSE, components = "churn")
+    calculateRatio(data, use = use, ratio = ratio, volume = FALSE, components = "churn",
+                   name = "Customer Churn")
 }
 
 #' \code{CustomerRetention}
@@ -53,7 +54,8 @@ CustomerChurn <- function(data, use = "Aggregate", ratio = TRUE)
 #' @export
 CustomerRetention <- function(data, use = "Aggregate", ratio = TRUE)
 {
-    calculateChurn(data, use = use, ratio = ratio, volume = FALSE, components = "retention")
+    calculateRatio(data, use = use, ratio = ratio, volume = FALSE, components = "retention",
+                   name = "Customer Retention")
 }
 
 
@@ -69,7 +71,8 @@ CustomerRetention <- function(data, use = "Aggregate", ratio = TRUE)
 #' @export
 RecurringRevenueChurn <- function(data, use = "Aggregate", ratio = TRUE)
 {
-    calculateChurn(data, use = use, ratio = ratio, volume = TRUE, components = "churn")
+    calculateRatio(data, use = use, ratio = ratio, volume = TRUE, components = "churn",
+                   name = "Recurring Revenue Churn")
 }
 
 #' \code{RecurringRevenueRetention}
@@ -83,7 +86,8 @@ RecurringRevenueChurn <- function(data, use = "Aggregate", ratio = TRUE)
 #' @export
 RecurringRevenueRetention <- function(data, use = "Aggregate", ratio = TRUE)
 {
-    calculateChurn(data, use = use, ratio = ratio, volume = TRUE, components = "retention")
+    calculateRatio(data, use = use, ratio = ratio, volume = TRUE, components = "retention",
+                   name = "Recurring Revenue Retenton")
 }
 
 #' \code{NetRecurringRevenueRetention}
@@ -100,7 +104,8 @@ RecurringRevenueRetention <- function(data, use = "Aggregate", ratio = TRUE)
 #' @export
 NetRecurringRevenueRetention <- function(data, use = "Aggregate", ratio = TRUE)
 {
-    calculateChurn(data, use = use, ratio = ratio, volume = TRUE, components = "net retention")
+    calculateRatio(data, use = use, ratio = ratio, volume = TRUE, components = "net retention",
+                   "Net Recurring Revenue Retention")
 }
 
 #' \code{Contraction}
@@ -114,7 +119,8 @@ NetRecurringRevenueRetention <- function(data, use = "Aggregate", ratio = TRUE)
 #' @export
 Contraction <- function(data, use = "Aggregate", ratio = TRUE)
 {
-    calculateChurn(data, use = use, ratio = ratio, volume = TRUE, components = "contraction")
+    calculateRatio(data, use = use, ratio = ratio, volume = TRUE, components = "contraction",
+                   name = "Contraction")
 }
 
 
@@ -129,6 +135,21 @@ Contraction <- function(data, use = "Aggregate", ratio = TRUE)
 #' @export
 Expansion <- function(data, use = "Aggregate", ratio = TRUE)
 {
-    calculateChurn(data, use = use, ratio = ratio, volume = TRUE, components = "expansion")
+    calculateRatio(data, use = use, ratio = ratio, volume = TRUE, components = "expansion",
+                   name = "Expansion")
 }
 
+
+#' \code{AverageRecurringRevenue}
+#' 
+#' The average recurring revenue provided by each customer.
+#' @inherit CustomerChurn
+#' @importFrom flipTime Period AsDate
+#' @details Calculated based on all the customer immediately prior to the end of the
+#' previous period.
+#' @export
+AverageRecurringRevenue <- function(data, use = "Aggregate", ratio = TRUE)
+{
+    calculateRatio(data, use = use, ratio = ratio, volume = TRUE, components = "current",
+                   name = "Average Recurring Revenue")
+}

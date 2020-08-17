@@ -248,13 +248,13 @@ createPlots <- function(x, start, end, y.min, y.max)
     else if ("RevenueByCohort" %in% class(x[[1]]))
         plotSubGroups(x)
     else plotSubGroups(x,
-                  # need to specify bounds to ensure subplot share axis properly 
-                  x.bounds.minimum = format(start, "%Y-%m-%d"), # pass date as a string
-                  x.bounds.maximum = format(end, "%Y-%m-%d"),
-                  x.tick.format = "%b %y",  # specify date format to help flipStandardChart figure out parsing
-                  y.bounds.minimum = y.min, 
-                  y.bounds.maximum = y.max,
-                  opacity = 1.0)
+                       # need to specify bounds to ensure subplot share axis properly 
+                       x.bounds.minimum = format(start, "%Y-%m-%d"), # pass date as a string
+                       x.bounds.maximum = format(end, "%Y-%m-%d"),
+                       x.tick.format = "%b %y",  # specify date format to help flipStandardChart figure out parsing
+                       y.bounds.minimum = y.min, 
+                       y.bounds.maximum = y.max,
+                       opacity = 1.0)
 }
 canPlot <- function(x)
 {
@@ -288,14 +288,14 @@ plotSubGroups <- function(x, ...)
         for (i in seq_along(plots))
         {
             annotations[[i]]  <- list(text = names(plots)[i],
-                                         x = titles.xpos[i],
-                                         y = titles.ypos[i],
-                                         yref = "paper",
-                                         xref = "paper",
-                                         xanchor = "center",
-                                         yanchor = "top",
-                                         showarrow = FALSE,
-                                         font = list(size = 15))
+                                      x = titles.xpos[i],
+                                      y = titles.ypos[i],
+                                      yref = "paper",
+                                      xref = "paper",
+                                      xanchor = "center",
+                                      yanchor = "top",
+                                      showarrow = FALSE,
+                                      font = list(size = 15))
         }
         layout(pp, annotations = annotations)
     }
@@ -366,7 +366,7 @@ createFilters <- function(profiling, subset, id)
     }
     nms <- apply(combs,1, function(x) paste(as.character(x), collapse = " + "))
     nms <- trimws(nms)
-#nms <- paste0(nms, "\nn: ", sapply(subsets, function(x) length(unique(id[x]))))
+    #nms <- paste0(nms, "\nn: ", sapply(subsets, function(x) length(unique(id[x]))))
     names(subsets) <- nms
     # Filtering out empty subsets
     subsets[sapply(subsets, function(x) length(x) > 0)]
@@ -397,7 +397,7 @@ removeAttributesAndClass <- function(x)
                 "y.title",
                 "date.format",
                 "cohort.by"))
-        attr(x, a) <- NULL
+    attr(x, a) <- NULL
     class(x) <- class(x)[-1:-2]
     x
 }
@@ -410,13 +410,21 @@ addAttributesAndClass <- function(x, class.name, by, detail)
     x    
 }    
 
-createOutput <- function(x, class.name, calculation)
+createOutput <- function(x, class.name, calculation, name)
 {
     attr(x, "by") <- calculation$by
     attr(x, "volume") <- calculation$volume
     attr(x, "detail") <- calculation$detail
     attr(x, "numerator") <- calculation$numerator
     attr(x, "denominator") <- calculation$denominator
+    attr(x, "subscription.length") <- s.l <- calculation$subscription.length
+    attr(x, "y.title") <- paste(switch(s.l,
+                                       week = "Weekly",
+                                       month = "Monthly",
+                                       quarter = "Quarterly",
+                                       year = "Annual"),
+                                if (calculation$use == "Initial") "(Initial)" else "",
+                                name)
     class(x) <- c(class.name, "RevenueMetric", class(x))
     x    
 }    

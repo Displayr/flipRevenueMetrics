@@ -1,12 +1,26 @@
+calculateRatio <- function(data, ratio, components, volume, use, name)
+{
+    calc <- calculate(data, components, volume, use)
+    stat <- if (ratio) calc$numerator / calc$denominator else calc$numerator
+    if (components == "retention")
+        stat <- 1 - stat
+    class.name <- if (use == "Cohort") "MetricCohort" else "MetricRatio" 
+    createOutput(stat, class.name, calc, name)
+}    
+
+
+calculateUnivariate <- function(data, ratio, volume, use, name, statistic)
+{
+    calc <- calculate(data, components = "current", volume, use)
+    stat <- calc[[statistic]]
+    class.name <- if (use == "Cohort") "MetricCohort" else "MetricUnivariate"
+    createOutput(stat, class.name, calc, name)
+}    
+
+
 #' \code{calculate}
 #' 
-#' The percentage of customers who could churn in a period that did churn.
-#' Note that this is not the most widely used definition. A more common definition
-#' is the proportion of customers that churned. These two measures differ in some  situations:
-#' 1. Multi-year contracts.
-#' 2. Incomplete periods (e.g., the conventional metric can't be used in a quarter until it
-#' has been completed.
-#' 3. Where a customer joins and churns withhin a single period (ignored in the traditional definition)
+#' Calculates main metrics
 #' @param data A \code{MetricData} object.
 #' @param components A character indicating the revenue metric component to use; one
 #' of 'churn', 'expansion', 'contraction', 'retention', and 'net retention'.
@@ -62,6 +76,8 @@ tidyResults <- function(results, use, volume, by, subscription.length)
         out <- matrixToVectorForInitialPeriod(out, by, subscription.length)
     out$detail <- tidyDetail(volume, numerator, denominator, detail)
     out$by <- by
+    out$use <- use
+    out$subscription.length <- subscription.length
     out$volume <- volume
     out
 }
@@ -74,25 +90,6 @@ checkInputs <- function(components, use)
         stop("Unknown use: ", paste(use, separate = ","))
 }            
 
-calculateChurn <- function(data, ratio, components, volume, use)
-{
-    calc <- calculate(data, components, volume, use)
-    stat <- if (ratio) calc$numerator / calc$denominator else calc$numerator
-    if (components == "retention")
-        stat <- 1 - stat
-    class.name <- if (use == "Cohort") "MetricCohort" else
-        { if (ratio) "MetricRatio" else "MetricUnivariate" }
-    createOutput(stat, class.name, calc)
-}    
-
-
-calculateCurrent <- function(data, ratio, volume, use)
-{
-    calc <- calculate(data, components = "current", volume, use)
-    stat <- if (ratio) calc$numerator / calc$denominator else calc$numerator
-    class.name <- paste0("Current", if (use == "Cohort") "ByCohort" else "")
-    createOutput(stat, class.name, calc)
-}    
 
 
 # asRetention <- function(components, use)
@@ -138,23 +135,6 @@ diagRectangular <- function(x, by, subscription.length)
     out
 }   
 
-#' #' @importFrom flipTime AsDate Period Periods
-#' #' @importFrom lubridate floor_date
-#' diagRectangular <- function(x, data)
-#' {
-#'     by <- attr(data, "by")
-#'     subscription.length <- attr(data, "subscription.length")
-#'     unit <- Periods(1, subscription.length)
-#'     row.dts <- AsDate(rownames(x))
-#'     rows <- floor_date(row.dts, subscription.length) + unit
-#'     rowm <- matrix(rows, nrow(x), ncol(x))                   
-#'     cols <- AsDate(colnames(x))
-#'     colm <- matrix(cols, nrow(x), ncol(x), byrow = TRUE)    
-#'     m <- colm == rowm
-#'     out <- x[m]
-#'     names(out) <- Period(row.dts [rowSums(m) != 0] + unit, by)
-#'     out
-#' }   
 
 convertToMatrix <- function(results, statistic)
 {
@@ -188,11 +168,11 @@ doCalculations <- function(volume, i, period.dt, start.dt, subscription.dts, uni
 {
     if (volume | use == "current")
         return(volumeOrCurrentCalculation(period.dt, start.dt, cohort.id, unit, use, components, data))
-    customerCalculation(i, start.dt, end.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
+    customerCalculation(i, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
     
 }
 
-customerCalculation <- function(i, start.dt, end.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
+customerCalculation <- function(i, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
 {
     from <- data$from
     to <- data$to
@@ -208,10 +188,10 @@ customerCalculation <- function(i, start.dt, end.dt, subscription.dts, unit, coh
     id.churned <- setdiff(id.to.renew, id.subscribed.in.period)
     
     #Taking mergers ito account
-    calculateChurnNumbers(mergers, start.dt, next.dt, id.to.renew, id.churned)
+    calculateRatioNumbers(mergers, start.dt, next.dt, id.to.renew, id.churned)
 }
 
-calculateChurnNumbers <- function(mergers, start.dt, next.dt, id.to.renew, id.churned)
+calculateRatioNumbers <- function(mergers, start.dt, next.dt, id.to.renew, id.churned)
 {
     merger.in.period <- mergers$date >= start.dt & mergers$date < next.dt
     merger.after.period <- mergers$date <= start.dt
@@ -372,9 +352,8 @@ tidyNumeratorAndDenominator <- function(numerator, denominator)#, mergers, by, v
 }
 
 
-#' Adds a column of the tim period at which the mergers occurred
 mergersWithDates <- function(data)
-{
+{   #' Adds a column of the tim period at which the mergers occurred
     mergers <- attr(data, "mergers")
     by <- attr(data, "by")
     id <- data$id
@@ -387,23 +366,7 @@ mergersWithDates <- function(data)
     mergers$date[match(ag[,1], mergers$id)] <- ag[, 2]
     mergers
 }
-#mergers$date
-    # m <- id %in% mergers$id
-    # tmp <- aggregate(to[m], list(id[m]), FUN = max)
-    # merge.period <- Period(tmp[, 2], "by")
-    # merge.id <- tmp[, 1]
-    # 
-    # increment <- if (volume) 
-    #     tapply(rr[m], list(id[m]), FUN = sum)
-    # else
-    #     rep(1, NROW(merge.period))
-    # 
-    # # Applying to customer churn
-    # # applying to numertor
-    # m <- match(names(increment), names(numerator))
-    # diffs <- tapply(increment, list(merge.id), sum)
-    #  <- if (volume) 
-    
+
     
 
 zeroRowsAtTopAndBottom <- function(x)
@@ -411,3 +374,13 @@ zeroRowsAtTopAndBottom <- function(x)
     rs <- rowSums(x)
     cumsum(rs) > 0 & rev(cumsum(rev(rs))) > 0
 }
+
+
+#' @importFrom flipTables Cbind
+asMatrix <- function(list.of.lists, FUN, fill.with = 0)
+{
+    x <- lapply(list.of.lists, function(x) sapply(x, FUN))
+    m <- t(do.call("Cbind", x)) #Using t() to hack around DS-3041
+    m[is.na(m)] <- fill.with
+    m
+}    

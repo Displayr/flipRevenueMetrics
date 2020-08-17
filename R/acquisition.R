@@ -34,17 +34,17 @@ Acquisition <- function(data, remove.last = TRUE, volume = FALSE, number.periods
     class(result) <- c("Acquisition", class(result))
     result
 }
-
-#' @importFrom flipStandardCharts Chart
-#' @export
-plot.Acquisition <- function(x, ...)
-{
-    rates <- x$counts
-    period.names <- names(rates)
-    title <- if(x$volume) "Acquisition (% volume)" else "Acquisition (subscribers)"
-    p <- Chart(rates,  x.tick.angle=0,
-               y.title = title, fit.type = "Smooth", fit.ignore.last = TRUE,
-               fit.line.type = "solid", fit.line.width = 2, fit.line.colors="Custom color", 
-               fit.line.colors.custom.color="#ED7D31")
-    print(p)
-}
+#' 
+#' #' @importFrom flipStandardCharts Chart
+#' #' @export
+#' plot.Acquisition <- function(x, ...)
+#' {
+#'     rates <- x$counts
+#'     period.names <- names(rates)
+#'     title <- if(x$volume) "Acquisition (% volume)" else "Acquisition (subscribers)"
+#'     p <- Chart(rates,  x.tick.angle=0,
+#'                y.title = title, fit.type = "Smooth", fit.ignore.last = TRUE,
+#'                fit.line.type = "solid", fit.line.width = 2, fit.line.colors="Custom color", 
+#'                fit.line.colors.custom.color="#ED7D31")
+#'     print(p)
+#' }

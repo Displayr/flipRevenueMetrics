@@ -145,7 +145,7 @@ filterMetricData <- function(metric.data, subset)
     class(out) <- atr[["class"]]
     out
 }    
-    
+
 #' @importFrom flipStatistics Table
 #' @importFrom flipTime Periods AsDate
 #' @importFrom plyr mapvalues

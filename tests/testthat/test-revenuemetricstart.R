@@ -3,23 +3,14 @@ context("Revenue Metric - start")
 data(q.invoice.lines.short)
 d <- q.invoice.lines.short
 
-funcs <- c("GrowthAccounting",
-           "Expansion",
-           "Contraction",
-           "InitialCustomerChurn",  
-           "CustomerChurn",
-           "CustomerRetentionByCohort",
-           "RecurringRevenue",
-           "InitialRecurringRevenueChurn",
-           "RecurringRevenueChurn",
-           "RecurringRevenueRetentionByCohort")#,
+data(metric.functions)
 
 # Checking that start parameter is taken into account 
 library(flipTime)
 strt = as.Date("2013-01-01")
 nd = as.Date("2015-01-01")
 
-for (fun in funcs)
+for (fun in metric.functions)
     for (out in c("Table"))#
         for (by in c("month", "quarter", "year"))
         {
