@@ -146,21 +146,21 @@ test_that("Customer Churn and Retention",
 # RevenueMetric("NetRecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
 # RevenueMetric("Expansion", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
 # # RevenueMetric("Contraction", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# 
-q = displayr.2020.aug.17
-# 
-# dputt <- function(x)
-# { out <- as.numeric(x)
-# names(out) <- names(x)
-# dput(out)}    
-# 
-# s = RevenueMetric("InitialRecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# dputt(s)
-# 
-# 
-RevenueMetric("NetRecurringRevenueRetention", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# 
-# RevenueMetric("InitialRecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# # 
+# q = displayr.2020.aug.17
+# # 
+# # dputt <- function(x)
+# # { out <- as.numeric(x)
+# # names(out) <- names(x)
+# # dput(out)}    
+# # 
+# # s = RevenueMetric("InitialRecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# # dputt(s)
+# # 
+# # 
+# RevenueMetric("NetRecurringRevenueRetention", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
+# # 
+# # RevenueMetric("InitialRecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
 # RevenueMetric("RecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
 # RevenueMetric("Expansion", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
 # s = RevenueMetric("RecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
