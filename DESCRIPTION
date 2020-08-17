@@ -29,5 +29,6 @@ Remotes:
     Displayr/flipStatistics,
     Displayr/flipStandardCharts,
     Displayr/flipTime,
+    Displayr/flipTables
 RoxygenNote: 7.1.1
 Encoding: UTF-8
