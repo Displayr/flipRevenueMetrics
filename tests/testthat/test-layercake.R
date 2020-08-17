@@ -12,6 +12,6 @@ for (by in c("week", "month", "quarter", "year"))
               lc <- LayerCake(rd)
               LayerCake(rd, as.table = TRUE)
               expect_error(capture.output(print(lc), NA))
-})
+          })
 
 

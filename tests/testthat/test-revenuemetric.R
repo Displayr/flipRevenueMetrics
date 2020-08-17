@@ -5,62 +5,39 @@ library(lubridate)
 end <- ISOdate(2016, 2, 15, tz = tz(q.invoice.lines$ValidFrom))
 start <- ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom))
 
-
-  test_that(paste("Mean recurrent revenue consistency"), {
-    by= "year"
-    # Near-depricated
-    rdd <- RevenueData(d$AUD,d$ValidFrom,d$ValidTo, id = d$name, subscription.length = by)
-    r <- Lifetime(rdd)
-    # These tests are checking that numer methods of computing churn give the same
-    # answer as depricated methods
-#warning("Test that need to add back in")
-    rr = RevenueMetric("RecurringRevenueByCohort", output = "Table", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by, subscription.length = by)
-    expect_equal(flipRevenueMetrics:::removeAttributesAndClass(rr)[rownames(r$total), ], r$total[, colnames(rr)])
-
+for (by in c("week", "month", "quarter"))
+  test_that(paste("RecurringRevenue and GrowthAccounting are consistent", by),{
+      rr = RevenueMetric("RecurringRevenue", output = "Table",  use = "Aggregate", d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+      ga  = RevenueMetric("GrowthAccounting", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+      aga = cumsum(colSums(ga))
+      expect_equivalent(as.numeric(tail(aga, length(rr))), as.numeric(rr))
   })
-
-for (by in c("week", "month", "quarter", "year"))
-test_that(paste("RecurringRevenue and GrowthAccounting are consistent", by),{
-    rr = RevenueMetric("RecurringRevenue", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
-#warning("Test that need to add back in")
-    ga  = RevenueMetric("GrowthAccounting", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
-    aga = cumsum(colSums(ga))
-    expect_equal(as.numeric(rr[-1]), as.numeric(aga))
-})
 
 
 data(q.invoice.lines.short)
 d <- q.invoice.lines.short
 
-funcs <- c("GrowthAccounting",
+funcs <- c("GrowthAccounting", # growth accounting
+           "RecurringRevenue", # non-ratios
+           "CustomerChurn", # ratios
+           "CustomerRetention",
+           "RecurringRevenueChurn",
            "Expansion",
            "Contraction",
-           "InitialCustomerChurn",  
-           "CustomerChurn",
-           "CustomerRetentionByCohort",
-           "RecurringRevenue",
-           "InitialRecurringRevenueChurn",
-           "RecurringRevenueChurn",
-           "RecurringRevenueRetentionByCohort")#,
-           #           "RecurringRevenueChurnByCohort",
-#           "Customers", # Customers
- #          "NewCustomers",
-  #         "CustomerGrowth",
-           #"Revenue",                  # Revenue
-          # "RecurringRevenueGrowth",
-          # "MeanRecurringRevenue")#,
-           #"MeanRecurringRevenueByCohort")
+           "RecurringRevenueRetention",
+           "NetRecurringRevenueRetention")
+#fun = "NetRecurringRevenueRetention"
 
-warning("Add test for MeanRecurringRevenue, RecurringRevenueByCohort, Customers, NewCustomers, CustomerGrowth")
 # Quick run through checking that the basic function works
 by = "year"
-for (fun in funcs)
-      test_that(paste("metrics", fun),
-                {
-                  s = RevenueMetric(FUN = fun, output = "Plot", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by)
-                  expect_error(print(s), NA)
-                }
-      )
+for (fun in "RecurringRevenue")#funcs)
+  for (use in c("Aggregate", "Initial", "Cohort"))
+    test_that(paste("metrics", fun),
+              {
+                s = RevenueMetric(FUN = fun, output = "Plot", d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by)
+                expect_error(print(s), NA)
+              }
+    )
 
 warning("Test other subscription lengths")
 # Looping though arguments 

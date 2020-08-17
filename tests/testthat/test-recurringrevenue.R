@@ -11,7 +11,7 @@ test_that("Recurring Revenue", {
                        by = "year")
     expect_equivalent(r["2016"], 100 + 100 / 0.5 + 100 + 100 * 12 / 13, tolerance = .02) # 2017
     expect_equivalent(r["2017"], 0, tolerance = .02) # 2017
-
+    
     r <- RevenueMetric(FUN = "RecurringRevenue", "Table", 
                        dollars, from, to, id = name, end = Sys.Date(), subscription.length = "year", 
                        by = "month")
@@ -19,7 +19,7 @@ test_that("Recurring Revenue", {
     expect_equivalent(r["2016-06"], 100, tolerance = .02) # 2016
     expect_equivalent(r["2016-08"], 100 + 100 * (12/6) + 100, tolerance = .02) # 2016
     expect_equivalent(r["2017-01"], 100 + 100 * 12/13, tolerance = .02) # 2017
-
+    
     r <- RevenueMetric(FUN = "RecurringRevenue", "Table", 
                        dollars, from, to, id = name, end = Sys.Date(), subscription.length = "year", 
                        by = "quarter")

@@ -44,15 +44,15 @@ RevenueMetric <- function(FUN = "Acquisition",
         # The start parameter is used later, so the data set isn't filted
         #rd <- revenueDataForRevenueMetrics(value, from, to, start, end ,id, subscription.length, subset = filters[[i]], profiling = NULL, trim.id)
         rd <- MetricData(value, 
-                          from, 
-                          to, 
-                          start,
-                          end, 
-                          id,
-                          subscription.length,
+                         from, 
+                         to, 
+                         start,
+                         end, 
+                         id,
+                         subscription.length,
                          by,
                          mergers,
-                          trim.id)
+                         trim.id)
         if (!is.null(rd))
         {
             metric <- do.call(FUN, list(rd, ...))
@@ -74,9 +74,9 @@ RevenueMetric <- function(FUN = "Acquisition",
     if (length(out) == 0)
         return(NULL)
     out <- switch(output,
-           Plot = createPlots(out, start, end, y.min, y.max),
-           Table = createTable(out, start, end),
-           Detail = createDetails(out, start, end))
+                  Plot = createPlots(out, start, end, y.min, y.max),
+                  Table = createTable(out, start, end),
+                  Detail = createDetails(out, start, end))
     out
 }
 
@@ -88,13 +88,13 @@ checkIDmerges <- function(id, mergers)
     
     if (!is.data.frame(mergers))
         stop("'mergers' needs to be a data frame")
-
+    
     if (any(is.na(mergers)))
         stop("mergers contains missing values")
     
     if (!(all(c("id", "id.to") %in% names(mergers))))
         stop("'mergers' must be a data.frame containing 'id' and 'id.to'")
-
+    
     ids.are.same <- as.character(mergers$id) == as.character(mergers$id.to)
     if (any(ids.are.same))
         stop("mergers$id.to contains same values as mergers$id:", 
@@ -157,15 +157,15 @@ changeRangeOfAttribute <- function(filtered, original)
     {
         rn <- rownames(filtered)
         cn <- colnames(filtered)
-       if(all(rn %in% rownames(original)) & all(cn %in% colnames(original)))
-           return(original[rn, cn])
+        if(all(rn %in% rownames(original)) & all(cn %in% colnames(original)))
+            return(original[rn, cn])
     }
     original
 }
 
 createDetails <- function(x, start, end)
 {
-
+    
     out = lapply(x, function(x) attr(x, "detail"))
     if (length(out) == 1)
         return(out[[1]])
@@ -187,7 +187,7 @@ createTable <- function(x, start, end)
         names(x[[1]])
     else {
         rng <- if (is.m) sapply(x, function(x) colnames(x)[c(1, ncol(x))])
-             else sapply(x, function(x) names(x)[c(1, length(x))])
+        else sapply(x, function(x) names(x)[c(1, length(x))])
         mn <- minDate(rng[1,])
         mx <- maxDate(rng[2,])
         Period(seq.Date(mn, mx, by = by), by)
@@ -201,8 +201,8 @@ datesWithinRange <- function(dt.as.character, start, end)
     dts <- AsDate(dt.as.character)
     dts >= start & dts <= end    
 }    
-    
-    
+
+
 datesAreSame <- function(x)
 {
     if (sd(sapply, nms) == 0)

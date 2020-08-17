@@ -29,7 +29,7 @@ GrowthAccounting <- function(data, small = 0.1)
     to <- data$to
     id <- data$id
     rr <- data$recurring.value
-
+    
     # Calculations used in loop
     ids.ever.customers <- unique(id[from <= previous.date])
     invoice.previous <- from <= previous.date & to > previous.date 
@@ -47,20 +47,21 @@ GrowthAccounting <- function(data, small = 0.1)
     
     for (i in 1:n.dates)
     {
-        a.a.dt <- dts[i]
-        invoice <- a.a.dt >= from  & a.a.dt < to#from < a.a.dt & to >= a.a.dt 
-        rr.by.id <- tapply(rr[invoice], list(id[invoice]), sum)
-        
-        ids <- names(rr.by.id)
-        ids.new <- ids[!ids %in% ids.ever.customers]
-        ids.resurrection <- ids[ids %in% ids.ever.customers & !ids %in% ids.previous]
-        ids.churn <- ids.previous[!ids.previous %in% ids]
-        ids.existing <- ids[ids %in% ids.previous]
-        
-        rr.previous.by.id <- rr.by.id.previous[ids.existing]
-        rr.change.by.id <- rr.by.id[ids.existing] - rr.previous.by.id
-        expansion <- rr.change.by.id > 0
-        minor <- expansion & rr.change.by.id / rr.previous.by.id <= small
+      dt <- dts[i]
+      invoice <- customerAtPeriodEnd(data, dt) #Can be made more efficent by not passing in data
+      #invoice <- dt >= from  & dt < to
+      rr.by.id <- tapply(rr[invoice], list(id[invoice]), sum)
+      
+      ids <- names(rr.by.id)
+      ids.new <- ids[!ids %in% ids.ever.customers]
+      ids.resurrection <- ids[ids %in% ids.ever.customers & !ids %in% ids.previous]
+      ids.churn <- ids.previous[!ids.previous %in% ids]
+      ids.existing <- ids[ids %in% ids.previous]
+      
+      rr.previous.by.id <- rr.by.id.previous[ids.existing]
+      rr.change.by.id <- rr.by.id[ids.existing] - rr.previous.by.id
+      expansion <- rr.change.by.id > 0
+      minor <- expansion & rr.change.by.id / rr.previous.by.id <= small
         major <- expansion & !minor
         
         rr.metric.by.id <- list(New = rr.by.id[ids.new],

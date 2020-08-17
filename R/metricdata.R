@@ -47,15 +47,15 @@
 #' @importFrom flipTime AsDate
 #' @export
 MetricData <- function(value, 
-                        from, 
-                        to, 
-                        start,
-                        end, 
-                        id,
-                        subscription.length,
+                       from, 
+                       to, 
+                       start,
+                       end, 
+                       id,
+                       subscription.length,
                        by,
-                        mergers,
-                        trim.id) #, tolerance = .01)
+                       mergers,
+                       trim.id) #, tolerance = .01)
 {
     id <- as.character(id)
     # Checking the input variables.

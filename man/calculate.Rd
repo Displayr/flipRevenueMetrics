@@ -4,18 +4,13 @@
 \alias{calculate}
 \title{\code{calculate}}
 \usage{
-calculate(
-  data,
-  components = c("current", "expansion", "contraction", "churn")[3],
-  volume = TRUE,
-  use = c("aggregate", "initial", "cohort")[1]
-)
+calculate(data, components, volume, use)
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
 
-\item{components}{A vector of characters indicating the components of churn to use.
-Contains any of 'churn', 'expansion', and 'contraction'.}
+\item{components}{A character indicating the revenue metric component to use; one
+of 'churn', 'expansion', 'contraction', 'retention', and 'net retention'.}
 
 \item{volume}{If TRUE, recurring revenue rather than customers is used in calculations.}
 

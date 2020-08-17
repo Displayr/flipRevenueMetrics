@@ -1,3 +1,51 @@
+addSubscriptionLengthToName <- function(x, subscription.length, by)
+{
+    Period(AsDate(x) + Periods(1, subscription.length), by)
+}    
+
+
+#' @export
+plot.Churn <- function(x, ...)
+{
+    smooth <- if (length(x) < 4) "None" else "Friedman's super smoother"
+    y.title <- if (attr(x, "volume")) "Recurring Revenue Churn Rate" else "Customer Churn Rate"
+    columnChart(x, 
+                fit.type = smooth,
+                fit.ignore.last = TRUE,
+                y.title = y.title, 
+                y.tick.format = "%", ...)
+}
+
+
+
+
+#' @export
+plot.MetricRatio <- function(x, ...)
+{
+    smooth <- if (length(x) < 4) "None" else "Friedman's super smoother"
+    y.title <- if (attr(x, "volume")) "Recurring Revenue Churn Rate" else "Customer Churn Rate"
+    columnChart(x, 
+                fit.type = smooth,
+                fit.ignore.last = TRUE,
+                y.title = y.title, 
+                y.tick.format = "%", ...)
+}
+
+
+#' @export
+plot.MetricUniveriate <- function(x, ...)
+{
+    title <- switch(attr(x, "subscription.length"),
+                    week = "Weekly Recurring Revenue",
+                    month = "Monthly Recurring Revenue",
+                    quarter = "Quarterly Recurring Revenue",
+                    year = "Annual Recurring Revenue")
+    if (length(x) < 20)
+        areaChart(x, y.title = title, ...)
+    else
+        plot.MetricRatio(x, y.title = title, ...)
+}
+
 requiresHeatmap <- function(x)
 {
     required.for <- c("ChurnByCohort")#, "RevenuePerSubscriberByCohortByTime")
