@@ -85,7 +85,7 @@ tidyResults <- function(results, use, volume, by, subscription.length)
 checkInputs <- function(components, use)
 {
     if (!components %in% c("current", "expansion", "contraction", "churn", "retention", "net retention"))
-        stop("Unknown components: ", paste(comonents, separate = ","))
+        stop("Unknown components: ", paste(components, separate = ","))
     if (!use %in% c("Initial", "Aggregate", "Cohort"))
         stop("Unknown use: ", paste(use, separate = ","))
 }            

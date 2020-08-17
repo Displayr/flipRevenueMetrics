@@ -4,10 +4,18 @@
 \alias{Customers}
 \title{\code{Customers}}
 \usage{
-Customers(data)
+Customers(data, use = "Aggregate")
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
+
+\item{use}{The data to be used in the calculation:
+\enumerate{
+  \item \code{"Aggregate"} All data is used in the calculation for each period.
+  \item \code{"Initial"} Data for the initial subscription period is used. 
+  \item \code{"Cohort"} The statistic is computed for each cohort by each 
+  subscription period.
+}}
 }
 \value{
 A vector showing the recurring revenue by time points.

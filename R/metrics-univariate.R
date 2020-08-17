@@ -33,7 +33,7 @@ RecurringRevenue <- function(data, use = "Aggregate")
 #' @return A vector showing the recurring revenue by time points.
 #' @importFrom lubridate as_datetime
 #' @export
-Customers <- function(data)
+Customers <- function(data, use = "Aggregate")
 {
     calculateUnivariate(data, ratio = FALSE, volume = TRUE, use = use,
                         name = "Customers", "denominator")
