@@ -423,8 +423,8 @@ createOutput <- function(x, class.name, calculation, name)
                                        month = "Monthly",
                                        quarter = "Quarterly",
                                        year = "Annual"),
-                                if (calculation$use == "Initial") "(Initial)" else "",
-                                name)
+                                paste0(if (calculation$use == "Initial") "(Initial) " else "",
+                                name))
     class(x) <- c(class.name, "RevenueMetric", class(x))
     x    
 }    

@@ -7,11 +7,13 @@ addSubscriptionLengthToName <- function(x, subscription.length, by)
 plot.MetricRatio <- function(x, ...)
 {
     smooth <- if (length(x) < 4) "None" else "Friedman's super smoother"
+    y.title <- attr(x, "y.title")
+    ytickformat <- if (grepl("Average", y.title)) "" else "%"
     columnChart(x, 
                 fit.type = smooth,
                 fit.ignore.last = TRUE,
-                y.title = attr(x, "y.title"), 
-                y.tick.format = "%", ...)
+                y.title = y.title, 
+                y.tick.format = ytickformat, ...)
 }
 
 
@@ -19,10 +21,13 @@ plot.MetricRatio <- function(x, ...)
 plot.MetricUnivariate <- function(x, ...)
 {
     y.title <- attr(x, "y.title")
-    if (length(x) < 20)
+    if (length(x) > 20)
         areaChart(x, y.title = y.title, ...)
     else
-        plot.MetricRatio(x, ...)
+        columnChart(x, 
+                    fit.ignore.last = TRUE,
+                    y.title = y.title, 
+                    ...)
 }
 
 
@@ -33,7 +38,9 @@ plot.MetricUnivariate <- function(x, ...)
 plot.MetricCohort <- function(x, ...)
 {
     churn.type <- if(attr(x, "volume")) "Recurring Revenue " else "Customer "
-    series.hover <-paste0(churn.type, "Churn Rate: ", FormatAsPercent(x, decimals = 1))
+    y.title <- attr(x, "y.title")
+    vals <- if (grepl("Average", y.title)) FormatAsReal(x) else FormatAsPercent(x, decimals = 1)
+    series.hover <-paste0(y.title, ": ", vals)
     cohortHeatmap(x, series.hover = series.hover, ...)
 }
 
@@ -92,9 +99,9 @@ cohortHeatmap <- function(x, series.hover, ...)
     rn <- matrix(rownames(x), nrow(x), ncol(x), byrow = FALSE)
     cn <- matrix(colnames(x), nrow(x), ncol(x), byrow = TRUE)
     hover.text <- matrix(paste0("Customer since: ", rn, "<br>",
-                                properCase(attr(x, "by")), "s since starting: ", cn, "<br>",
+                                properCase(attr(x, "by")), ": ", cn, "<br>",
                                 series.hover, "<br>",
-                                "Cohort size: ", c(attr(x, "cohort.size"))), nrow(x))
+                                "Cohort size: ", c(attr(x, "denominator"))), nrow(x))
     plot_ly(x = colnames(x),
             y = rownames(x),
             z = x, 
