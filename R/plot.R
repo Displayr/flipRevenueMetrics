@@ -11,7 +11,7 @@ plot.MetricRatio <- function(x, ...)
     ytickformat <- if (grepl("Average", y.title)) "" else "%"
     columnChart(x, 
                 fit.type = smooth,
-                fit.ignore.last = TRUE,
+                fit.ignore.last = FALSE,
                 y.title = y.title, 
                 y.tick.format = ytickformat, ...)
 }
@@ -39,7 +39,7 @@ plot.MetricCohort <- function(x, ...)
 {
     churn.type <- if(attr(x, "volume")) "Recurring Revenue " else "Customer "
     y.title <- attr(x, "y.title")
-    vals <- if (grepl("Average", y.title)) FormatAsReal(x) else FormatAsPercent(x, decimals = 1)
+    vals <- if (grepl("Average", y.title) | grepl("Customers", y.title) ) FormatAsReal(x) else FormatAsPercent(x, decimals = 1)
     series.hover <-paste0(y.title, ": ", vals)
     cohortHeatmap(x, series.hover = series.hover, ...)
 }

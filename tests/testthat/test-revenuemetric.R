@@ -18,12 +18,12 @@ data(q.invoice.lines.short)
 d <- q.invoice.lines.short
 
 data(metric.functions)
-#fun = "NetRecurringRevenueRetention"
 
 # Quick run through checking that the basic function works
 by = "year"
 for (fun in metric.functions)
   for (use in c("Aggregate", "Initial", "Cohort"))
+    if (!(fun == "Customers" & use == "Cohort"))
     test_that(paste("metrics", fun),
               {
                 s = RevenueMetric(FUN = fun, output = "Plot", use = use, d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by)

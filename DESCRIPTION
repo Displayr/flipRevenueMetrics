@@ -7,10 +7,11 @@ Maintainer: Displayr <opensource@displayr.com>
 Description: Revenue-based analytics for understanding the performance of subscription businesses.
 License: GPL-3
 LazyData: TRUE
-Depends: R (>= 2.10)
+Depends: R (>= 2.11)
 Suggests:
     testthat
 Imports:
+    dplyr,
     flipFormat,
     flipStatistics,
     flipStandardCharts,

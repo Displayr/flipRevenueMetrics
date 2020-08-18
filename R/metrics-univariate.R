@@ -35,9 +35,16 @@ RecurringRevenue <- function(data, use = "Aggregate")
 #' @export
 Customers <- function(data, use = "Aggregate")
 {
-    calculateUnivariate(data, ratio = FALSE, volume = TRUE, use = use,
-                        name = "Customers", "denominator")
-}
+    calc <- calculate(data, components = "customers", volume = FALSE, use = use)
+    createOutput(calc$denominator, "MetricUnivariate", calc, "Customers")
+}    
+    
+    
+#    calculateUnivariate(data, ratio = FALSE, volume = TRUE, use = use,
+ #                        name = "Customers", "denominator")
+    #calculateRatio(data, ratio = FALSE, components = "customers", use = use,
+    #               name = "Customers")
+#}
 
     
 #        calculateRecurringRevenueOrCustomers(data, recurring.revenue = FALSE)

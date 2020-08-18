@@ -100,7 +100,7 @@ MetricData <- function(value,
     
     start <- floor_date(attr(data, "start"), subscription.length)# + unit
     ceil.end <- as.Date(ceiling_date(end, subscription.length, change_on_boundary = NULL))
-    dts <- seq.Date(start, by = subscription.length, length.out = length(dts))
+    dts <- seq.Date(start, to = ceil.end, by = subscription.length)
     attr(data, "subscription.period.sequence") <- Period(dts, subscription.length)
     attr(data, "subscription.sequence") <- c(dts[-length(dts)], end)
     

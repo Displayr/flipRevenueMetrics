@@ -87,8 +87,7 @@ test_that("Customer Churn and Retention",
               expect_equal(s[2, ], c(`2009` = 1, `2010` = 0.978260869565217, `2011` = 0.891304347826087, 
                                      `2012` = 0.923076923076923, `2013` = 0.945945945945946, `2014` = 1, 
                                      `2015` = 0.916666666666667, `2016` = 1))
-              
-              
+
               ss = RevenueMetric("CustomerChurn", use = "Initial", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
               expect_equal(as.numeric(ss),c(0, 0.0217391304347826, 0.111111111111111, 0.123287671232877, 
                                            0.111111111111111, 0.09, 0.389221556886228, 0.0666666666666667))                                 
@@ -127,61 +126,3 @@ test_that("Customer Churn and Retention",
               # expect_equal(as.numeric(s),c(0.0373773458628039, 0.0526306299999406, 0.199106589341175, 
               #                              0.115138533321218, 0.162709152884027, 0.178098968441071, 0.157996829606064))                                 
 
-
-
-# 
-# q <- q.data
-# 
-# RevenueMetric("InitialCustomerChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# RevenueMetric("GrowthAccounting", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# # 
-# # 
-# #RevenueMetric("InitialRecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# RevenueMetric("CustomerChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# #RevenueMetric("RecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# # 
-# d <- q.invoice.lines.short
-# RevenueMetric("RecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# 
-# RevenueMetric("NetRecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# RevenueMetric("Expansion", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# # RevenueMetric("Contraction", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# # 
-# q = displayr.2020.aug.17
-# # 
-# # dputt <- function(x)
-# # { out <- as.numeric(x)
-# # names(out) <- names(x)
-# # dput(out)}    
-# # 
-# # s = RevenueMetric("InitialRecurringRevenueChurn", output = "Table",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# # dputt(s)
-# # 
-# # 
-# RevenueMetric("NetRecurringRevenueRetention", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# # 
-# # RevenueMetric("InitialRecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# RevenueMetric("RecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# RevenueMetric("Expansion", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# s = RevenueMetric("RecurringRevenueChurn", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# #RevenueMetric("RecurringRevenue", output = "Table",  q$value, q$from, q$to, id = q$id,  by = by, end = Sys.Date())
-# RevenueMetric("RecurringRevenue", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = q$id,  by = "month", end = Sys.Date())
-# RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = q$parent,  by = "month", end = Sys.Date())
-
-
-q = displayr.2020.aug.17
-q = q[q$Product == "Q",]
-ID = q$id
-RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = ID,  by = "month", end = Sys.Date())
-
-q = displayr.2020.aug.17
-q = q[q$Product == "Displayr",]
-ID = q$id
-RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = ID,  by = "month", end = Sys.Date())
-
-q = displayr.2020.aug.17
-#q = q[q$Product == "Displayr",]
-ID = q$id
-prof = q[, "Product", drop = FALSE]
-RevenueMetric("Customers", output = "Plot",  q$value, q$from, q$to, id = ID,  by = "month", end = Sys.Date(), profiling = prof)

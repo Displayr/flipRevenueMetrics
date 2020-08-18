@@ -33,39 +33,90 @@ calculate <- function(data,
                       volume, 
                       use)
 {
-    checkInputs(components, use)
+    mergers <- mergersWithDates(data)
+
+    if (components == "customers" & use != "Aggregate") 
+        return(calculateNumberCustomers(use, data, mergers))
+    calculateUsingLoop(data, components, use, mergers, volume)
+}
+
+#' @importFrom flipTime Period
+calculateNumberCustomers <- function(use, data, mergers)
+{
+    #warning("Need to hook up mergers")
+    if (use == "Cohort")
+        stop("There is no way of looking at number of customer by cohort. Perhaps Customer Retention is what you are after.")
+    # out <- if (use == "Initial")
+    # {
+        cohort.ids <- cohortIDs(data)    
+    out <- list(detail = cohort.ids,
+                denominator = sapply(cohort.ids, length),
+                numerator = NULL)
+    # } else {
+    #     periods <- attr(data, "by.period.sequence")
+    #     periods <- periods[-length(periods)]
+    #     period.dts <- attr(data, "by.sequence")
+    #     n <- length(periods)
+    #     #unit <- Periods(1, attr(data, "subscription.length"))
+    #     from <- data$from
+    #     to <- data$to
+    #     id <- data$id
+    #     n.cust <- rep(0, n)
+    #     id.cust <- vector("list", n)
+    #     names(id.cust) <- names(n.cust) <- periods
+    #     for (i in 1:n)
+    #     {
+    #         period.start <- period.dts[i]
+    #         next.start <- period.dts[i + 1]
+    #         ids <- unique(id[from < next.start & to >= period.start])
+    #         n.cust[i] <- length(ids)
+    #         id.cust[[i]] <- ids
+    #     }
+    #     list(numerator = n.cust, denominator = NULL, detail = id.cust)
+    # }
+    out$by <- attr(data, "by")
+    out$use <- use
+    out$subscription.length <- attr(data, "subscription.length")
+    out$volume <- attr(data, "volume")
+    out
+}
     
+    
+    
+calculateUsingLoop <- function(data, components, use, mergers, volume)
+{
+    checkInputs(components, use)
+    cohort.ids <- if (!volume | use != "Aggregate") cohortIDs(data)
     period.dts <- attr(data, "by.sequence")
     periods <- periodLabels(data, use,  components)
     subscription.dts <- attr(data, "subscription.sequence")
     subscription.dts <- c(subscription.dts[-length(subscription.dts)], attr(data, "end"))
     subscription.periods <- subscriptionPeriods(data, use)
     unit <- Periods(1, attr(data, "subscription.length"))
-    cohort.ids <- if (!volume | use != "Aggregate") cohortIDs(data)
-    mergers <- mergersWithDates(data)
     
     results <-  matrixLikeList(periods, subscription.periods)
     for (period in 1:length(periods))
     {
         period.dt <- period.dts[period]
         cohort.id <- if (volume & use == "Aggregate") NULL else idCohort(period, cohort.ids, use)
-
+        
         for (i in seq_along(subscription.periods))
         {
             start.dt <- if (use == "Aggregate") period.dt else subscription.dts[i]
             if (start.dt >= period.dt)
             {
                 is.first.period <- start.dt > period.dt & period.dt + unit >= start.dt
-                if (is.first.period | use != "first period")
+                if (is.first.period | use != "initial")
                     results[[period]][[i]] <- doCalculations(volume, i, period.dt, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
-
+                
             }
         }
     }
-    tidyResults(results, use, volume, attr(data, "by"), attr(data, "subscription.length"))
+    tidyResults(results, use, volume, attr(data, "by"), attr(data, "subscription.length"), components)
 }
 
-tidyResults <- function(results, use, volume, by, subscription.length)
+
+tidyResults <- function(results, use, volume, by, subscription.length, components)
 {
     
     denominator <- convertToMatrix(results, "denominator")
@@ -74,7 +125,7 @@ tidyResults <- function(results, use, volume, by, subscription.length)
     out <- tidyNumeratorAndDenominator(numerator, denominator)
     if (use == "Initial")
         out <- matrixToVectorForInitialPeriod(out, by, subscription.length)
-    out$detail <- tidyDetail(volume, numerator, denominator, detail)
+    out$detail <- tidyDetail(volume, numerator, denominator, detail, components)
     out$by <- by
     out$use <- use
     out$subscription.length <- subscription.length
@@ -82,9 +133,10 @@ tidyResults <- function(results, use, volume, by, subscription.length)
     out
 }
 
+
 checkInputs <- function(components, use)
 {
-    if (!components %in% c("current", "expansion", "contraction", "churn", "retention", "net retention"))
+    if (!components %in% c("current", "expansion", "contraction", "churn", "retention", "net retention", "customers"))
         stop("Unknown components: ", paste(components, separate = ","))
     if (!use %in% c("Initial", "Aggregate", "Cohort"))
         stop("Unknown use: ", paste(use, separate = ","))
@@ -148,11 +200,17 @@ convertToMatrix <- function(results, statistic)
     out
 }
 
-
-tidyDetail <- function(volume, numerator, denominator, detail)
+#' @importFrom dplyr bind_rows 
+tidyDetail <- function(volume, numerator, denominator, detail, components)
 {
     if (volume) 
         return(detail)
+    if (components == "customers")# This could probably can be combined into the code below
+    { 
+        detail <- lapply(detail, function(x) x[['All']])
+        return(bind_rows(detail))
+    }
+        
     cohort.matrix <- matrix(rownames(denominator),  nrow(denominator), ncol(denominator))
     subscription.matrix <- matrix(colnames(denominator),  nrow(denominator), ncol(denominator))
     data.frame(Cohort = rep(cohort.matrix, numerator),
@@ -166,13 +224,13 @@ tidyDetail <- function(volume, numerator, denominator, detail)
     
 doCalculations <- function(volume, i, period.dt, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
 {
-    if (volume | use == "current")
-        return(volumeOrCurrentCalculation(period.dt, start.dt, cohort.id, unit, use, components, data))
-    customerCalculation(i, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
+    if (volume | components %in%  c("current", "customers"))
+        return(pointInTimeCalculation(period.dt, start.dt, cohort.id, unit, use, components, data))
+    timeWindowCalculation(i, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
     
 }
 
-customerCalculation <- function(i, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
+timeWindowCalculation <- function(i, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
 {
     from <- data$from
     to <- data$to
@@ -208,14 +266,14 @@ calculateRatioNumbers <- function(mergers, start.dt, next.dt, id.to.renew, id.ch
          detail = id.churned)
 }
 
-volumeOrCurrentCalculation <- function(period.dt, start.dt, cohort.id, unit, use, components, data)
+pointInTimeCalculation <- function(period.dt, start.dt, cohort.id, unit, use, components, data)
 {
     id <- data$id
     rr <- data$recurring.value
-    if (components != "current" | use != "Aggregate")
+    if (!components %in% c("current", "customers") | use != "Aggregate")
         start.dt <- min(start.dt + unit, attr(data, "end"))
     current <- customerAtPeriodEnd(data, start.dt)
-    if (components == "current") # recurring revenue and customer numbers
+    if (components %in% c("current", "customers")) # recurring revenue and customer numbers
         return(currentRevenueAndCustomers(current, cohort.id, id, rr, use))
      #churn/retention
     previous <- customerAtEarlierPeriodEnd(data, period.dt, start.dt)
@@ -240,8 +298,11 @@ currentRevenueAndCustomers <- function(current, cohort.id, id, rr, use)
         m <- m & id %in% cohort.id # Can be made more efficient by moving up
     value <- rr[m]
     id <- id[m]
-    numerator <- sum(value)
-    list(numerator = sum(value), denominator = length(id), detail = data.frame(id = id, value = value))
+    list(numerator = sum(value), 
+         denominator = nUnique(id),
+         detail = data.frame(id = as.character(id), 
+                             value = value, 
+                             stringsAsFactors = FALSE))
 }    
 
 expansionOrContraction <- function(components, current, previous, id, rr, previous.id)
