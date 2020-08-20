@@ -43,37 +43,12 @@ calculate <- function(data,
 #' @importFrom flipTime Period
 calculateNumberCustomers <- function(use, data, mergers)
 {
-    #warning("Need to hook up mergers")
     if (use == "Cohort")
         stop("There is no way of looking at number of customer by cohort. Perhaps Customer Retention is what you are after.")
-    # out <- if (use == "Initial")
-    # {
-        cohort.ids <- cohortIDs(data)    
+    cohort.ids <- cohortIDs(data)    
     out <- list(detail = cohort.ids,
                 denominator = sapply(cohort.ids, length),
                 numerator = NULL)
-    # } else {
-    #     periods <- attr(data, "by.period.sequence")
-    #     periods <- periods[-length(periods)]
-    #     period.dts <- attr(data, "by.sequence")
-    #     n <- length(periods)
-    #     #unit <- Periods(1, attr(data, "subscription.length"))
-    #     from <- data$from
-    #     to <- data$to
-    #     id <- data$id
-    #     n.cust <- rep(0, n)
-    #     id.cust <- vector("list", n)
-    #     names(id.cust) <- names(n.cust) <- periods
-    #     for (i in 1:n)
-    #     {
-    #         period.start <- period.dts[i]
-    #         next.start <- period.dts[i + 1]
-    #         ids <- unique(id[from < next.start & to >= period.start])
-    #         n.cust[i] <- length(ids)
-    #         id.cust[[i]] <- ids
-    #     }
-    #     list(numerator = n.cust, denominator = NULL, detail = id.cust)
-    # }
     out$by <- attr(data, "by")
     out$use <- use
     out$subscription.length <- attr(data, "subscription.length")
@@ -82,7 +57,7 @@ calculateNumberCustomers <- function(use, data, mergers)
 }
     
     
-    
+#' @importFrom flipTime Period
 calculateUsingLoop <- function(data, components, use, mergers, volume)
 {
     checkInputs(components, use)
@@ -92,8 +67,7 @@ calculateUsingLoop <- function(data, components, use, mergers, volume)
     subscription.dts <- attr(data, "subscription.sequence")
     subscription.dts <- c(subscription.dts[-length(subscription.dts)], attr(data, "end"))
     subscription.periods <- subscriptionPeriods(data, use)
-    unit <- Periods(1, attr(data, "subscription.length"))
-    
+    subscription.unit <- Periods(1, attr(data, "subscription.length"))
     results <-  matrixLikeList(periods, subscription.periods)
     for (period in 1:length(periods))
     {
@@ -102,12 +76,12 @@ calculateUsingLoop <- function(data, components, use, mergers, volume)
         
         for (i in seq_along(subscription.periods))
         {
-            start.dt <- if (use == "Aggregate") period.dt else subscription.dts[i]
+            start.dt <- if (use == "Aggregate") period.dt else period.dt + subscription.unit * (i - 1)# subscription.dts[i]
             if (start.dt >= period.dt)
             {
-                is.first.period <- start.dt > period.dt & period.dt + unit >= start.dt
-                if (is.first.period | use != "initial")
-                    results[[period]][[i]] <- doCalculations(volume, i, period.dt, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
+                is.first.period <- start.dt > period.dt & period.dt + subscription.unit >= start.dt
+                if (is.first.period | use != "Initial")
+                    results[[period]][[i]] <- doCalculations(volume, i, period.dt, start.dt, subscription.dts, cohort.id, use, components, data, mergers)
                 
             }
         }
@@ -116,127 +90,23 @@ calculateUsingLoop <- function(data, components, use, mergers, volume)
 }
 
 
-tidyResults <- function(results, use, volume, by, subscription.length, components)
-{
     
-    denominator <- convertToMatrix(results, "denominator")
-    numerator <- convertToMatrix(results, "numerator")
-    detail <- lapply(results, function(x) lapply(x, function(x) x[["detail"]]))
-    out <- tidyNumeratorAndDenominator(numerator, denominator)
-    if (use == "Initial")
-        out <- matrixToVectorForInitialPeriod(out, by, subscription.length)
-    out$detail <- tidyDetail(volume, numerator, denominator, detail, components)
-    out$by <- by
-    out$use <- use
-    out$subscription.length <- subscription.length
-    out$volume <- volume
-    out
-}
-
-
-checkInputs <- function(components, use)
-{
-    if (!components %in% c("current", "expansion", "contraction", "churn", "retention", "net retention", "customers"))
-        stop("Unknown components: ", paste(components, separate = ","))
-    if (!use %in% c("Initial", "Aggregate", "Cohort"))
-        stop("Unknown use: ", paste(use, separate = ","))
-}            
-
-
-
-# asRetention <- function(components, use)
-# {
-#     if (use == "Cohort")
-#         return(TRUE)
-#     all(c("churn", "expansion", "contraction") %in% components)
-# }
-
-
-periodLabels <- function(data, use, components)
-{
-    periods <- attr(data, "by.period.sequence")
-    periods <- periods[-length(periods)]
-    if ("current" %in% components & attr(data, "by") != "day" & use == "Aggregate")
-        periods <- c(attr(data, "previous.period"), periods)
-    periods
-}
-
-
-
-matrixToVectorForInitialPeriod <- function(calculation, by, subscription.length)
-{
-    calculation$denominator <- diagRectangular(calculation$denominator, by, subscription.length)
-    calculation$numerator <- diagRectangular(calculation$numerator, by, subscription.length)
-    calculation
-}    
-
-
-#' @importFrom flipTime AsDate Period Periods
-#' @importFrom lubridate floor_date
-diagRectangular <- function(x, by, subscription.length)
-{
-    unit <- Periods(1, subscription.length)
-    row.dts <- AsDate(rownames(x))
-    rows <- floor_date(row.dts, subscription.length) + unit
-    rowm <- matrix(rows, nrow(x), ncol(x))                   
-    cols <- AsDate(colnames(x))
-    colm <- matrix(cols, nrow(x), ncol(x), byrow = TRUE)    
-    m <- colm == rowm
-    out <- x[m]
-    names(out) <- Period(row.dts [rowSums(m) != 0] + unit, by)
-    out
-}   
-
-
-convertToMatrix <- function(results, statistic)
-{
-    out <- sapply(results, function(x) sapply(x, function(x) {
-            r <- x[[statistic]]
-            if (is.null(r)) 0 else r}))
-    if (is.matrix(out))
-        out <- t(out)
-    if (!is.matrix(out))
-        out <- matrix(out, ncol = 1, dimnames = list(names(results), names(results[[1]])))
-    out
-}
-
-#' @importFrom dplyr bind_rows 
-tidyDetail <- function(volume, numerator, denominator, detail, components)
-{
-    if (volume) 
-        return(detail)
-    if (components == "customers")# This could probably can be combined into the code below
-    { 
-        detail <- lapply(detail, function(x) x[['All']])
-        return(bind_rows(detail))
-    }
-        
-    cohort.matrix <- matrix(rownames(denominator),  nrow(denominator), ncol(denominator))
-    subscription.matrix <- matrix(colnames(denominator),  nrow(denominator), ncol(denominator))
-    data.frame(Cohort = rep(cohort.matrix, numerator),
-               "Rewewal Period" = rep(subscription.matrix, numerator),
-               Churned = unlist(unlist(detail)),
-               row.names = NULL)
-
-    
-}
-    
-    
-doCalculations <- function(volume, i, period.dt, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
+doCalculations <- function(volume, i, period.dt, start.dt, subscription.dts, cohort.id, use, components, data, mergers)
 {
     if (volume | components %in%  c("current", "customers"))
-        return(pointInTimeCalculation(period.dt, start.dt, cohort.id, unit, use, components, data))
-    timeWindowCalculation(i, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
+        return(pointInTimeCalculation(period.dt, start.dt, cohort.id, use, components, data))
+    timeWindowCalculation(i, start.dt, subscription.dts, cohort.id, use, components, data, mergers)
     
 }
 
-timeWindowCalculation <- function(i, start.dt, subscription.dts, unit, cohort.id, use, components, data, mergers)
+timeWindowCalculation <- function(i, start.dt, subscription.dts, cohort.id, use, components, data, mergers)
 {
+    subscription.unit <- Periods(1, attr(data, "subscription.length"))
     from <- data$from
     to <- data$to
     id <- data$id
     # Working out who was due to churn
-    next.dt <- if (use != "Aggregate") subscription.dts[i + 1] else min(start.dt + unit, attr(data, "end"))
+    next.dt <- if (use != "Aggregate") subscription.dts[i + 1] else min(start.dt + subscription.unit, attr(data, "end"))
     to.renew <- to >= start.dt & to < next.dt
     id.to.renew <- intersect(unique(id[to.renew]), cohort.id)
     
@@ -266,17 +136,20 @@ calculateRatioNumbers <- function(mergers, start.dt, next.dt, id.to.renew, id.ch
          detail = id.churned)
 }
 
-pointInTimeCalculation <- function(period.dt, start.dt, cohort.id, unit, use, components, data)
+#' @importFrom flipTime Period
+pointInTimeCalculation <- function(period.dt, start.dt, cohort.id, use, components, data)
 {
+    by.unit <- Periods(1, attr(data, "by"))
+    subscription.unit <- Periods(1, attr(data, "subscription.length"))
     id <- data$id
     rr <- data$recurring.value
     if (!components %in% c("current", "customers") | use != "Aggregate")
-        start.dt <- min(start.dt + unit, attr(data, "end"))
+        start.dt <- min(start.dt + by.unit, attr(data, "end"))
     current <- customerAtPeriodEnd(data, start.dt)
     if (components %in% c("current", "customers")) # recurring revenue and customer numbers
         return(currentRevenueAndCustomers(current, cohort.id, id, rr, use))
      #churn/retention
-    previous <- customerAtEarlierPeriodEnd(data, period.dt, start.dt)
+    previous <- customerAtPeriodEnd(data, start.dt - subscription.unit)
     previous.id <- unique(id[previous])
     if (any(c("contraction", "expansion") == components) & !"churn" %in% components)
         detail <- expansionOrContraction(components, current, previous, id, rr, previous.id)
@@ -288,6 +161,14 @@ pointInTimeCalculation <- function(period.dt, start.dt, cohort.id, unit, use, co
             previous & id %in% setdiff(previous.id, id[current])
         detail <- tapply(rr[m], list(id[m]), sum)
     }
+    # print(paste("previous", as.character(period.dt),
+    #         as.character(start.dt),
+    #         "customers: ", sum(nUnique(id[previous])),
+    #         "base rr: ", round(sum(rr[previous])),
+    #         "expanders n: ", length(detail),
+    #         "%: ", round(length(detail)/nUnique(id[previous]), 2),
+    #         "expansion $: ", round(sum(detail)),
+    #         "%: ", round(sum(detail)/sum(rr[previous]), 2)))
     list(denominator = sum(rr[previous]), numerator = sum(detail), detail = detail)
 }
 
@@ -309,6 +190,11 @@ expansionOrContraction <- function(components, current, previous, id, rr, previo
 {
     
     rr.change.by.id <- changeInRecurringRevenueByID(current, previous, id, rr, previous.id)
+    #print(rr.change.by.id)
+    #print(c(Contraction = mean(rr.change.by.id < 0),
+    ##        Same = mean(rr.change.by.id == 0),
+     #       Expansion = mean(rr.change.by.id > 0)))
+    #print(c("Mean Expansion" = mean(rr.change.by.id[rr.change.by.id > 0])))
     if (components == "contraction") 
         return(-rr.change.by.id[rr.change.by.id < 0])
     rr.change.by.id[rr.change.by.id > 0]
@@ -330,13 +216,14 @@ customerAtPeriodEnd <- function(data, period.date)
     period.date > data$from  & period.date <= data$to
 }
 
-customerAtEarlierPeriodEnd <- function(data, period.dt, later.period.being.compared.to)
-{
-    previous <- customerAtPeriodEnd(data, period.dt)
-    if (later.period.being.compared.to - period.dt < attr(data, "subscription.length")) # Dealing with final incomplete period
-        previous <- previous & data$to < attr(data, "end")
-    previous
-}
+# customerAtEarlierPeriodEnd <- function(data, period.dt, later.period.being.compared.to)
+# {
+#     previous <- customerAtPeriodEnd(data, period.dt)
+#     if (later.period.being.compared.to - period.dt < attr(data, "subscription.length")) # Dealing with final incomplete period
+#         previous <- previous & data$to < attr(data, "end")
+#     previous
+# }
+
 
 matrixLikeList <- function(rownames, colnames)
 {
@@ -445,3 +332,108 @@ asMatrix <- function(list.of.lists, FUN, fill.with = 0)
     m[is.na(m)] <- fill.with
     m
 }    
+tidyResults <- function(results, use, volume, by, subscription.length, components)
+{
+    
+    denominator <- convertToMatrix(results, "denominator")
+    numerator <- convertToMatrix(results, "numerator")
+    detail <- lapply(results, function(x) lapply(x, function(x) x[["detail"]]))
+    out <- tidyNumeratorAndDenominator(numerator, denominator)
+    if (use == "Initial")
+        out <- matrixToVectorForInitialPeriod(out, by, subscription.length)
+    out$detail <- tidyDetail(volume, numerator, denominator, detail, components)
+    out$by <- by
+    out$use <- use
+    out$subscription.length <- subscription.length
+    out$volume <- volume
+    out
+}
+
+
+checkInputs <- function(components, use)
+{
+    if (!components %in% c("current", "expansion", "contraction", "churn", "retention", "net retention", "customers"))
+        stop("Unknown components: ", paste(components, separate = ","))
+    if (!use %in% c("Initial", "Aggregate", "Cohort"))
+        stop("Unknown use: ", paste(use, separate = ","))
+}            
+
+
+
+# asRetention <- function(components, use)
+# {
+#     if (use == "Cohort")
+#         return(TRUE)
+#     all(c("churn", "expansion", "contraction") %in% components)
+# }
+
+
+periodLabels <- function(data, use, components)
+{
+    periods <- attr(data, "by.period.sequence")
+    periods <- periods[-length(periods)]
+    if ("current" %in% components & attr(data, "by") != "day" & use == "Aggregate")
+        periods <- c(attr(data, "previous.period"), periods)
+    periods
+}
+
+
+
+matrixToVectorForInitialPeriod <- function(calculation, by, subscription.length)
+{
+    calculation$denominator <- diagRectangular(calculation$denominator, by, subscription.length)
+    calculation$numerator <- diagRectangular(calculation$numerator, by, subscription.length)
+    calculation
+}    
+
+
+#' @importFrom flipTime AsDate Period Periods
+#' @importFrom lubridate floor_date
+diagRectangular <- function(x, by, subscription.length)
+{
+    subscription.unit <- Periods(1, subscription.length)
+    row.dts <- AsDate(rownames(x))
+    rows <- floor_date(row.dts, subscription.length) + subscription.unit
+    rowm <- matrix(rows, nrow(x), ncol(x))                   
+    cols <- AsDate(colnames(x))
+    colm <- matrix(cols, nrow(x), ncol(x), byrow = TRUE)    
+    m <- colm == rowm
+    out <- x[m]
+    names(out) <- Period(row.dts [rowSums(m) != 0] + subscription.unit, by)
+    out
+}   
+
+
+convertToMatrix <- function(results, statistic)
+{
+    out <- sapply(results, function(x) sapply(x, function(x) {
+        r <- x[[statistic]]
+        if (is.null(r)) 0 else r}))
+    if (is.matrix(out))
+        out <- t(out)
+    if (!is.matrix(out))
+        out <- matrix(out, ncol = 1, dimnames = list(names(results), names(results[[1]])))
+    out
+}
+
+#' @importFrom dplyr bind_rows 
+tidyDetail <- function(volume, numerator, denominator, detail, components)
+{
+    if (volume) 
+        return(detail)
+    if (components == "customers")# This could probably can be combined into the code below
+    { 
+        detail <- lapply(detail, function(x) x[['All']])
+        return(bind_rows(detail))
+    }
+    
+    cohort.matrix <- matrix(rownames(denominator),  nrow(denominator), ncol(denominator))
+    subscription.matrix <- matrix(colnames(denominator),  nrow(denominator), ncol(denominator))
+    data.frame(Cohort = rep(cohort.matrix, numerator),
+               "Rewewal Period" = rep(subscription.matrix, numerator),
+               Churned = unlist(unlist(detail)),
+               row.names = NULL)
+    
+    
+}
+
