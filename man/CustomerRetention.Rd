@@ -4,28 +4,20 @@
 \alias{CustomerRetention}
 \title{\code{CustomerRetention}}
 \usage{
-CustomerRetention(data, use = "Aggregate", ratio = TRUE)
+CustomerRetention(data, ratio = TRUE)
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
 
-\item{use}{The data to be used in the calculation:
-\enumerate{
-  \item \code{"Aggregate"} All data is used in the calculation for each period.
-  \item \code{"Initial"} Data for the initial subscription period is used. 
-  \item \code{"Cohort"} The statistic is computed for each cohort by each 
-  subscription period.
-}}
-
 \item{ratio}{If \code{TRUE}, the statistic is returned as a ratio.}
 }
 \value{
-A named vector if \code{use} is set to \code{"Aggregate"} or \code{"Initial"}, or,
+A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding"}, or,
   a \code{matrix}. This will contain a number of attributes includeing:
 \enumerate{
-  \item \code{denominator} Used when \code{ratio} is \code{TRUE}.
-  \item \code{numerator} Used when \code{ratio} is \code{TRUE}.
-  \item The \code{detail} used when \code{ratio} is \code{TRUE}.
+  \item \code{denominator} cohort.typed when \code{ratio} is \code{TRUE}.
+  \item \code{numerator} cohort.typed when \code{ratio} is \code{TRUE}.
+  \item The \code{detail} cohort.typed when \code{ratio} is \code{TRUE}.
   }
 }
 \description{

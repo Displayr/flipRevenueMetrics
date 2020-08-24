@@ -9,11 +9,23 @@
 #' with a prorated price of $1000/12, then the recurring revenue is $2,000.
 #' @return A vector showing the recurring revenue by time points.
 #' @importFrom lubridate as_datetime
-#' @export
-RecurringRevenue <- function(data, use = "Aggregate")
+RecurringRevenue <- function(data)
 {
-    calculateUnivariate(data, ratio = FALSE, volume = TRUE, use = use,
-                        name = "Recurring Revenue", "numerator")
+    # calculateUnivariate(data, 
+    #                     ratio = FALSE, 
+    #                     volume = TRUE,
+    #                     name = "Recurring Revenue",
+    #                     statistic = "numerator")
+    # calculateUnivariate <- function(data, ratio, volume, name, statistic)
+    # {
+        calc <- calculate(data, components = "current", volume = TRUE)
+        stat <- calc[["numerator"]]
+        plt <- if (!singleSeries(data)) "Heatmap" else  {
+                if  (newCohort(data)) "OneDimensionalWithTrend" else "OneDimensionalWithoutTrend"
+            }
+        createOutput(stat, plt, calc, "Recurring Revenue")
+    # }    
+    
 }
 # tidyingDetailForCustomerChurn <- function(detail, subscription.length, by)
 # {
@@ -23,7 +35,7 @@ RecurringRevenue <- function(data, use = "Aggregate")
 #     detail
 # }
 
-#' \code{Customers}
+#' \code{NumberofCustomers}
 #'
 #' @description Number of customers by time period..
 #' @inheritParams CustomerChurn
@@ -32,31 +44,33 @@ RecurringRevenue <- function(data, use = "Aggregate")
 #' with a prorated price of $1000/12, then the recurring revenue is $2,000.
 #' @return A vector showing the recurring revenue by time points.
 #' @importFrom lubridate as_datetime
-#' @export
-Customers <- function(data, use = "Aggregate")
+NumberofCustomers <- function(data)
 {
-    calc <- calculate(data, components = "customers", volume = FALSE, use = use)
-    createOutput(calc$denominator, "MetricUnivariate", calc, "Customers")
+    calc <- calculate(data, components = "number of customers", volume = FALSE)
+    plt <- if (newCohort(data)) "OneDimensionalWithTrend" else "OneDimensionalWithoutTrend"
+    createOutput(calc$denominator, plt, calc, "Customers")
 }    
     
-    
-#    calculateUnivariate(data, ratio = FALSE, volume = TRUE, use = use,
- #                        name = "Customers", "denominator")
-    #calculateRatio(data, ratio = FALSE, components = "customers", use = use,
-    #               name = "Customers")
+
+
+
+#    calculateUnivariate(data, ratio = FALSE, volume = TRUE, cohort.type = cohort.type,
+#                        name = "Customers", "denominator")
+#calculateRatio(data, ratio = FALSE, components = "customers", cohort.type = cohort.type,
+#               name = "Customers")
 #}
 
-    
+
 #        calculateRecurringRevenueOrCustomers(data, recurring.revenue = FALSE)
-    
-    
-    # from <- floor_date(AsDate(attr(data, "start")), unit = by)
-    # end <- floor_date(AsDate(attr(data, "end")), unit = by)
-    # dts <- seq.Date(from, end, by = by)
-    # m <- matrix(dts, nrow(data), length(dts), byrow = TRUE)
-    # m <- sweep(m, 1, as.numeric(as.Date(data$from)), ">=") & sweep(m, 1, as.numeric(as.Date(data$to)), "<")  
-    # out <- apply(m, 2, function(x) nUnique(data$id[x]))
-    # names(out) <- Period(dts, by)
-    # detail <- data[data$observation == 0 &  data$to >= attr(data, "start") & data$to <= attr(data, "end"), 
-    #                c("id", "subscriber.from.period", "subscriber.to.period")]
-    # addAttributesAndClass(out, "Customers", by, detail)
+
+
+# from <- floor_date(AsDate(attr(data, "start")), unit = by)
+# end <- floor_date(AsDate(attr(data, "end")), unit = by)
+# dts <- seq.Date(from, end, by = by)
+# m <- matrix(dts, nrow(data), length(dts), byrow = TRUE)
+# m <- sweep(m, 1, as.numeric(as.Date(data$from)), ">=") & sweep(m, 1, as.numeric(as.Date(data$to)), "<")  
+# out <- apply(m, 2, function(x) nUnique(data$id[x]))
+# names(out) <- Period(dts, by)
+# detail <- data[data$observation == 0 &  data$to >= attr(data, "start") & data$to <= attr(data, "end"), 
+#                c("id", "subscriber.from.period", "subscriber.to.period")]
+# addAttributesAndClass(out, "Customers", by, detail)

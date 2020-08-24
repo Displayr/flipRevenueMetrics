@@ -1,5 +1,6 @@
 metric.functions <-  c("RecurringRevenue", 
-                       "Customers",
+                       "NumberofCustomers",
+                       #"Customers",
                        "CustomerChurn",
                        "CustomerRetention",
                        "RecurringRevenueChurn",

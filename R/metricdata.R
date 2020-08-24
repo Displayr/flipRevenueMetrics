@@ -1,36 +1,7 @@
 #' \code{MetricData}
 #'
-#' @description Cleans and tidies data for use in revenue metric calculations.
-#' @param value A vector of containing the revenue per transaction.
-#' @param from A vector of class \code{POSIXct} or \code{POSIXt},
-#'     recording the date and time each subscription commences.
-#' @param to A vector of class \code{POSIXct} or \code{POSIXt},
-#'     recording the date and time each subscription ends
-#' @param start The date at which the analysis outputs should
-#'     commence. By default, the earliest date recorded in
-#'     \code{from}.
-#' @param end The date at which the analysis ends, which is used to
-#'     determine churn.  By default, the most recent date recorded in
-#'     \code{from}.
-#' @param id A vector of \code{character}, unique identifier for
-#'     subscribers that made the transactions (e.g., email addresses,
-#'     names, subscriber keys).
-#' @param subscription.length The time unit that describes the
-#'     subscription length: \code{year} to view the data by year,
-#'     \code{quarter}, and \code{month}. This is assumed to be the
-#'     billing period when determining if subscribers have churned or
-#'     not.
-#' @param by The time unit that describes the
-#'     subscription length: \code{year} to view the data by year,
-#'     \code{quarter}, and \code{month}. This is assumed to be the
-#'     billing period when determining if subscribers have churned or
-#'     not.
-#' @param mergers A data frame with two variables 'id' and 'id.to'. 
-#' 'id' contains the ids of companies that appeara, based on their data,
-#' to have churned, but have in fact merged with the corresponding 'id.to'.
-#' @param trim.id The maximum length of the strings to be used showing
-#'     ID names (used to avoid situations where string names are so
-#'     long as to make reading of tables impossible.
+#' @description Cleans and tidies data for cohort.type in revenue metric calculations.
+#' @inheritParams RevenueMetric     
 #' @return A \code{\link{data.frame}} where the rows represent invoice lines
 #'     and the variables are: 
 #'     \itemize{
@@ -42,10 +13,9 @@
 #'        inconsistencies in how people enter data)}.
 #'    }
 #'    Additional information is included in attributes
-#' @importFrom lubridate floor_date
+#' @importFrom lubridate floor_date time_length
 #' @importFrom stats aggregate
 #' @importFrom flipTime AsDate
-#' @export
 MetricData <- function(value, 
                        from, 
                        to, 
@@ -54,6 +24,8 @@ MetricData <- function(value,
                        id,
                        subscription.length,
                        by,
+                       cohort.type,
+                       cohort.period,
                        mergers,
                        trim.id) #, tolerance = .01)
 {
@@ -62,6 +34,7 @@ MetricData <- function(value,
     n <- length(value)
     from <- AsDate(from)
     to <- AsDate(to)
+    checkCohortType(cohort.type)
     checkVariableForLengthAndMissingData(value, n)
     checkVariableForLengthAndMissingData(from, n)
     checkVariableForLengthAndMissingData(to, n)
@@ -79,34 +52,212 @@ MetricData <- function(value,
     # Sorting so that other calculations can be made easier
     data <- data[with(data, order(id, from, to)), ]
     
+    # Adding data for processing cohorts, if required
+    data$subscribed.from <- subscribedFrom(data$from, data$id, cohort.type)
+    
     # appending other info
     data$recurring.value <- recurringValue(data$value, data$from, data$to, subscription.length)
-    attr(data, "mergers") <- mergers
+    attr(data, "mergers") <- mergersWithDates(data, mergers)
     attr(data, "start") <- start
     attr(data, "end") <- end
-    attr(data, "subscription.length") <- subscription.length
     attr(data, "by") <- by
+    attr(data, "subscription.length") <- subscription.length
+    attr(data, "cohort.type") <- cohort.type
+    attr(data, "cohort.period") <- cohort.period
+    by.dates <- seq.Date(floor_date(start, by),
+                         floor_date(end, by),
+                         by = by)
+    attr(data, "by.date.names") <- Period(by.dates, by)
+    if(!end %in% by.dates)
+        by.dates <- c(by.dates, end)
+    attr(data, "by.dates") <- by.dates
     
-    unit <- Periods(1, by)
-    start <- floor_date(attr(data, "start"), by)# + unit
-    ceil.end <- as.Date(ceiling_date(end, by, change_on_boundary = NULL))
-    attr(data, "previous.date") <- previous.date <- start - unit # Used in growth accounting
-    attr(data, "previous.period") <- Period(previous.date, by)
+    if (cohort.type %in% c("Calendar", "Tenure"))
+    {
+        strt <- start
+        if (calendarCohort(data))
+        {
+            strt <- floor_date(start, cohort.period)
+            attr(data, "calendar.start") <- strt
+        }
+        u <- cohortUnit(data) 
+        n <- ceiling(time_length(end - strt) / time_length(u))
+        nms <- if (tenureCohort(data)) 0:n else {
+            dts <- seq.Date(strt, by = cohort.period, length.out = n)
+            Period(dts, cohort.period)
+        }
+        attr(data, "cohort.names") <- nms
+    }
     
-    dts <- seq.Date(start, ceil.end, by)
-    attr(data, "by.period.sequence") <- Period(dts, by)
-    dts[length(dts)] <- end
-    attr(data, "by.sequence") <- dts
     
-    start <- floor_date(attr(data, "start"), subscription.length)# + unit
-    ceil.end <- as.Date(ceiling_date(end, subscription.length, change_on_boundary = NULL))
-    dts <- seq.Date(start, to = ceil.end, by = subscription.length)
-    attr(data, "subscription.period.sequence") <- Period(dts, subscription.length)
-    attr(data, "subscription.sequence") <- c(dts[-length(dts)], end)
-    
+    # unit <- Periods(1, by)
+    # start <- floor_date(attr(data, "start"), by)# + unit
+    # ceil.end <- as.Date(ceiling_date(end, by, change_on_boundary = NULL))
+    # #attr(data, "previous.date") <- previous.date <- start - unit # Used in growth accounting
+    # #attr(data, "previous.period") <- Period(previous.date, by)
+    # 
+    # dts <- seq.Date(start, ceil.end, by)
+    # #attr(data, "by.period.sequence") <- Period(dts, by)
+    # dts[length(dts)] <- end
+    # attr(data, "by.dates") <- dts
+    # # The last date is excluded as it is only ever used to define the end of a period
+    # attr(data, "by.date.names") <- Period(dts, by)[-length(dts)]
+    # 
+    # # 
+    # # start <- floor_date(attr(data, "start"), subscription.length)# + unit
+    # # ceil.end <- as.Date(ceiling_date(end, subscription.length, change_on_boundary = NULL))
+    # # dts <- seq.Date(start, to = ceil.end, by = subscription.length)
+    # # attr(data, "subscription.period.sequence") <- Period(dts, subscription.length)
+    # # attr(data, "subscription.sequence") <- c(dts[-length(dts)], end)
+    # # 
     class(data) <- c(class(data), "MetricData")
     data
 }
+
+
+cohortNames <- function(data)
+{
+    attr(data, "cohort.names")
+}
+
+nCohorts <- function(data)
+{
+    length(cohortNames(data))
+}
+
+calendarStart <- function(data)
+{
+    attr(data, "calendar.start")
+}
+
+start <- function(data)
+{
+    attr(data, "start")
+}
+
+cohortType <- function(data)
+{
+    attr(data, "cohort.type")
+}
+
+calendarCohort <- function(data)
+{
+    cohortType(data) == "Calendar"
+}
+
+tenureCohort <- function(data)
+{
+    cohortType(data) == "Tenure"
+}
+
+newCohort <- function(data)
+{
+    cohortType(data) == "New"
+}
+
+subscribedFrom <- function(from, id, cohort.type)
+{
+    if (cohort.type == "None")
+        return(NULL)
+    start.by.id <- aggregate(from ~ id, FUN = min)
+    m <- match(id, start.by.id[, 1])
+    start.by.id[m, 2]
+}
+
+periodStart <- function(data, i)
+{
+    attr(data, "by.dates")[i]
+}
+
+nextDate <- function(data, date)
+{
+    dates <- attr(data, "by.dates")
+    dates[1 + match(date, dates)]
+}
+
+
+nextPeriodStart <- function(data, i)
+{
+    periodStart(data, i + 1)
+}
+
+nextCohortPeriodStart <- function(data, start.date)
+{
+    end.date <- start.date + cohortUnits(2, data)
+    end.date <- min(end.date, attr(data, "end"))
+    end.date <- end.date - cohortUnit(data)
+}
+
+
+subscriptionLength <- function(data)
+{
+    attr(data, "subscription.length")
+}    
+
+subscriptionUnit <- function(data)
+{
+    subscriptionUnits(1, data)
+}    
+
+cohortUnit <- function(data)
+{
+    cohortUnits(1, data)
+}    
+
+#' @importFrom flipTime Periods
+cohortUnits <- function(x, data)
+{
+    Periods(x, attr(data, "cohort.period"))
+}    
+
+
+
+#' @importFrom flipTime Periods
+subscriptionUnits <- function(x, data)
+{
+    Periods(x, attr(data, "subscription.length"))
+}    
+
+#' @importFrom flipTime Periods
+byUnit <- function(data)
+{
+    Periods(1, attr(data, "by"))
+}    
+
+nPeriods <- function(data)
+{
+    length(attr(data, "by.dates")) - 1
+}
+
+periodNames <- function(data)
+{
+    attr(data, "by.date.names")
+}
+
+periodName <- function(data, i)
+{
+    periodNames(data)[i]
+}
+
+cohortStartDate <- function(data, cohort)
+{
+    attr(data, "by.sequence")[cohort]
+}    
+ 
+checkCohortTypes <- function(cohort.type)
+{
+    if (!cohort.type %in% c("None", "New", "Calendar", "Tenure"))
+        stop("Unknown cohort.type: ", paste(cohort.type, separate = ","))
+}            
+
+
+# cohortNames <- function(data, cohort.type)
+# {
+#     switch(cohort.type,
+#            "Cohort" = attr(data, "subscription.period.sequence"),
+#            "Initial" = paste("Initial", subscriptionLength(data)),
+#            "Aggregate" = "All")
+# }    
 
 # Computing recurring.revenue
 
@@ -163,3 +314,22 @@ filterMetricDataByRelationshipLength <- function(metric.data, n.subscriptions)
     out
 }    
 
+checkCohortType <- function(cohort.type)
+{
+    if (!cohort.type %in% c("None", "New", "Calendar", "Tenure"))
+        stop("Unknown cohort.type: ", paste(cohort.type, separate = ","))
+}            
+
+mergersWithDates <- function(data, mergers)
+{   #' Adds a column of the tim period at which the mergers occurred
+    if (is.null(mergers) || nrow(mergers) == 0)
+        return(NULL)
+    by <- attr(data, "by")
+    id <- data$id
+    mergers$date <- rep(as.Date("2999-12-31"), NROW(mergers)) # Lazy way of dealing with situation where churn doesn't occur
+    m <- id %in% mergers$id
+    ag <- aggregate(data$to[m], list(id[m]), FUN = max)
+    m <- ag[, ] %in% id
+    mergers$date[match(ag[,1], mergers$id)] <- ag[, 2]
+    mergers
+}

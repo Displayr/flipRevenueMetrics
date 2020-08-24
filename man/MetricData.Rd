@@ -13,6 +13,8 @@ MetricData(
   id,
   subscription.length,
   by,
+  cohort.type,
+  cohort.period,
   mergers,
   trim.id
 )
@@ -44,19 +46,32 @@ subscription length: \code{year} to view the data by year,
 billing period when determining if subscribers have churned or
 not.}
 
-\item{by}{The time unit that describes the
-subscription length: \code{year} to view the data by year,
-\code{quarter}, and \code{month}. This is assumed to be the
-billing period when determining if subscribers have churned or
-not.}
+\item{by}{The unit of time to report on ("day", "month", "quarter", "year").}
+
+\item{cohort.type}{How cohorts are to be used when performing the analysis
+\code{by} setting.
+\itemize{
+ \code{"None"} {All customers are cohort.typed in calculations.}
+ \code{"New"} {Customers added in the preceding \code{by}.}
+ \code{"Calendar"} {Calender time periods are used. For example, if \code{cohort.period} is set
+ to "year" then calendar years are used as cohorts.}
+ \code{"Tenure"} {Tenure based time periods are used. For example, if \code{cohort.period} is set
+ to "year", then cohorts are based on the number of years since a customeer first signed up.
+ then calendar years are used as cohorts.}
+}}
+
+\item{cohort.period}{The period of aggregation to be used, with options of \code{"week"}, \code{"month"},
+\code{"quarter"}, and \code{"year"}. This parameter is only used when \code{cohort.type} is \code{"Calendar"}
+or \code{"Tenure"}}
 
 \item{mergers}{A data frame with two variables 'id' and 'id.to'. 
 'id' contains the ids of companies that appeara, based on their data,
 to have churned, but have in fact merged with the corresponding 'id.to'.}
 
 \item{trim.id}{The maximum length of the strings to be used showing
-ID names (used to avoid situations where string names are so
-long as to make reading of tables impossible.}
+    ID names (used to avoid situations where string names are so
+    long as to make reading of tables impossible.
+\code{"quarter"}, and \code{"year"}.}
 }
 \value{
 A \code{\link{data.frame}} where the rows represent invoice lines
@@ -72,5 +87,5 @@ A \code{\link{data.frame}} where the rows represent invoice lines
    Additional information is included in attributes
 }
 \description{
-Cleans and tidies data for use in revenue metric calculations.
+Cleans and tidies data for cohort.type in revenue metric calculations.
 }

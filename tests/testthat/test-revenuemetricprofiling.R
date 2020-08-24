@@ -17,30 +17,17 @@ for (fun in metric.functions)
         {
             for (subscription.length in "year")
             {
-                # days <- if (fun %in%  c("MeanRecurringRevenue", "MeanRecurringRevenueByCohort")) c(0, 30, 90, 180, 365, 365 * 2) else NA
-                # for (day in days)
-                # {
-                #     
                 descr <- paste("metrics", fun, out, by, subscription.length)#, "days", day)
-                
-                # # Tests that the function works with a total data set
-                # test_that(paste("aggregate ", descr),{
-                    #     s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by, cohort.by = cohort.by, days.to.count = day)
-                    #     if (is.null(s)) expect_true(TRUE)
-                    #     else capture.output(expect_error(print(s), NA))
-                    # })
-                    # 
                     # Conducts the analysis split by a profiling variable
                     test_that(paste("profiling 1 ", descr),{
-                        s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by, subscription.length = subscription.length, profiling = p.country)
-#                        s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by, cohort.by = cohort.by, profiling = p.country, days.to.count = day)
+                        s = RevenueMetric(FUN = fun, output = out, value=d$AUD,from=d$ValidFrom,to=d$ValidTo, id = d$name, by = by, subscription.length = subscription.length, profiling = p.country)
                         if (is.null(s)) expect_true(TRUE)
                         else capture.output(expect_error(print(s), NA))
                     })
                     
                     # Conducts the analysis split by two profiling variables
                     test_that(paste("profiling 2 ", descr),{
-                        s = RevenueMetric(fun, output = out, d$AUD, d$ValidFrom,d$ValidTo, id = d$name, by = by, subscription.length = subscription.length, profiling = p.country)#cohort.by = cohort.by, profiling = p.country.salesman, days.to.count = day)
+                        s = RevenueMetric(fun, output = out, value=d$AUD,from=d$ValidFrom,to=d$ValidTo, id = d$name, by = by, subscription.length = subscription.length, profiling = p.country)#cohort.by = cohort.by, profiling = p.country.salesman, days.to.count = day)
                         if (is.null(s)) expect_true(TRUE)
                         else capture.output(expect_error(print(s), NA))
                     })

@@ -4,39 +4,31 @@
 \alias{CustomerChurn}
 \title{\code{CustomerChurn}}
 \usage{
-CustomerChurn(data, use = "Aggregate", ratio = TRUE)
+CustomerChurn(data, ratio = TRUE)
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
 
-\item{use}{The data to be used in the calculation:
-\enumerate{
-  \item \code{"Aggregate"} All data is used in the calculation for each period.
-  \item \code{"Initial"} Data for the initial subscription period is used. 
-  \item \code{"Cohort"} The statistic is computed for each cohort by each 
-  subscription period.
-}}
-
 \item{ratio}{If \code{TRUE}, the statistic is returned as a ratio.}
 }
 \value{
-A named vector if \code{use} is set to \code{"Aggregate"} or \code{"Initial"}, or,
+A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding"}, or,
   a \code{matrix}. This will contain a number of attributes includeing:
 \enumerate{
-  \item \code{denominator} Used when \code{ratio} is \code{TRUE}.
-  \item \code{numerator} Used when \code{ratio} is \code{TRUE}.
-  \item The \code{detail} used when \code{ratio} is \code{TRUE}.
+  \item \code{denominator} cohort.typed when \code{ratio} is \code{TRUE}.
+  \item \code{numerator} cohort.typed when \code{ratio} is \code{TRUE}.
+  \item The \code{detail} cohort.typed when \code{ratio} is \code{TRUE}.
   }
 }
 \description{
 The percentage or number of customers who could churn in a period that did churn.
 }
 \details{
-The definition of churn is is not the most widely used definition.
+The definition of churn is is not the most widely cohort.typed definition.
 A more common definition is the proportion of customers that churned. 
 These two measures differ in some situations:
 \enumerate{
-  \item Incomplete periods. The traditional metric can only be used with completed metrics.
+  \item Incomplete periods. The traditional metric can only be cohort.typed with completed metrics.
 This function computes churn for periods that are not yet complete, by using the dat
 for the customers that were have been up for renewal prior to the point at which the
 analysis is conducted.

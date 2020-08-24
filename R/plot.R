@@ -4,30 +4,27 @@ addSubscriptionLengthToName <- function(x, subscription.length, by)
 }    
 
 #' @export
-plot.MetricRatio <- function(x, ...)
+plot.OneDimensionalWithTrend <- function(x, ...)
 {
     smooth <- if (length(x) < 4) "None" else "Friedman's super smoother"
     y.title <- attr(x, "y.title")
-    ytickformat <- if (grepl("Average", y.title)) "" else "%"
+    numerics <- c("Average Recurring Revenue", "Recurring Revenue", "Customers")
+    numerics <- c(numerics, paste("New", numerics))
+    is.numeric <- y.title %in% numerics
+    ytickformat <- if (is.numeric) "" else "%"
     columnChart(x, 
                 fit.type = smooth,
-                fit.ignore.last = FALSE,
+                fit.ignore.last = is.numeric,
                 y.title = y.title, 
                 y.tick.format = ytickformat, ...)
 }
 
 
 #' @export
-plot.MetricUnivariate <- function(x, ...)
+plot.OneDimensionalWithoutTrend <- function(x, ...)
 {
     y.title <- attr(x, "y.title")
-    if (length(x) > 20)
-        areaChart(x, y.title = y.title, ...)
-    else
-        columnChart(x, 
-                    fit.ignore.last = TRUE,
-                    y.title = y.title, 
-                    ...)
+    areaChart(x, y.title = y.title, ...)
 }
 
 
@@ -35,11 +32,13 @@ plot.MetricUnivariate <- function(x, ...)
 #' @importFrom plotly plot_ly layout `%>%`
 #' @importFrom flipFormat FormatAsPercent
 #' @export
-plot.MetricCohort <- function(x, ...)
+plot.Heatmap <- function(x, ...)
 {
-    churn.type <- if(attr(x, "volume")) "Recurring Revenue " else "Customer "
+    volume <- attr(x, "volume")
+    churn.type <- if(volume) "Recurring Revenue " else "Customer "
     y.title <- attr(x, "y.title")
-    vals <- if (grepl("Average", y.title) | grepl("Customers", y.title) ) FormatAsReal(x) else FormatAsPercent(x, decimals = 1)
+    real <- volume | grepl("Average", y.title) | grepl("Customers", y.title) 
+    vals <- if (real) FormatAsReal(x) else FormatAsPercent(x, decimals = 1)
     series.hover <-paste0(y.title, ": ", vals)
     cohortHeatmap(x, series.hover = series.hover, ...)
 }
@@ -71,7 +70,7 @@ columnChart <- function(x,  ...)
                             ...))$htmlwidget
 }
 
-#' @importFrom flipStandardCharts Column
+#' @importFrom flipStandardCharts Area
 areaChart <- function(x,  ...)
 {
     Area(x,  x.tick.angle = 0,
@@ -92,14 +91,16 @@ areaChart <- function(x,  ...)
 #' @param series.hover The description of the value that appears in each cell;
 #' used in the hover tooltips 
 #' @param ... Additional arguments to be passed to lower level functions.
-#' @importFrom plotly plot_ly layout
+#' @importFrom plotly plot_ly layout config
 #' @return A plotly heatmap
 cohortHeatmap <- function(x, series.hover, ...)
 {
     rn <- matrix(rownames(x), nrow(x), ncol(x), byrow = FALSE)
     cn <- matrix(colnames(x), nrow(x), ncol(x), byrow = TRUE)
-    hover.text <- matrix(paste0("Customer since: ", rn, "<br>",
-                                properCase(attr(x, "by")), ": ", cn, "<br>",
+    by <- properCase(attr(x, "by"))
+    y.title <- if(tenureCohort(x)) paste0(by, "s as customer") else "Customer since"
+    hover.text <- matrix(paste0(y.title, ": ", rn, "<br>",
+                                by, ": ", cn, "<br>",
                                 series.hover, "<br>",
                                 "Cohort size: ", c(attr(x, "denominator"))), nrow(x))
     plot_ly(x = colnames(x),
@@ -113,7 +114,7 @@ cohortHeatmap <- function(x, series.hover, ...)
             hoverinfo = "text",
             type = "heatmap", 
             showscale = FALSE) %>% config(displayModeBar = FALSE) %>% 
-        layout("Hello", xaxis = list(title = "Period"), yaxis = list(title = "Cohort")) 
+        layout("Hello", xaxis = list(title = by), yaxis = list(title = y.title)) 
     
     
 }

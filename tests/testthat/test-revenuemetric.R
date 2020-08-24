@@ -7,10 +7,10 @@ start <- ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom))
 
 for (by in c("week", "month", "quarter"))
   test_that(paste("RecurringRevenue and GrowthAccounting are consistent", by),{
-      rr = RevenueMetric("RecurringRevenue", output = "Table",  use = "Aggregate", d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
-      ga  = RevenueMetric("GrowthAccounting", output = "Table",  d$AUD, d$ValidFrom, d$ValidTo, id = d$name,  by = by)
+      rr = RevenueMetric("RecurringRevenue", output = "Table",  cohort.type = "None", value = d$AUD, from = d$ValidFrom, to = d$ValidTo, id = d$name,  by = by)
+      ga  = RevenueMetric("GrowthAccounting", output = "Table",  value = d$AUD, from = d$ValidFrom, to = d$ValidTo, id = d$name,  by = by)
       aga = cumsum(colSums(ga))
-      expect_equivalent(as.numeric(tail(aga, length(rr))), as.numeric(rr))
+      expect_equivalent(as.numeric(tail(aga, length(rr) - 1)), as.numeric(rr)[-1])
   })
 
 
@@ -22,11 +22,11 @@ data(metric.functions)
 # Quick run through checking that the basic function works
 by = "year"
 for (fun in metric.functions)
-  for (use in c("Aggregate", "Initial", "Cohort"))
-    if (!(fun == "Customers" & use == "Cohort"))
-    test_that(paste("metrics", fun),
+  for (cohort.type in c("None", "New", "Calendar"))
+    if (!(fun %in% "NumberofCustomers" & cohort.type == "Calendar"))
+    test_that(paste("metrics", fun, cohort.type),
               {
-                s = RevenueMetric(FUN = fun, output = "Plot", use = use, d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by)
+                s = RevenueMetric(FUN = fun, output = "Plot", cohort.type = cohort.type, value = d$AUD, from = d$ValidFrom, to = d$ValidTo, id = d$name, by = by)
                 expect_error(print(s), NA)
               }
     )
@@ -46,7 +46,7 @@ for (fun in metric.functions)
         descr <- paste("metrics", fun, out, by, subscription.length)
         # Tests that the function works with a total data set
         test_that(paste("aggregate ", descr),{
-          s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, id = d$name, by = by, subscription.length = subscription.length)
+          s = RevenueMetric(FUN = fun, output = out, value = d$AUD, from = d$ValidFrom, to = d$ValidTo, id = d$name, by = by, subscription.length = subscription.length)
           if (is.null(s)) expect_true(TRUE)
           else capture.output(expect_error(print(s), NA))
         })

@@ -7,15 +7,17 @@
 RevenueMetric(
   FUN = "Acquisition",
   output = c("Plot", "Table", "Detail")[1],
+  by = c("day", "month", "quarter", "year")[4],
+  cohort.type = "None",
+  cohort.period = "year",
+  id,
   value,
   from,
   to,
   start = as.Date(min(from)),
   end = as.Date(max(from)),
-  id,
   subscription.length = "year",
   subset = rep(TRUE, length(id)),
-  by = c("day", "month", "quarter", "year")[4],
   profiling = NULL,
   trim.id = 50,
   mergers = NULL,
@@ -26,6 +28,28 @@ RevenueMetric(
 \item{FUN}{A function that calculates a metric}
 
 \item{output}{Whether to output as a Plot, Table, or Detail}
+
+\item{by}{The unit of time to report on ("day", "month", "quarter", "year").}
+
+\item{cohort.type}{How cohorts are to be used when performing the analysis
+\code{by} setting.
+\itemize{
+ \code{"None"} {All customers are cohort.typed in calculations.}
+ \code{"New"} {Customers added in the preceding \code{by}.}
+ \code{"Calendar"} {Calender time periods are used. For example, if \code{cohort.period} is set
+ to "year" then calendar years are used as cohorts.}
+ \code{"Tenure"} {Tenure based time periods are used. For example, if \code{cohort.period} is set
+ to "year", then cohorts are based on the number of years since a customeer first signed up.
+ then calendar years are used as cohorts.}
+}}
+
+\item{cohort.period}{The period of aggregation to be used, with options of \code{"week"}, \code{"month"},
+\code{"quarter"}, and \code{"year"}. This parameter is only used when \code{cohort.type} is \code{"Calendar"}
+or \code{"Tenure"}}
+
+\item{id}{A vector of \code{character}, unique identifier for
+subscribers that made the transactions (e.g., email addresses,
+names, subscriber keys).}
 
 \item{value}{A vector of containing the revenue per transaction.}
 
@@ -43,10 +67,6 @@ commence. By default, the earliest date recorded in
 determine churn.  By default, the most recent date recorded in
 \code{from}.}
 
-\item{id}{A vector of \code{character}, unique identifier for
-subscribers that made the transactions (e.g., email addresses,
-names, subscriber keys).}
-
 \item{subscription.length}{The time unit that describes the
 subscription length: \code{year} to view the data by year,
 \code{quarter}, and \code{month}. This is assumed to be the
@@ -56,13 +76,12 @@ not.}
 \item{subset}{An optional vector specifying a subset of
 observations to be used in the calculations}
 
-\item{by}{The unit of time to report on ("day", "month", "quarter", "year").}
-
 \item{profiling}{Separate analyses are conducted among each unique combination of these variables.}
 
 \item{trim.id}{The maximum length of the strings to be used showing
-ID names (used to avoid situations where string names are so
-long as to make reading of tables impossible.}
+    ID names (used to avoid situations where string names are so
+    long as to make reading of tables impossible.
+\code{"quarter"}, and \code{"year"}.}
 
 \item{mergers}{A data frame with two variables 'id' and 'id.to'. 
 'id' contains the ids of companies that appeara, based on their data,

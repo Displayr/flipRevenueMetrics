@@ -23,7 +23,7 @@ for (fun in metric.functions)
                     # Tests that the function works with a total data set
                     test_that(paste("Start and end ", descr),{
                         #print(fun)
-                        s = RevenueMetric(FUN = fun, output = out, d$AUD,d$ValidFrom,d$ValidTo, 
+                        s = RevenueMetric(FUN = fun, output = out, value=d$AUD,from=d$ValidFrom,to=d$ValidTo, 
                                           start = strt,
                                           end = nd,
                                           id = d$name, by = by, subscription.length = subscription.length)#cohort.by = cohort.by, days.to.count = day)
