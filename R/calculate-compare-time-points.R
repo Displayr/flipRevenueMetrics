@@ -8,12 +8,14 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
     current <- currentCustomers(in.cohort, period.start, data)
     earlier <- earlierCustomers(in.cohort, period.start, data)
     
-    id <- data$id
+    id <- idsReflectingMergers(data, period.start)
     rr <- data$recurring.value
     earlier.id <- unique(id[earlier])
+    #merger.in.period <- mergerInPeriod(data, start.dt, next.dt)
+    #merger
 #    earlier <- id %in% earlier.id & current
     if (any(c("contraction", "expansion") == components) & !"churn" %in% components)
-        detail <- expansionOrContraction(components, current, earlier, data)
+        detail <- expansionOrContraction(components, current, earlier, period.start, rr, id)
     else
     {
         m <- if ("net retention" == components)
@@ -48,33 +50,44 @@ earlierCustomers <- function(in.cohort, period.start, data)
     andSubsetIfItExists(m, in.cohort)
 }
 
-expansionOrContraction <- function(components, current, earlier, data)
+expansionOrContraction <- function(components, current, earlier, period.start,  value, id)
 {
-    
-    rr.change.by.id <- changeInRecurringRevenueByID(current, earlier, data)
+    rr.change.by.id <- changeInRecurringRevenueByID(current, earlier, value, id)
     if (components == "contraction") 
         return(-rr.change.by.id[rr.change.by.id < 0])
     rr.change.by.id[rr.change.by.id > 0]
     
 }
 
-changeInRecurringRevenueByID <- function(current, earlier, data)
+idsReflectingMergers <- function(data, period.start)
 {
-    id <- data$id
+    merger.info <- mergerInfo(data, period.start, nextDate(data, period.start))
+    id <- data$id    
+    if (length(merger.info$from.id) == 0)
+        return(id)
+    mtch <- match(id, merger.info$from.id)
+    m <- !is.na(mtch)
+    id[m] <- merger.info$to.id[mtch[m]] 
+    id
+}
+
+
+changeInRecurringRevenueByID <- function(current, earlier, value, id)
+{
     id.earlier <- unique(id[earlier])
     id.current <- unique(id[current])
     id.retained <- intersect(id.earlier, id.current)
     retained <- id %in% id.retained
-    rr.current <- recurringRevenueByID(current, retained, data)
-    rr.earlier <- recurringRevenueByID(earlier, retained, data)
+    rr.current <- recurringRevenueByID(current, retained, value, id)
+    rr.earlier <- recurringRevenueByID(earlier, retained, value, id)
     rr.current - rr.earlier
 }
 
 
-recurringRevenueByID <- function(x, y, data)
+recurringRevenueByID <- function(x, y, value, id)
 {
     subset <- x & y
-    tapply(data$recurring.value[subset],
-           list(data$id[subset]), 
+    tapply(value[subset],
+           list(id[subset]), 
            sum)
 }

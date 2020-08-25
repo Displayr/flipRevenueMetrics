@@ -87,7 +87,28 @@ test_that("Checking calculations",
               expect_equal(s1["2018"], c("2018" = 0))
               expect_equal(attr(s1, "den")["2018"], c("2018" = 1))
               
+              s <- RevenueMetric(FUN = "Contraction", output = out,value = d$Value , from = d$From, to = d$To,
+                                 id = d$Name, by = by, mergers = NULL)
+              expect_equal(s["2018"], c("2018" = 0))
+              s1 <- RevenueMetric(FUN = "Contraction", output =out, value = d$Value , from = d$From, to = d$To, #end = as.Date("2020/06/30"), 
+                                  id = d$Name, by = by, mergers = id.m)
+              expect_equal(s1["2018"], c("2018" = 0.09090909), tol = 0.0000001)
               
+              s <- RevenueMetric(FUN = "RecurringRevenueChurn", output = out,value = d$Value , from = d$From, to = d$To,
+                                 id = d$Name, by = by, mergers = NULL)
+              expect_equal(s["2018"], c("2018" = 0.09090909))
+              s1 <- RevenueMetric(FUN = "RecurringRevenueChurn", output =out, value = d$Value , from = d$From, to = d$To, #end = as.Date("2020/06/30"), 
+                                  id = d$Name, by = by, mergers = id.m)
+              expect_equal(s1["2018"], c("2018" = 0), tol = 0.0000001)
+
+              s <- RevenueMetric(FUN = "NetRecurringRevenueRetention", output = out,value = d$Value , from = d$From, to = d$To,
+                                 id = d$Name, by = by, mergers = NULL)
+              expect_equal(s["2018"], c("2018" = 1 - 0.09090909), tol = 0.0000001)
+              s1 <- RevenueMetric(FUN = "NetRecurringRevenueRetention", output =out, value = d$Value , from = d$From, to = d$To, #end = as.Date("2020/06/30"), 
+                                  id = d$Name, by = by, mergers = id.m)
+              expect_equal(s1["2018"], c("2018" = 1 - 0.09090909), tol = 0.0000001)
+              
+
               data(q.invoice.lines)
               q <- q.invoice.lines
               s <- RevenueMetric(FUN = "CustomerChurn", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
@@ -100,7 +121,5 @@ test_that("Checking calculations",
                                   id = q$name, by = by, mergers = id.m)
               expect_equal(s1["2015"], c("2015" = 0.20437956))
               expect_true(all(s[-1:-2] >= s1[-1:-2]))
-              
-              
           })
 
