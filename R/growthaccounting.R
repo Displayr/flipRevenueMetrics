@@ -2,78 +2,66 @@
 #'
 #' @description Computes the growth within accounts
 #' @param data A \code{data.frame} that has the same variables as a \code{RevenueData} object.
-#' @param by The time period to aggregate the dates by: 
-#' \code{"year"}, \code{"quarter"}, \code{"month"}, \code{"week"}, 
-#' and \code{"day"}.
 #' @param small A proportion. Expansion less than or equal to this  is classified as minor expansion (e.g., price rises) or
 #' an increase in license sales in a larger company.
-#' @param ... Additional arguments to be passed to lower level functions.
 #' @return A matrix
 #' @importFrom flipTime AsDate Period
 #' @importFrom flipStatistics Table
 #' @importFrom lubridate floor_date years ceiling_date
-#' @export
-GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
+GrowthAccounting <- function(data, small = 0.1)
 {
-    unit <- Periods(1, by)
-    true.end <- attr(data, "end")
-    start <- floor_date(attr(data, "start"), by)# + unit
-    end <- as.Date(ceiling_date(true.end, by, change_on_boundary = NULL))
-    subscription.length <- attr(data, "subscription.length")
-    subscription.unit <- Periods(1, subscription.length)
+ #   by <- attr(data, "by")
+#    true.end <- attr(data, "end")
+  #  start <- floor_date(attr(data, "start"), by)# + unit
+ #   end <- as.Date(ceiling_date(true.end, by, change_on_boundary = NULL))
+   # previous.date <- attr(data, "previous.date")
+    #dts <- attr(data, "by.sequence")[-1]
     
-    previous.date <- start - unit
-    dts <- seq.Date(start, end, by)
-    n.dates <- length(dts)
-    periods <- Period(c(previous.date, dts[-length(dts)]), by)
+#    n.dates <- length(dts)
+ #   periods <- attr(data, "by.period.sequence")[1:n.dates]
     
     # Ensuring dates used in calculations don't go past the 'end'
-    dts <- ensureDatesArentInFuture(dts, true.end + 1) # +1 due to the < operator below
+    #dts <- ensureDatesArentInFuture(dts, true.end + 1) # +1 due to the < operator below
     
     # Variables used in loop
     from <- data$from
     to <- data$to
     id <- data$id
     rr <- data$recurring.value
-
+    
     # Calculations used in loop
+    previous.date <- start(data) - byUnit(data)
     ids.ever.customers <- unique(id[from <= previous.date])
     invoice.previous <- from <= previous.date & to > previous.date 
     ids.previous <- unique(id[invoice.previous])
-    rr.by.id.previous <- tapply(rr[invoice.previous], list(id[invoice.previous]), sum)
+    rr.by.id.previous <- if(sum(invoice.previous) == 0) rep(0, 0) else tapply(rr[invoice.previous], list(id[invoice.previous]), sum)
     
     # Storing results of loop
     metrics <- c("New", "Resurrection", "Major Expansion", "Minor Expansion", "Contraction", "Churn")
-    counts <- accounting <- matrix(0, 6, n.dates, dimnames = list(metrics, periods))
+    counts <- accounting <- matrix(0, 6, nPeriods(data), dimnames = list(metrics, periodNames(data)))
     names(dimnames(accounting)) <- c("Metric", "Date") 
-    n <- nrow(data) * n.dates 
+    n <- nrow(data) * nPeriods(data)
     str <- rep("", n)
     detail <- data.frame(Date = str, Metric = str, Name = str, Change = rep(NA, n), stringsAsFactors = FALSE)
     counter <- 0
     
-    for (i in 1:n.dates)
+    for (i in 1:nPeriods(data))
     {
-        dt <- dts[i]
-        invoice <- from < dt & to >= dt 
-        rr.by.id <- tapply(rr[invoice], list(id[invoice]), sum)
-        
-        ids <- names(rr.by.id)
-        ids.new <- ids[!ids %in% ids.ever.customers]
-        ids.resurrection <- ids[ids %in% ids.ever.customers & !ids %in% ids.previous]
-        ids.churn <- ids.previous[!ids.previous %in% ids]
-        # Deakug 
-        # if (true.end - subscription.unit < dt)
-        # {
-        #     f <- data$subscriber.to > true.end
-        #     ids.not.churned <- unique(data$id[f])
-        #     ids.churn <- setdiff(ids.churn, ids.not.churned)
-        # }
-        ids.existing <- ids[ids %in% ids.previous]
-        
-        rr.previous.by.id <- rr.by.id.previous[ids.existing]
-        rr.change.by.id <- rr.by.id[ids.existing] - rr.previous.by.id
-        expansion <- rr.change.by.id > 0
-        minor <- expansion & rr.change.by.id / rr.previous.by.id <= small
+      dt <- nextPeriodStart(data, i)
+      invoice <- customerAtPeriodEnd(data, dt) #Can be made more efficent by not passing in data
+      #invoice <- dt >= from  & dt < to
+      rr.by.id <- tapply(rr[invoice], list(id[invoice]), sum)
+      
+      ids <- names(rr.by.id)
+      ids.new <- ids[!ids %in% ids.ever.customers]
+      ids.resurrection <- ids[ids %in% ids.ever.customers & !ids %in% ids.previous]
+      ids.churn <- ids.previous[!ids.previous %in% ids]
+      ids.existing <- ids[ids %in% ids.previous]
+      
+      rr.previous.by.id <- rr.by.id.previous[ids.existing]
+      rr.change.by.id <- rr.by.id[ids.existing] - rr.previous.by.id
+      expansion <- rr.change.by.id > 0
+      minor <- expansion & rr.change.by.id / rr.previous.by.id <= small
         major <- expansion & !minor
         
         rr.metric.by.id <- list(New = rr.by.id[ids.new],
@@ -90,7 +78,7 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
         if (lngth > 0)
         {
             rws <- counter + (1:lngth)
-            detail$Date[rws] <- rep(periods[i], lngth)
+            detail$Date[rws] <- rep(periodName(data, i), lngth)
             rr.metric.by.id.vector <- unlist(unname(rr.metric.by.id), use.names = TRUE)
             detail$Name[rws] <- names(rr.metric.by.id.vector)
             detail$Change[rws] <- rr.metric.by.id.vector
@@ -107,14 +95,22 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
     detail <- detail[1:counter, ] #Right-sizing the data frame
     detail <- detail[detail$Date != colnames(accounting)[1], ]
     detail <- detail[AsDate(detail$Date) >= attr(data, "start") & AsDate(detail$Date) <= attr(data, "end"), ]
-    
-    accounting <- accounting[, -1, drop = FALSE]
-    counts <- counts[, -1, drop = FALSE]
-    accounting <- addAttributesAndClass(accounting, "GrowthAccounting", by, detail)
-    attr(accounting, "counts") <- counts
-    attr(accounting, "by") <- by
-    accounting
+    out <- list(detail = detail,
+                numerator = accounting[, -1, drop = FALSE],
+                denominator = counts[, -1, drop = FALSE],
+                by = by,
+                cohort.type = attr(data, "cohort.period"),
+                cohort.period = attr(data, "cohort.period"),
+                volume = TRUE,
+                subscroption.length = attr(data, "subscription.length"))
+        accounting <- addAttributesAndClass(accounting, "GrowthAccounting", by, detail)
+        createOutput(out$numerator, "GrowthAccounting", out, "Growth Accounting")
 }
+#     {
+#       #attr(accounting, "counts") <- counts
+#     #attr(accounting, "by") <- by
+#     accounting
+# }
 
 #' plot.GrowthAccounting
 #' 
@@ -123,7 +119,8 @@ GrowthAccounting <- function(data, by = "year", small = 0.1,  ...)
 #' @importFrom ggplot2 ggplot geom_bar aes scale_y_continuous ggtitle theme_bw
 #' @importFrom scales comma
 #' @importFrom reshape2 melt
-#' @importFrom flipFormat FormatAsReal
+#' @importFrom plotly plotly add_trace config layout
+#' @importFrom flipFormat FormatAsReal 
 #' @export
 plot.GrowthAccounting <- function(x, ...)
 {
@@ -180,10 +177,8 @@ plot.GrowthAccounting <- function(x, ...)
         p <- add_trace(#evaluate = TRUE,
             p,
             text = paste0("Number of accounts: ", ct[i,]),
-            #hoverinfo = "text",
             x = x.periods,
             y = y.values,
-            #hoverlabel.align = "left",
             hovertemplate = paste(
               " %{xaxis.title.text}: %{x}<br>",
               "%{yaxis.title.text}: %{y:$,.0f}<br>",
@@ -223,3 +218,4 @@ growthColors <- function()
       Contraction = "#ff905a",
       Churn = "#c44e41")[6:1]
 }
+
