@@ -43,3 +43,4 @@
 #'           colors = col_numeric("Blues", domain = NULL)(1:(k + 3))[-1:-3],
 #'           legend.ascending = FALSE)$htmlwidget
 #' }
+

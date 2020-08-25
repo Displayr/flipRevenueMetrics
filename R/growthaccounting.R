@@ -218,3 +218,4 @@ growthColors <- function()
       Contraction = "#ff905a",
       Churn = "#c44e41")[6:1]
 }
+
