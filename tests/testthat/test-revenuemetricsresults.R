@@ -40,14 +40,17 @@ test_that("Recurring Revenue Churn",
                                             0.0512936476901212, 0.0859822919426476, 0.142475132527322, 0.103565887))
               expect_equal(as.numeric(sy[2:(length(sy)-2)]), as.numeric(attr(s, "denominator")[3:(length(s)-1)]))
 
-              # s = RevenueMetric("RecurringRevenueRetention", cohort.type = "Calendar", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              # expect_equal(s[2, ], c(`2009` = NaN, `2010` = 0.994963139414411, `2011` = 0.947369370000059, 
-              #                        `2012` = 0.895820705115493, `2013` = 0.889920696404257, `2014` = 0.889920696404257, 
-              #                        `2015` = 0.818929400709358, `2016` = 0.829851138508574))
-              
-              # sr = RevenueMetric("RecurringRevenueChurn", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              # expect_equal(as.numeric(sr), c(0.0373773458628039, 0.0526306299999406, 0.199688856811766, 
-              #                                0.115366142841956, 0.162440774758907, 0.178098968441071, 0.157996829606064))                                 
+              sr = RevenueMetric("RecurringRevenueRetention", cohort.type = "Calendar", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              ss = colSums(Numerator(sr), na.rm = TRUE) / colSums(Denominator(sr), na.rm = TRUE)
+              expect_equivalent(ss, s[-1:-2])
+
+              s2 = RevenueMetric("RecurringRevenueChurn", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              sss2 <- diag(Numerator(sr))
+              k <- length(sss2)
+              # Removing last element for reasons described in documentation of RevenueMetric
+              expect_equal(as.numeric(sss2[-k]), as.numeric(Numerator(s2)[-1:-2][-k]))
+              expect_equal(as.numeric(diag(Denominator(sr))[-k]), as.numeric(Denominator(s2)[-1:-2][-k]))
+              expect_equal(1 - as.numeric(diag(sr))[-k], as.numeric(s2)[-1:-2][-k])
           }
 )
 
@@ -93,36 +96,7 @@ test_that("Customer Churn and Retention",
               expect_equal(as.numeric(ss[-1:-2]),c(0, 0.0217391304347826, 0.111111111111111, 0.123287671232877, 
                                            0.111111111111111, 0.09, 0.389221556886228, 0.06779661))                                 
 
-              # by = "quarter"
-              # s = RevenueMetric("CustomerChurn", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              # attr(ss, "denominator")
-              # attr(s, "denominator")
-              
+
           }
 )
-
-
-
-              
-                            # 
-              # 
-              # 
-              # g
-              # s = RevenueMetric("RecurringRevenueChurn", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              # expect_equal(attr(s, "numerator"),  -g[6, -1])
-              # 
-              # 
-              #               # Checking growwth accounting consistent with churh
-              # arr = cumsum(colSums(g))
-              # rc <- -g[6, ] / arr
-              # 
-              # s = RevenueMetric("RecurringRevenueRetentionByCohort", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              # expect_equal(s[2, ], c(`2009` = NaN, `2010` = 0.994963139414411, `2011` = 0.947369370000059, 
-              #                        `2012` = 0.895820705115493, `2013` = 0.889920696404257, `2014` = 0.889920696404257, 
-              #                        `2015` = 0.818929400709358, `2016` = 0.829851138508574))
-              # 
-              # 
-              # s = RevenueMetric("InitialRecurringRevenueChurn", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              # expect_equal(as.numeric(s),c(0.0373773458628039, 0.0526306299999406, 0.199106589341175, 
-              #                              0.115138533321218, 0.162709152884027, 0.178098968441071, 0.157996829606064))                                 
 

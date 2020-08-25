@@ -95,3 +95,21 @@ A plotly plot#?
 \description{
 Creates a small multiple plot by sub-groups
 }
+\details{
+The \code{cohort.type} parameter does not have the transitive properties
+that many assume. For example, it's not always the case that \code{"New"} is 
+equivalent to a diagonal from \code{"Calendar"}, or that \code{"None"} is 
+the column-sums of \code{"Calendar"}. 
+
+Consider as an example \code{CustomerChurn} where
+all analysis is being done with the unit of \code{"year"}. A customer that 
+purchases a contract less than the length of a year will appear below the
+(possibly offset) diagonal in \code{"Calendar"} and if they renew will be in 
+the denominator for the following year of \code{"New"}, but not if they do 
+not renew.
+
+Similarly, with \code{RecurringRevenueChurn}, \code{"New"} in an incomplete final
+ period will compare to the same period in the previous year, whereas the bottom
+ row of \code{"Calendar"}  will use the entire calendar yearear as the base, and
+ thus look much better (in a misleading way).
+}

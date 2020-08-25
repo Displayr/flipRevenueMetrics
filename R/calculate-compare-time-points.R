@@ -6,14 +6,12 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
     # of the peeriod. The period.end.boundary is the beginning of the following period.
     # That is, in terms of mathematical notation for intervals: [period)
     current <- currentCustomers(in.cohort, period.start, data)
-    earlier <- if (newCohort(data))
-        dateVariableInWindow(data$subscribed.from, period.start - byUnit(data), period.start)
-    else
-        earlierCustomers(in.cohort, period.start, data)
+    earlier <- earlierCustomers(in.cohort, period.start, data)
     
     id <- data$id
     rr <- data$recurring.value
     earlier.id <- unique(id[earlier])
+#    earlier <- id %in% earlier.id & current
     if (any(c("contraction", "expansion") == components) & !"churn" %in% components)
         detail <- expansionOrContraction(components, current, earlier, data)
     else
@@ -37,8 +35,16 @@ currentCustomers <- function(in.cohort, period.start, data)
 earlierCustomers <- function(in.cohort, period.start, data)
 {
     period.boundary <- nextDate(data, period.start)
-    earlier.boundary <- period.boundary - subscriptionUnit(data)
+    unit <- if(newCohort(data)) byUnit(data) else cohortUnit(data)
+    earlier.boundary <- period.boundary - unit
     m <- customerAtPeriodEnd(data, earlier.boundary)
+    if (newCohort(data)) # Should only occur when is.null(in.cohort)
+    {
+        in.cohort <- dateVariableInWindow(data$subscribed.from, 
+                                          earlier.boundary - unit, 
+                                          earlier.boundary)
+        #print(paste("new", earlier.boundary - unit, earlier.boundary))
+    }
     andSubsetIfItExists(m, in.cohort)
 }
 

@@ -51,12 +51,19 @@
 #' @details The \code{cohort.type} parameter does not have the transitive properties
 #' that many assume. For example, it's not always the case that \code{"New"} is 
 #' equivalent to a diagonal from \code{"Calendar"}, or that \code{"None"} is 
-#' the column-sums of \code{"Calendar"}. Consider as an example the case where
+#' the column-sums of \code{"Calendar"}. 
+#' 
+#' Consider as an example \code{CustomerChurn} where
 #' all analysis is being done with the unit of \code{"year"}. A customer that 
 #' purchases a contract less than the length of a year will appear below the
 #' (possibly offset) diagonal in \code{"Calendar"} and if they renew will be in 
-#' the denominator for the following year of \code{"New}, but not if they do 
+#' the denominator for the following year of \code{"New"}, but not if they do 
 #' not renew.
+#' 
+#' Similarly, with \code{RecurringRevenueChurn}, \code{"New"} in an incomplete final
+#'  period will compare to the same period in the previous year, whereas the bottom
+#'  row of \code{"Calendar"}  will use the entire calendar yearear as the base, and
+#'  thus look much better (in a misleading way).
 #' @importFrom plotly add_annotations subplot
 #' @importFrom lubridate floor_date ceiling_date
 #' @return A plotly plot#?
@@ -495,3 +502,23 @@ createOutput <- function(x, class.name, calculation, name)
 #     license.end.date >= window.start & license.end.date < window.end
 # }
     
+#' 
+#' \code{Denominator}
+#' 
+#' Extracts the denominator from a RevenueMetric object (or a component of in some situations).
+#' @param x A \code{RevenueMetric} object.
+#' @export
+Denominator <- function(x)
+{
+    attr(x, "denominator")
+}
+
+#' \code{Numerator}
+#' 
+#' Extracts the numerator from a RevenueMetric object (or a component of in some situations).
+#' @param x A \code{RevenueMetric} object.
+#' @export
+Numerator <- function(x)
+{
+    attr(x, "numerator")
+}

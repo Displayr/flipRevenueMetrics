@@ -185,7 +185,7 @@ nextCohortPeriodStart <- function(data, start.date)
 {
     end.date <- start.date + cohortUnits(2, data)
     end.date <- min(end.date, attr(data, "end"))
-    end.date <- end.date - cohortUnit(data)
+    end.date - cohortUnit(data)
 }
 
 

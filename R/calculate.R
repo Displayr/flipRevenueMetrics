@@ -37,11 +37,13 @@ calculateByCohort <- function(data, components, volume)
     for (cohort in 1:nCohorts(data))
     {
         cohort.start <- cohortStart(data, cohort)
-        in.cohort <- inCohort(data, cohort.start, components)
+        in.cohort <- inCohort(data, cohort.start, components, volume)
         results[[cohort]] <- loopByPeriod(in.cohort, cohort.start, data, components, volume)
     }
     results
 }
+
+
 
 loopByPeriod <- function(in.cohort, cohort.start, data, components, volume)
 {
@@ -66,13 +68,22 @@ doCalculations <- function(in.cohort, period.start, components, volume, data)
 }
 
 
-inCohort <- function(data, cohort.start, components)
+inCohort <- function(data, cohort.start, components, volume)
 {
-    cohort.boundary <- if (components %in% c("number of customers", "current"))
-        cohort.start + cohortUnit(data)
+    u <- cohortUnit(data)
+    cohort.boundary <- if (volume | components %in% c("number of customers", "current"))
+        min(attr(data, "end"), cohort.start + u)
     else
         nextCohortPeriodStart(data, cohort.start)
- #   print(c("cohort window", as.character(cohort.start), as.character(cohort.boundary)))
+#    new.cohort.start <- cohort.boundary - u
+    # # Dealing with edge case of churn among people that start in last period
+    # if (new.cohort.start + u < cohort.start)
+    # {
+    #     cohort.boundary <- cohort.boundary + u
+    #     new.cohort.start <- cohort.start
+    # }
+    #     
+    #print(paste("cohort window", cohort.start, cohort.boundary))
     data$subscribed.from >= cohort.start & data$subscribed.from < cohort.boundary
 }
 
