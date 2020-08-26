@@ -37,7 +37,7 @@ currentCustomers <- function(in.cohort, period.start, data)
 earlierCustomers <- function(in.cohort, period.start, data)
 {
     period.boundary <- nextDate(data, period.start)
-    unit <- if(newCohort(data)) byUnit(data) else cohortUnit(data)
+    unit <- cohortUnit(data)#if(newCohort(data)) byUnit(data) else cohortUnit(data)
     earlier.boundary <- period.boundary - unit
     m <- customerAtPeriodEnd(data, earlier.boundary)
     if (newCohort(data)) # Should only occur when is.null(in.cohort)
