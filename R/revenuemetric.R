@@ -263,40 +263,17 @@ datesWithinRange <- function(dt.as.character, start, end)
 }    
 
 
-datesAreSame <- function(x)
-{
-    if (sd(sapply, nms) == 0)
-        return(FALSE)
-    nms <- lapply(x, names)
-    
-    
-    
-}
+# datesAreSame <- function(x)
+# {
+#     if (sd(sapply, nms) == 0)
+#         return(FALSE)
+#     nms <- lapply(x, names)
+#     
+#     
+#     
+# }
 
-spliceVectors <- function(x, dates)
-{
-    k <- length(x)
-    m <- matrix(0, length(dates), k, dimnames = list(dates, names(x)))
-    for (i in 1:k)
-        m[names(x[[i]]), i] <- x[[i]]
-    m
-}
 
-stackMatrices <- function(x, dates)
-{
-    nr <- sum(sapply(x, nrow))
-    m <- matrix(NA, nr, length(dates), dimnames = list(1:nr, dates))
-    counter <- 0
-    for (i in 1:length(x))
-    {
-        t <- x[[i]]
-        rows <- counter + 1:nrow(t)
-        m[rows, colnames(t)] <- t
-        nm <- strsplit(names(x)[i], split = "\n", fixed = TRUE)[[1]][1]
-        rownames(m)[rows] <- paste(nm,rownames(t))
-    }
-    m    
-}
 
 createPlots <- function(x, start, end, y.min, y.max)
 {
@@ -315,14 +292,6 @@ createPlots <- function(x, start, end, y.min, y.max)
                        y.bounds.minimum = y.min, 
                        y.bounds.maximum = y.max,
                        opacity = 1.0)
-}
-canPlot <- function(x)
-{
-    if (is.null(x))
-        return(FALSE)
-    if (all(is.na(x)))
-        return(FALSE)
-    TRUE
 }
 
 #' @importFrom graphics plot
@@ -360,20 +329,6 @@ plotSubGroups <- function(x, ...)
         layout(pp, annotations = annotations)
     }
     print(pp)
-}
-
-#' Detail
-#' 
-#' @param x A RevenueMetric object  
-#' @description Creates a detailed description of the input data used to create the object.
-Detail <- function(x)
-{
-    UseMethod("Tab", x)
-}
-
-Detail.default <- function(x, ...)
-{
-    attr(x, "detail")
 }
 
 yLim <- function(x)
@@ -450,6 +405,7 @@ removeAttributesAndClass <- function(x)
                 "denominator",
                 "n.retained",
                 "n.churned",
+                "churn",
                 "cohort.size",
                 "subscription.length",
                 "y.title",
@@ -460,13 +416,6 @@ removeAttributesAndClass <- function(x)
     x
 }
 
-addAttributesAndClass <- function(x, class.name, by, detail)
-{
-    attr(x, "by") <- by
-    attr(x, "detail") <- detail
-    class(x) <- c(class.name, "RevenueMetric", class(x))
-    x    
-}    
 
 
 #' Create a standardized object 
@@ -524,3 +473,27 @@ Numerator <- function(x)
 {
     attr(x, "numerator")
 }
+
+canPlot <- function(x)
+{
+    if (is.null(x))
+        return(FALSE)
+    if (all(is.na(x)))
+        return(FALSE)
+    TRUE
+}
+
+#' 
+#' #' Detail
+#' #' 
+#' #' @param x A RevenueMetric object  
+#' #' @description Creates a detailed description of the input data used to create the object.
+#' Detail <- function(x)
+#' {
+#'     UseMethod("Tab", x)
+#' }
+#' 
+#' Detail.default <- function(x, ...)
+#' {
+#'     attr(x, "detail")
+#' }

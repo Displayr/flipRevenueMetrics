@@ -97,19 +97,19 @@ cohortStart <- function(data, cohort)
 
 startPeriod <- function(data, components)
 {
-    if(components %in% c("current", "customers"))
-        return(1)
+    # if(components %in% c("current", "customers"))
+    #     return(1)
     # With calculations that look at data in one time pepriod relative to earlier time periods, we can't start at period 
     # 1 as their's no relevant history
     ceiling(1 + subscriptionUnit(data) / byUnit(data))
 }
-cohortID <- function(cohort.ids, date, data)
-{
-    if (is.null(cohort.ids)) # All
-        return(NULL)
-    period.name <- Period(date, attr(data, "by"))
-    cohort.ids[[period.name]]
-}
+# cohortID <- function(cohort.ids, date, data)
+# {
+#     if (is.null(cohort.ids)) # All
+#         return(NULL)
+#     period.name <- Period(date, attr(data, "by"))
+#     cohort.ids[[period.name]]
+# }
 
 customerAtPeriodEnd <- function(data, period.date)
 {

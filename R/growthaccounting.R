@@ -98,14 +98,17 @@ GrowthAccounting <- function(data, small = 0.1)
     out <- list(detail = detail,
                 numerator = accounting[, -1, drop = FALSE],
                 denominator = counts[, -1, drop = FALSE],
-                by = by,
-                cohort.type = attr(data, "cohort.period"),
+                by = attr(data, "by"),
+                cohort.type = attr(data, "cohort.type"),
                 cohort.period = attr(data, "cohort.period"),
                 volume = TRUE,
                 subscroption.length = attr(data, "subscription.length"))
-        accounting <- addAttributesAndClass(accounting, "GrowthAccounting", by, detail)
+#        out <- addAttributesAndClass(out, "GrowthAccounting", attr(data, "by"), detail)
         createOutput(out$numerator, "GrowthAccounting", out, "Growth Accounting")
 }
+
+
+
 #     {
 #       #attr(accounting, "counts") <- counts
 #     #attr(accounting, "by") <- by

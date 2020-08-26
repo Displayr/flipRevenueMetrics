@@ -1,7 +1,3 @@
-addSubscriptionLengthToName <- function(x, subscription.length, by)
-{
-    Period(AsDate(x) + Periods(1, subscription.length), by)
-}    
 
 #' @export
 plot.OneDimensionalWithTrend <- function(x, ...)
@@ -115,6 +111,9 @@ cohortHeatmap <- function(x, series.hover, ...)
             type = "heatmap", 
             showscale = FALSE) %>% config(displayModeBar = FALSE) %>% 
         layout("Hello", xaxis = list(title = by), yaxis = list(title = y.title)) 
-    
-    
 }
+
+# addSubscriptionLengthToName <- function(x, subscription.length, by)
+# {
+#     Period(AsDate(x) + Periods(1, subscription.length), by)
+# }    

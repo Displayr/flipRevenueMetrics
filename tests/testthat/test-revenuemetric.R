@@ -13,7 +13,6 @@ for (by in c("week", "month", "quarter"))
       expect_equivalent(as.numeric(tail(aga, length(rr) - 1)), as.numeric(rr)[-1])
   })
 
-
 data(q.invoice.lines.short)
 d <- q.invoice.lines.short
 
@@ -26,7 +25,10 @@ for (fun in metric.functions)
     if (!(fun %in% "NumberofCustomers" & cohort.type == "Calendar"))
     test_that(paste("metrics", fun, cohort.type),
               {
-                s = RevenueMetric(FUN = fun, output = "Plot", cohort.type = cohort.type, value = d$AUD, from = d$ValidFrom, to = d$ValidTo, id = d$name, by = by)
+                s = RevenueMetric(FUN = fun, 
+                                  output = "Plot", 
+                                  cohort.type = cohort.type, 
+                                  value = d$AUD, from = d$ValidFrom, to = d$ValidTo, id = d$name, by = by)
                 expect_error(print(s), NA)
               }
     )

@@ -199,6 +199,11 @@ subscriptionUnit <- function(data)
     subscriptionUnits(1, data)
 }    
 
+subscriptionUnits <- function(x, data)
+{
+    Periods(x, subscriptionLength(data))
+}    
+
 cohortUnit <- function(data)
 {
     cohortUnits(1, data)
@@ -210,13 +215,7 @@ cohortUnits <- function(x, data)
     Periods(x, attr(data, "cohort.period"))
 }    
 
-
-
 #' @importFrom flipTime Periods
-subscriptionUnits <- function(x, data)
-{
-    Periods(x, attr(data, "subscription.length"))
-}    
 
 #' @importFrom flipTime Periods
 byUnit <- function(data)
@@ -226,7 +225,7 @@ byUnit <- function(data)
 
 nPeriods <- function(data)
 {
-    length(attr(data, "by.dates")) - 1
+    length(periodNames(data))
 }
 
 periodNames <- function(data)
@@ -239,12 +238,12 @@ periodName <- function(data, i)
     periodNames(data)[i]
 }
 
-cohortStartDate <- function(data, cohort)
-{
-    attr(data, "by.sequence")[cohort]
-}    
+# cohortStartDate <- function(data, cohort)
+# {
+#     attr(data, "by.sequence")[cohort]
+# }    
  
-checkCohortTypes <- function(cohort.type)
+checkCohortType <- function(cohort.type)
 {
     if (!cohort.type %in% c("None", "New", "Calendar", "Tenure"))
         stop("Unknown cohort.type: ", paste(cohort.type, separate = ","))
@@ -281,45 +280,6 @@ checkVariableForLengthAndMissingData <- function(x, n)
         stop("'" , deparse(substitute(x)), "' contains ", deparse(substitute(x)), " observations, but 'value' contains ", n, ".")
 }
 
-
-filterMetricData <- function(metric.data, subset)
-{
-    
-    atr <- attributes(metric.data)
-    out <- subset(metric.data, subset)
-    
-    # Re-appending attributes
-    to.replace <- names(atr)
-    to.replace <- to.replace[!to.replace %in% c("row.names", "class", "dim", "dimnames", "names")]
-    for (a in to.replace)
-        attr(out, a) <- atr[[a]]
-    class(out) <- atr[["class"]]
-    out
-}    
-
-#' @importFrom flipStatistics Table
-#' @importFrom flipTime Periods AsDate
-#' @importFrom plyr mapvalues
-filterMetricDataByRelationshipLength <- function(metric.data, n.subscriptions)
-{
-    start.by.id <- aggregate(from ~ id, data = metric.data, FUN = min)
-    #start.by.id <- ag[, 2]
-    #names(start.by.id) <- ag[, 1]
-    time.to.add <- Periods(n.subscriptions + 0, attr(metric.data, "subscription.length"))
-    start.by.case <- mapvalues(metric.data$id, 
-                               start.by.id[,1], as.character(start.by.id[, 2]))#(start.by.id + time.to.add)[metric.data$id]
-    cutoff <- AsDate(start.by.case) + time.to.add
-    subset <- metric.data$from < cutoff
-    out <- filterMetricData(metric.data, subset)
-    out
-}    
-
-checkCohortType <- function(cohort.type)
-{
-    if (!cohort.type %in% c("None", "New", "Calendar", "Tenure"))
-        stop("Unknown cohort.type: ", paste(cohort.type, separate = ","))
-}            
-
 mergersWithDates <- function(data, mergers)
 {   #' Adds a column of the tim period at which the mergers occurred
     if (is.null(mergers) || nrow(mergers) == 0)
@@ -333,3 +293,36 @@ mergersWithDates <- function(data, mergers)
     mergers$date[match(ag[,1], mergers$id)] <- ag[, 2]
     mergers
 }
+
+
+#' filterMetricData <- function(metric.data, subset)
+#' {
+#'     
+#'     atr <- attributes(metric.data)
+#'     out <- subset(metric.data, subset)
+#'     
+#'     # Re-appending attributes
+#'     to.replace <- names(atr)
+#'     to.replace <- to.replace[!to.replace %in% c("row.names", "class", "dim", "dimnames", "names")]
+#'     for (a in to.replace)
+#'         attr(out, a) <- atr[[a]]
+#'     class(out) <- atr[["class"]]
+#'     out
+#' }    
+#' 
+#' #' @importFrom flipStatistics Table
+#' #' @importFrom flipTime Periods AsDate
+#' #' @importFrom plyr mapvalues
+#' filterMetricDataByRelationshipLength <- function(metric.data, n.subscriptions)
+#' {
+#'     start.by.id <- aggregate(from ~ id, data = metric.data, FUN = min)
+#'     #start.by.id <- ag[, 2]
+#'     #names(start.by.id) <- ag[, 1]
+#'     time.to.add <- Periods(n.subscriptions + 0, attr(metric.data, "subscription.length"))
+#'     start.by.case <- mapvalues(metric.data$id, 
+#'                                start.by.id[,1], as.character(start.by.id[, 2]))#(start.by.id + time.to.add)[metric.data$id]
+#'     cutoff <- AsDate(start.by.case) + time.to.add
+#'     subset <- metric.data$from < cutoff
+#'     out <- filterMetricData(metric.data, subset)
+#'     out
+#' }    

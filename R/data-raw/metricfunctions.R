@@ -1,4 +1,5 @@
-metric.functions <-  c("RecurringRevenue", 
+metric.functions <-  c("GrowthAccounting", 
+                       "RecurringRevenue", 
                        "NumberofCustomers",
                        #"Customers",
                        "CustomerChurn",
