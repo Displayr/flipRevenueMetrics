@@ -41,12 +41,10 @@ earlierCustomers <- function(in.cohort, period.start, data)
     earlier.boundary <- period.boundary - unit
     m <- customerAtPeriodEnd(data, earlier.boundary)
     if (newCohort(data)) # Should only occur when is.null(in.cohort)
-    {
         in.cohort <- dateVariableInWindow(data$subscribed.from, 
                                           earlier.boundary - unit, 
                                           earlier.boundary)
         #print(paste("new", earlier.boundary - unit, earlier.boundary))
-    }
     andSubsetIfItExists(m, in.cohort)
 }
 
@@ -61,8 +59,12 @@ expansionOrContraction <- function(components, current, earlier, period.start,  
 
 idsReflectingMergers <- function(data, period.start)
 {
+    changingMergedIDs(data, period.start, data$id)
+}
+
+changingMergedIDs <- function(data, period.start, id)
+{
     merger.info <- mergerInfo(data, period.start, nextDate(data, period.start))
-    id <- data$id    
     if (length(merger.info$from.id) == 0)
         return(id)
     mtch <- match(id, merger.info$from.id)
@@ -70,7 +72,6 @@ idsReflectingMergers <- function(data, period.start)
     id[m] <- merger.info$to.id[mtch[m]] 
     id
 }
-
 
 changeInRecurringRevenueByID <- function(current, earlier, value, id)
 {

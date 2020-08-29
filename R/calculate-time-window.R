@@ -37,14 +37,7 @@ newCusts <- function(data, period.start, next.period.start)
 
 calculateRatioNumbers <- function(data, start.date, next.start.date, id.to.renew, id.churned)
 {
-   # mergers <- attr(data, "mergers")
-    # merger.in.period <- mergers$date >= start.date & mergers$date < next.start.date
-    # merger.after.period <- mergers$date <= start.date
-    # relevant.mergers <- merger.in.period | merger.after.period
-    #print(cbind(relevant.mergers, mergerInPeriodOrSubsequentPeriod(mergers, start.date, next.start.date)))
-    #relevant.mergers <- mergerInPeriodOrSubsequentPeriod(mergers, start.date, next.start.date)
     merge.info <- mergerInfo(data, start.date, next.start.date)
-        
     if (any(merge.info$relevant))
     {
         mergers.from <- merge.info$from.id
@@ -69,21 +62,3 @@ mergerInfo <- function(data, start.date, next.start.date)
          in.period = in.period, 
          relevant = relevant)
 }
-
-
-# calculateRatioNumbers <- function(data, start.dt, next.dt, id.to.renew, id.churned)
-# {
-#     mergers <- attr(data, "mergers")
-#     relevant.mergers <- mergerInPeriodOrSubsequentPeriod(data, start.dt, next.dt)
-#     if (any(relevant.mergers))
-#     {
-#         mergers.from <- mergers$id[relevant.mergers]
-#         id.to.renew <- setdiff(id.to.renew, mergers.from)
-#         if (any(merger.in.period))
-#             id.churned <- setdiff(id.churned, mergers.from) 
-#     }
-#     #    print(length(id.to.renew))
-#     list(denominator = length(id.to.renew),
-#          numerator = length(id.churned),
-#          detail = id.churned)
-# }

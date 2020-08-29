@@ -1,3 +1,4 @@
+
 #' \code{MetricData}
 #'
 #' @description Cleans and tidies data for cohort.type in revenue metric calculations.
@@ -57,7 +58,7 @@ MetricData <- function(value,
     
     # appending other info
     data$recurring.value <- recurringValue(data$value, data$from, data$to, subscription.length)
-    attr(data, "mergers") <- mergersWithDates(data, mergers)
+    attr(data, "mergers") <- processMergers(id, to, by, mergers)
     attr(data, "start") <- start
     attr(data, "end") <- end
     attr(data, "by") <- by
@@ -172,9 +173,14 @@ periodStart <- function(data, i)
 nextDate <- function(data, date)
 {
     dates <- attr(data, "by.dates")
-    dates[1 + match(date, dates)]
+    dates[match(date, dates) + 1]
 }
 
+previousDate <- function(data, date)
+{
+    dates <- attr(data, "by.dates")
+    dates[match(date, dates) - 1]
+}
 
 nextPeriodStart <- function(data, i)
 {
@@ -280,19 +286,60 @@ checkVariableForLengthAndMissingData <- function(x, n)
         stop("'" , deparse(substitute(x)), "' contains ", deparse(substitute(x)), " observations, but 'value' contains ", n, ".")
 }
 
-mergersWithDates <- function(data, mergers)
-{   #' Adds a column of the tim period at which the mergers occurred
+processMergers <- function(id, to, by, mergers)
+{   
+    checkIDmerges(id, mergers)
+    #' Adds a column of the tim period at which the mergers occurred
     if (is.null(mergers) || nrow(mergers) == 0)
         return(NULL)
-    by <- attr(data, "by")
-    id <- data$id
     mergers$date <- rep(as.Date("2999-12-31"), NROW(mergers)) # Lazy way of dealing with situation where churn doesn't occur
     m <- id %in% mergers$id
-    ag <- aggregate(data$to[m], list(id[m]), FUN = max)
-    m <- ag[, ] %in% id
-    mergers$date[match(ag[,1], mergers$id)] <- ag[, 2]
+    if (sum(m) == 0)
+        return(NULL)
+    ag <- aggregate(to[m], list(id[m]), FUN = max)
+    m <- match(mergers$id, ag[, 1])
+    mergers$date <- ag[m, 2]
     mergers
 }
+
+
+#' @importFrom flipStatistics Table
+checkIDmerges <- function(id, mergers)
+{
+    if (is.null(mergers))
+        return();
+    
+    if (!is.data.frame(mergers))
+        stop("'mergers' needs to be a data frame")
+    
+    if (any(is.na(mergers)))
+        stop("mergers contains missing values")
+    
+    if (!(all(c("id", "id.to") %in% names(mergers))))
+        stop("'mergers' must be a data.frame containing 'id' and 'id.to'")
+    
+    ids.are.same <- as.character(mergers$id) == as.character(mergers$id.to)
+    if (any(ids.are.same))
+        stop("mergers$id.to contains same values as mergers$id:", 
+             paste(mergers$id[ids.are.same], collapse = ", "))
+    # Previousl we checked that the IDs were known. But this has been 
+    # removed as it fails when a user filters or uses profiling variables.
+    # ids.known <- mergers$id %in% id
+    # if (any(!ids.known))
+    #     stop("mergers$id contains ids not in 'id':", 
+    #          paste(mergers$id[ids.known], collapse = ", "))
+    # 
+    # ids.known <- mergers$id.to %in% id
+    # if (any(!ids.known))
+    #     stop("mergers$id contains ids not in 'id':", 
+    #          paste(mergers$id[ids.known], collapse = ", "))
+    # 
+    ids.dup <- duplicated(mergers$id)
+    if (any(ids.dup))
+        stop("mergers$id contains duplicates:", 
+             paste(mergers$id[ids.dup], collapse = ", "))
+}
+
 
 
 #' filterMetricData <- function(metric.data, subset)
@@ -326,3 +373,4 @@ mergersWithDates <- function(data, mergers)
 #'     out <- filterMetricData(metric.data, subset)
 #'     out
 #' }    
+

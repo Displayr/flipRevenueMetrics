@@ -86,10 +86,9 @@ RevenueMetric <- function(FUN = "Acquisition",
                           trim.id = 50,
                           mergers = NULL, ...)
 {
+    checkOutputArgument(output)
     start <- floor_date(start, by)
-    #end <- floor_date(end, by)
-    
-    checkIDmerges(id, mergers)
+
     filters <- createFilters(profiling, subset = subset, id)
     n.filters <- length(filters)
     out <- vector("list", n.filters)
@@ -138,43 +137,10 @@ RevenueMetric <- function(FUN = "Acquisition",
     out
 }
 
-#' @importFrom flipStatistics Table
-checkIDmerges <- function(id, mergers)
+checkOutputArgument <- function(output)
 {
-    if (is.null(mergers))
-        return();
-    
-    if (!is.data.frame(mergers))
-        stop("'mergers' needs to be a data frame")
-    
-    if (any(is.na(mergers)))
-        stop("mergers contains missing values")
-    
-    if (!(all(c("id", "id.to") %in% names(mergers))))
-        stop("'mergers' must be a data.frame containing 'id' and 'id.to'")
-    
-    ids.are.same <- as.character(mergers$id) == as.character(mergers$id.to)
-    if (any(ids.are.same))
-        stop("mergers$id.to contains same values as mergers$id:", 
-             paste(mergers$id[ids.are.same], collapse = ", "))
-    
-    ids.known <- mergers$id %in% id
-    if (any(!ids.known))
-        stop("mergers$id contains ids not in 'id':", 
-             paste(mergers$id[ids.known], collapse = ", "))
-    
-    ids.known <- mergers$id.to %in% id
-    if (any(!ids.known))
-        stop("mergers$id contains ids not in 'id':", 
-             paste(mergers$id[ids.known], collapse = ", "))
-    
-    ids.dup <- duplicated(mergers$id)
-    if (any(ids.dup))
-        stop("mergers$id contains duplicates:", 
-             paste(mergers$id[ids.dup], collapse = ", "))
-    
-    # Checking to see if id.to has churned at the same time as id.from
-    
+    if (!output %in% c("Plot", "Table", "Detail"))
+        stop("'output' was '", output, "'; it should be one of 'Plot', 'Table', or 'Detail'.")
 }
 
 
@@ -410,6 +376,8 @@ removeAttributesAndClass <- function(x)
                 "subscription.length",
                 "y.title",
                 "date.format",
+                "cohort.type",
+                "cohort.period",
                 "cohort.by"))
     attr(x, a) <- NULL
     class(x) <- class(x)[-1:-2]

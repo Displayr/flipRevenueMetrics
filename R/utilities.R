@@ -1,3 +1,12 @@
+aggregateByNames <- function(x, FUN = sum)
+{
+    x <- aggregate(x, list(names(x)), FUN = FUN)
+    result <- x[, 2]
+    names(result) <- x[, 1]
+    result
+}
+
+
 properCase <- function(x)
 {
     paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))
@@ -141,13 +150,6 @@ stackMatrices <- function(x, dates)
 #' }
 #' 
 #' 
-#' aggregateAsVector <- function(x)
-#' {
-#'     #print(x)
-#'     result <- x[, 2]
-#'     names(result) <- x[, 1]
-#'     result
-#' }
 #' 
 #' 
 #' 

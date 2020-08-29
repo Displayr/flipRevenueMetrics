@@ -22,7 +22,8 @@ data(metric.functions)
 by = "year"
 for (fun in metric.functions)
   for (cohort.type in c("None", "New", "Calendar"))
-    if (!(fun %in% "NumberofCustomers" & cohort.type == "Calendar"))
+    if (!(fun %in% "NumberofCustomers" & cohort.type == "Calendar" |
+          fun == "GrowthAccounting") & cohort.type != "None")
     test_that(paste("metrics", fun, cohort.type),
               {
                 s = RevenueMetric(FUN = fun, 

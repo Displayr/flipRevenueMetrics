@@ -18,3 +18,8 @@ A matrix
 \description{
 Computes the growth within accounts
 }
+\details{
+If the final period is incomplete, it can provide different results to 
+calcualtions from other functions, as other functions are designed to estimate
+ratios (e.g., \code{CustomerChurn}, whereas this sums of recurring revenue.
+}
