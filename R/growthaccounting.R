@@ -14,7 +14,7 @@
 GrowthAccounting <- function(data, small = 0.1)
 {
     if (cohortType(data) != "None")
-        Stop("'cohort.type' must be 'None'")
+        stop("'cohort.type' must be 'None'")
     # Variables used in loop
     from <- data$from
     to <- data$to
@@ -36,7 +36,6 @@ GrowthAccounting <- function(data, small = 0.1)
     str <- rep("", n)
     detail <- data.frame(Date = str, Metric = str, Name = str, Change = rep(NA, n), stringsAsFactors = FALSE)
     counter <- 0
-    
     for (i in 1:nPeriods(data))
     {
         dt <- nextPeriodStart(data, i)

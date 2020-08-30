@@ -289,7 +289,7 @@ checkVariableForLengthAndMissingData <- function(x, n)
 processMergers <- function(id, to, by, mergers)
 {   
     checkIDmerges(id, mergers)
-    #' Adds a column of the tim period at which the mergers occurred
+    # Adds a column of the tim period at which the mergers occurred
     if (is.null(mergers) || nrow(mergers) == 0)
         return(NULL)
     mergers$date <- rep(as.Date("2999-12-31"), NROW(mergers)) # Lazy way of dealing with situation where churn doesn't occur
