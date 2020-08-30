@@ -131,14 +131,6 @@ bindListAsDataFrame <- function(x)
     stop("Method not yet written for this data structure.")
 }
 
-stopIfNameExists <- function(x, names.variable.name)
-{
-    if (names.variable.name %in% names(df))
-        stop("Cannot set 'names.variable.name' as ", names.variable.name,
-             "as this is already the name of a variable.")
-    FALSE
-}
-
 namesAsVariable <- function(x)
 {
     rep(names(x), sapply(x, NROW))
