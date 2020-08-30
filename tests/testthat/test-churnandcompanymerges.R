@@ -4,10 +4,8 @@ data(q.invoice.lines.short)
 d <- q.invoice.lines.short
 d$name <- factor(d$name)
 levels(d$name) <- paste0("Firm", 1:nlevels(d$name))
-#data(metric.functions)
 
 # Checking that start parameter is taken into account 
-#library(flipTime)
 test_that("Checking quality of mergers",
           {
               out = "Table"

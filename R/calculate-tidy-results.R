@@ -5,7 +5,7 @@ tidyResults <- function(results, volume, components, data)
     numerator <- deList(results, "numerator", is.matrix)
     detail <- deListDetails(results, is.matrix)
     out <- tidyNumeratorAndDenominator(numerator, denominator)
-    out$detail <- tidyDetail(volume, numerator, denominator, detail, components)
+    out$detail <- tidyDetail(volume, numerator, denominator, detail, components, data)
     out$volume <- volume
     out <- addAttributesToList(out, data)
     out
@@ -84,11 +84,13 @@ sapplyStatistic <- function(x, statistic)
     } )
 }
 
-#' @importFrom dplyr bind_rows 
-tidyDetail <- function(volume, numerator, denominator, detail, components)
+tidyDetail <- function(volume, numerator, denominator, detail, components, data)
 {
-    if (volume) 
-        return(detail)
+    
+    if (singleSeries(data) & components != "churn" & (volume | components == "number of customers"))
+       return(bindListAsDataFrame(detail))
+    
+    
     # if (components == "number of customers")# This could probably can be combined into the code below
     # { 
     #     detail <- lapply(detail, function(x) x[['All']])
@@ -111,6 +113,49 @@ tidyDetail <- function(volume, numerator, denominator, detail, components)
                Churned = churned,
                row.names = NULL)
 }
+
+
+
+#' @importFrom dplyr bind_rows 
+bindListAsDataFrame <- function(x)
+{
+    if (is.vector(x[[1]]) | is.array(x[[1]]))
+        return(listOfVectorsAsDataFrame(x))
+    if (is.data.frame(x[[1]]))
+    {
+        out <- bind_rows(x) 
+        out$zz <- namesAsVariable(x)
+        names(out) <- c("ID", "Value", "Period")
+        return(out[, c(3, 1, 2)])
+    }
+    stop("Method not yet written for this data structure.")
+}
+
+stopIfNameExists <- function(x, names.variable.name)
+{
+    if (names.variable.name %in% names(df))
+        stop("Cannot set 'names.variable.name' as ", names.variable.name,
+             "as this is already the name of a variable.")
+    FALSE
+}
+
+namesAsVariable <- function(x)
+{
+    rep(names(x), sapply(x, NROW))
+}
+
+listOfVectorsAsDataFrame <- function(x)
+{
+    out <- data.frame(Period = namesAsVariable(x),
+                      ID = unlist(x),
+                      row.names = NULL)
+    if (is.null(names(x[[1]]))) # Number of Customers
+        return(out)
+    names(out)[2] <- "VALUE"
+    out$ID = unlist(lapply(x, names))
+    out[, c(1, 3, 2)]
+}
+
 #' 
 #' #' @importFrom flipTables Cbind
 #' asMatrix <- function(list.of.lists, FUN, fill.with = 0)
