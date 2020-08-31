@@ -10,14 +10,6 @@
 calculate <- function(data, components, volume)
 {
     checkComponents(components)
-    if (components == "number of customers")
-        return(calculateNumberCustomers(data))
-    calculateUsingLoop(data, components, volume)
-}
-
-#' @importFrom flipTime Period
-calculateUsingLoop <- function(data, components, volume)
-{
     results <- if(singleSeries(data)) 
         calculateNoCohort(data, components, volume)
     else
@@ -44,7 +36,6 @@ calculateByCohort <- function(data, components, volume)
 }
 
 
-
 loopByPeriod <- function(in.cohort, cohort.start, data, components, volume)
 {
     results <- byPeriodList(data)
@@ -60,7 +51,9 @@ loopByPeriod <- function(in.cohort, cohort.start, data, components, volume)
 
 doCalculations <- function(in.cohort, period.start, components, volume, data)
 {
-    if (components %in%  c("current", "customers"))
+    if (components == "number of customers")
+        return(calculateNumberCustomers(in.cohort, period.start, data))
+    if (components == "current")
         return(revenueCalculation(in.cohort, period.start, data))
     if (volume)
         return(comparingTwoPointsInTime(in.cohort, period.start, data, components))
@@ -97,19 +90,19 @@ cohortStart <- function(data, cohort)
 
 startPeriod <- function(data, components)
 {
-    if(components %in% c("current", "customers"))
-        return(1)
+    # if(components %in% c("current", "customers"))
+    #     return(1)
     # With calculations that look at data in one time pepriod relative to earlier time periods, we can't start at period 
     # 1 as their's no relevant history
     ceiling(1 + subscriptionUnit(data) / byUnit(data))
 }
-cohortID <- function(cohort.ids, date, data)
-{
-    if (is.null(cohort.ids)) # All
-        return(NULL)
-    period.name <- Period(date, attr(data, "by"))
-    cohort.ids[[period.name]]
-}
+# cohortID <- function(cohort.ids, date, data)
+# {
+#     if (is.null(cohort.ids)) # All
+#         return(NULL)
+#     period.name <- Period(date, attr(data, "by"))
+#     cohort.ids[[period.name]]
+# }
 
 customerAtPeriodEnd <- function(data, period.date)
 {

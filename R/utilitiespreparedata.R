@@ -11,10 +11,10 @@ addAttributesToList <- function(list, object.with.attributes)
     out
 }
 
-getAttributes <- function(x)
-{
-    attributes(x)[c("start", "end", "mergers")]
-}
+# getAttributes <- function(x)
+# {
+#     attributes(x)[c("start", "end", "mergers")]
+# }
 
 setAttributes <- function(data, attr)
 {

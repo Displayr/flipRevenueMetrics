@@ -33,5 +33,22 @@ for (fun in metric.functions)
                     })
                 }
             }
- #       }
-#
+ 
+test_that(paste("stackMatrices "),{
+    
+    s = RevenueMetric(FUN = "Contraction", 
+                      output = "Table",
+                      cohort.type = "Calendar",
+                      value=d$AUD,from=d$ValidFrom,to=d$ValidTo, id = d$name, by = "year", 
+                      subscription.length = "year", 
+                      start = as.Date("2014-01-01"),
+                      profiling = p.country)
+    expect_equal(s, structure(c(0.0632014124792544, NaN, 0.377708171934232, NaN, 
+                                0.0564391440379688, NaN, 0, 0.13040103723447, NaN, 0.101021116909557, 
+                                0.106950377529656, 0.279268871980707, 0.212107272450097, 0.0931273683099599, 
+                                0.283940699716319, 0.101524315774963, 0.131601580716929, 0.173559359588234
+    ), .Dim = c(9L, 2L), .Dimnames = list(c("Australia 2014", "Australia 2015", 
+                                            "United Kingdom 2014", "United Kingdom 2015", "Other 2014", "Other 2015", 
+                                            "New Zealand 2014", "United States 2014", "United States 2015"
+    ), c("2015", "2016"))))
+})

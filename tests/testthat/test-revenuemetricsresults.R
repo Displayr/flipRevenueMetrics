@@ -51,6 +51,12 @@ test_that("Recurring Revenue Churn",
               expect_equal(as.numeric(sss2[-k]), as.numeric(Numerator(s2)[-1:-2][-k]))
               expect_equal(as.numeric(diag(Denominator(sr))[-k]), as.numeric(Denominator(s2)[-1:-2][-k]))
               expect_equal(1 - as.numeric(diag(sr))[-k], as.numeric(s2)[-1:-2][-k])
+              
+              by = "month"
+              s = RevenueMetric("RecurringRevenueChurn", cohort.type = "New", output = "Plot",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              sss2 <- diag(Numerator(sr))
+              k <- length(sss2)
+              
           }
 )
 

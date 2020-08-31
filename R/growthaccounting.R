@@ -4,25 +4,17 @@
 #' @param data A \code{data.frame} that has the same variables as a \code{RevenueData} object.
 #' @param small A proportion. Expansion less than or equal to this  is classified as minor expansion (e.g., price rises) or
 #' an increase in license sales in a larger company.
+#' @details If the final period is incomplete, it can provide different results to 
+#' calcualtions from other functions, as other functions are designed to estimate
+#' ratios (e.g., \code{CustomerChurn}, whereas this sums of recurring revenue.
 #' @return A matrix
 #' @importFrom flipTime AsDate Period
 #' @importFrom flipStatistics Table
 #' @importFrom lubridate floor_date years ceiling_date
 GrowthAccounting <- function(data, small = 0.1)
 {
- #   by <- attr(data, "by")
-#    true.end <- attr(data, "end")
-  #  start <- floor_date(attr(data, "start"), by)# + unit
- #   end <- as.Date(ceiling_date(true.end, by, change_on_boundary = NULL))
-   # previous.date <- attr(data, "previous.date")
-    #dts <- attr(data, "by.sequence")[-1]
-    
-#    n.dates <- length(dts)
- #   periods <- attr(data, "by.period.sequence")[1:n.dates]
-    
-    # Ensuring dates used in calculations don't go past the 'end'
-    #dts <- ensureDatesArentInFuture(dts, true.end + 1) # +1 due to the < operator below
-    
+    if (cohortType(data) != "None")
+        stop("'cohort.type' must be 'None'")
     # Variables used in loop
     from <- data$from
     to <- data$to
@@ -44,36 +36,64 @@ GrowthAccounting <- function(data, small = 0.1)
     str <- rep("", n)
     detail <- data.frame(Date = str, Metric = str, Name = str, Change = rep(NA, n), stringsAsFactors = FALSE)
     counter <- 0
-    
     for (i in 1:nPeriods(data))
     {
-      dt <- nextPeriodStart(data, i)
-      invoice <- customerAtPeriodEnd(data, dt) #Can be made more efficent by not passing in data
-      #invoice <- dt >= from  & dt < to
-      rr.by.id <- tapply(rr[invoice], list(id[invoice]), sum)
-      
-      ids <- names(rr.by.id)
-      ids.new <- ids[!ids %in% ids.ever.customers]
-      ids.resurrection <- ids[ids %in% ids.ever.customers & !ids %in% ids.previous]
-      ids.churn <- ids.previous[!ids.previous %in% ids]
-      ids.existing <- ids[ids %in% ids.previous]
-      
-      rr.previous.by.id <- rr.by.id.previous[ids.existing]
-      rr.change.by.id <- rr.by.id[ids.existing] - rr.previous.by.id
-      expansion <- rr.change.by.id > 0
-      minor <- expansion & rr.change.by.id / rr.previous.by.id <= small
-        major <- expansion & !minor
+        dt <- nextPeriodStart(data, i)
+        invoice <- customerAtPeriodEnd(data, dt) #Can be made more efficent by not passing in data
+        #id <- idsReflectingMergers(data, dt)
+        rr.by.id <- tapply(rr[invoice], list(id[invoice]), sum)
         
+        merger.info <- mergerInfo(data, previousDate(data, dt), dt)
+                                  
+#                                  previousDate(ddt, nextDate(data, dt))
+        if (thereAreMergers(merger.info))
+        {
+            
+            rr.by.id <- replaceNamesWithMergedIDs(rr.by.id, merger.info)
+            ids.ever.customers <- uniqueReplaceWithMergedIDs(ids.ever.customers, merger.info)
+            ids.previous <- uniqueReplaceWithMergedIDs(ids.previous, merger.info)
+            rr.by.id.previous <- replaceNamesWithMergedIDs(rr.by.id.previous, merger.info)
+            
+        }
+
+        ids <- names(rr.by.id)
+
+        ids.new <- ids[!ids %in% ids.ever.customers]
+        ids.resurrection <- ids[ids %in% ids.ever.customers & !ids %in% ids.previous]
+        ids.churn <- ids.previous[!ids.previous %in% ids]
+        ids.existing <- ids[ids %in% ids.previous]
+# if (dt == as.Date("2014-01-01"))
+# {
+#   print(mean(ids.existing %in% ids))
+#   print(mean(names(rr.by.id.previous) %in% ids))
+#   print(mean(names(rr.by.id.previous[ids.existing]) %in% ids))
+# #  print(mean(names(rr.by.id) %in% ids))
+#               print(mean(rr.by.id[ids.existing] %in% ids))
+#               print(sum(rr.by.id))
+#               print(sum(rr.by.id.previous))
+# }
+        rr.previous.by.id <- rr.by.id.previous[ids.existing]
+        rr.change.by.id <- rr.by.id[ids.existing] - rr.previous.by.id
+        expansion <- rr.change.by.id > 0
+        minor <- expansion & rr.change.by.id / rr.previous.by.id <= small
+        major <- expansion & !minor
         rr.metric.by.id <- list(New = rr.by.id[ids.new],
                                 Resurrection = rr.by.id[ids.resurrection],
                                 "Major Expansion" = rr.change.by.id[major],
                                 "Minor Expansion" = rr.change.by.id[minor],
                                 Contraction = rr.change.by.id[rr.change.by.id < 0],
                                 Churn = -rr.by.id.previous[ids.churn])
-        
+                  #        Churn = -rr.by.id.previous[ids.churn])
+
         accounting[, i] <- sapply(rr.metric.by.id, sum)
         counts[, i] <- cnts <- sapply(rr.metric.by.id, length)
         
+        # id.tmp <- changingMergedIDs(data, dt, id)
+        # if (any(id != id.tmp))
+        # {
+        #     rr.by.id <- rr.by.id.previous <- tapply(rr[invoice], list(id.tmp[invoice]), sum)
+        #     ids.previous <- ids <- names(rr.by.id.previous)
+        # }
         lngth <- sum(cnts)
         if (lngth > 0)
         {
@@ -98,19 +118,35 @@ GrowthAccounting <- function(data, small = 0.1)
     out <- list(detail = detail,
                 numerator = accounting[, -1, drop = FALSE],
                 denominator = counts[, -1, drop = FALSE],
-                by = by,
-                cohort.type = attr(data, "cohort.period"),
+                by = attr(data, "by"),
+                cohort.type = attr(data, "cohort.type"),
                 cohort.period = attr(data, "cohort.period"),
                 volume = TRUE,
                 subscroption.length = attr(data, "subscription.length"))
-        accounting <- addAttributesAndClass(accounting, "GrowthAccounting", by, detail)
         createOutput(out$numerator, "GrowthAccounting", out, "Growth Accounting")
 }
-#     {
-#       #attr(accounting, "counts") <- counts
-#     #attr(accounting, "by") <- by
-#     accounting
-# }
+
+
+thereAreMergers <- function(merger.info)
+{
+    length(merger.info$from.id) > 0
+}
+#' @importFrom plyr mapvalues
+replaceWithMergedIDs <- function(x, merger.info)
+{
+    mapvalues(x, merger.info$from.id, merger.info$to.id, FALSE)
+}
+
+uniqueReplaceWithMergedIDs <- function(x, merger.info)
+{
+    unique(replaceWithMergedIDs(x, merger.info))
+}
+
+replaceNamesWithMergedIDs <- function(x, merger.info)
+{
+    names(x) <- replaceWithMergedIDs(names(x), merger.info)
+    aggregateByNames(x)
+}
 
 #' plot.GrowthAccounting
 #' 
