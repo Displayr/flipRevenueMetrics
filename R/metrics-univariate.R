@@ -27,6 +27,8 @@ RecurringRevenue <- function(data)
     # }    
     
 }
+
+
 # tidyingDetailForCustomerChurn <- function(detail, subscription.length, by)
 # {
 #     #detail <- detail[, -2]

@@ -21,21 +21,6 @@ tidyNumeratorAndDenominator <- function(numerator, denominator)#, mergers, by, v
         cf <- zeroRowsAtTopAndBottom(t(denominator))
         denominator <- denominator[rf, cf, drop = FALSE]
         numerator <- numerator[rf, cf, drop = FALSE]
-        # if (ncol(denominator) == 1)
-        # {
-        #     if (nrow(denominator) == 1)
-        #     {
-        #         rn <- rownames(denominator)
-        #         denominator <- denominator[1, 1]
-        #         numerator <- numerator[1, 1]
-        #         names(denominator) <- names(numerator) <- rn
-        #         
-        #     } else
-        #     {
-        #         numerator <- numerator[, 1]
-        #         denominator <- denominator[, 1]
-        #     }
-        # }
     }
     list(denominator = denominator, numerator = numerator)
 }
@@ -87,15 +72,8 @@ sapplyStatistic <- function(x, statistic)
 tidyDetail <- function(volume, numerator, denominator, detail, components, data)
 {
     
-    if (singleSeries(data) & components != "churn" & (volume | components == "number of customers"))
+    if (singleSeries(data))# & components != "churn" & (volume | components == "number of customers"))
        return(bindListAsDataFrame(detail))
-    
-    
-    # if (components == "number of customers")# This could probably can be combined into the code below
-    # { 
-    #     detail <- lapply(detail, function(x) x[['All']])
-    #     return(bind_rows(detail))
-    # }
     rn <- if (is.matrix(denominator)) rownames(denominator) else names(denominator)
     cn <- if (is.matrix(denominator)) colnames(denominator) else "All"
     cohort.matrix <- matrix(rn,  length(rn), length(cn))
@@ -141,11 +119,16 @@ listOfVectorsAsDataFrame <- function(x)
     out <- data.frame(Period = namesAsVariable(x),
                       ID = unlist(x),
                       row.names = NULL)
-    if (is.null(names(x[[1]]))) # Number of Customers
+    if (vectorHasNoNames(x)) # Number of Customers
         return(out)
     names(out)[2] <- "VALUE"
     out$ID = unlist(lapply(x, names))
     out[, c(1, 3, 2)]
+}
+
+vectorHasNoNames <- function(x)
+{
+    all(sapply(x, FUN = function(x) is.null(names(x))))
 }
 
 #' 

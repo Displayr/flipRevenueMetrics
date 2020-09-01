@@ -41,4 +41,7 @@ if subscriptions are yearly, and a customer starts on the 1st of Jan and churns 
 30th of December, they will not appear in the churn statistics in the traditional
 metric. They do appear in the calculations in this function.
 }
+Another edge cases is inconsistent contract ends. For example, if a company has a contract that runs
+  from January to March, and another than runs from January to December, the contract ending in March
+  isn't couunted as Churn in this function (but is counted as contraction).
 }

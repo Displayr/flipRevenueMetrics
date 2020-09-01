@@ -141,6 +141,10 @@ cohortType <- function(data)
     attr(data, "cohort.type")
 }
 
+lastDate <- function(data)
+{
+    attr(data, "by.dates")[length(attr(data, "by.dates"))]
+}
 calendarCohort <- function(data)
 {
     cohortType(data) == "Calendar"
@@ -173,7 +177,11 @@ periodStart <- function(data, i)
 nextDate <- function(data, date)
 {
     dates <- attr(data, "by.dates")
-    dates[match(date, dates) + 1]
+    m <- match(date, dates)
+    # Edge case to be aware of: when a period starts on the same date as 'end'
+    if (m < length(dates))
+        m <- m + 1
+    dates[m]
 }
 
 previousDate <- function(data, date)
@@ -184,7 +192,9 @@ previousDate <- function(data, date)
 
 nextPeriodStart <- function(data, i)
 {
-    periodStart(data, i + 1)
+    # Dealing with situation where last period is first day only of the month
+    i1 <- min(nPeriods(data), i + 1)
+    periodStart(data, i1)
 }
 
 nextCohortPeriodStart <- function(data, start.date)

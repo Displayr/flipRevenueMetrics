@@ -42,10 +42,10 @@ test_that("Recurring Revenue Churn",
 
               sr = RevenueMetric("RecurringRevenueRetention", cohort.type = "Calendar", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
               ss = colSums(Numerator(sr), na.rm = TRUE) / colSums(Denominator(sr), na.rm = TRUE)
-              expect_equivalent(ss, s[-1:-2])
+              expect_equivalent(1 - ss, s[-1:-2])
 
               s2 = RevenueMetric("RecurringRevenueChurn", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              sss2 <- diag(Numerator(sr))
+              sss2 <- diag(Denominator(sr)) - diag(Numerator(sr))
               k <- length(sss2)
               # Removing last element for reasons described in documentation of RevenueMetric
               expect_equal(as.numeric(sss2[-k]), as.numeric(Numerator(s2)[-1:-2][-k]))

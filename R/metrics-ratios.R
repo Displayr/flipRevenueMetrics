@@ -22,6 +22,10 @@
 #' 30th of December, they will not appear in the churn statistics in the traditional
 #' metric. They do appear in the calculations in this function.
 #' }
+#' Another edge cases is inconsistent contract ends. For example, if a company has a contract that runs
+#'   from January to March, and another than runs from January to December, the contract ending in March
+#'   isn't couunted as Churn in this function (but is counted as contraction).
+
 #' @return A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding"}, or,
 #'   a \code{matrix}. This will contain a number of attributes includeing:
 #' \enumerate{
@@ -32,7 +36,7 @@
 #' @importFrom flipTime Period AsDate
 CustomerChurn <- function(data, ratio = TRUE)
 {
-    calculateRatio(data, ratio = ratio, volume = FALSE, components = "churn",
+    calculateRatio(data, ratio = TRUE, volume = FALSE, components = "churn",
                    name = "Customer Churn")
 }
 
@@ -81,7 +85,8 @@ RecurringRevenueRetention <- function(data,  ratio = TRUE)
 
 #' \code{NetRecurringRevenueRetention}
 #' 
-#' The change in the recurring revenue over time. A positive value inducates
+#' The change in the recurring revenue over time. A positive value indicates
+#' that the company is growing even without adding any new sales.
 #' that [Expansion()] + [Contraction()] > [RecurringRevenueChurn()].
 #' @inherit CustomerChurn
 #' @param data A \code{MetricData} object.
@@ -90,10 +95,9 @@ RecurringRevenueRetention <- function(data,  ratio = TRUE)
 #' previous period. Note that this is not the commplement of [RecurringRevenueChurn()],
 #' as that metric only takes into account churn, whereas this metric also 
 #' includes [Expansion()] and [Contraction()]
-NetRecurringRevenueRetention <- function(data, ratio = TRUE)
+NetRecurringRevenueRetention <- function(data)
 {
-    calculateRatio(data, ratio = ratio, volume = TRUE, components = "net retention",
-                   "Net Recurring Revenue Retention")
+    sumsOfRatios(data, include.new = FALSE, "Net Recurring Revenue Retention")
 }
 
 #' \code{Contraction}
@@ -104,9 +108,9 @@ NetRecurringRevenueRetention <- function(data, ratio = TRUE)
 #' @importFrom flipTime Period AsDate
 #' @details Calculated based on all the customer immediately prior to the end of the
 #' previous period.
-Contraction <- function(data,  ratio = TRUE)
+Contraction <- function(data)
 {
-    calculateRatio(data, ratio = ratio, volume = TRUE, components = "contraction",
+    calculateRatio(data, ratio = TRUE, volume = TRUE, components = "contraction",
                    name = "Contraction")
 }
 
@@ -117,14 +121,49 @@ Contraction <- function(data,  ratio = TRUE)
 #' period.
 #' @inherit CustomerChurn
 #' @importFrom flipTime Period AsDate
-#' @details Calculated based on all the customer immediately prior to the end of the
-#' previous period.
-Expansion <- function(data,  ratio = TRUE)
+#' @details The denominator is the annual recurring revenue of custoomers who were
+#' customers at the beginning of the period and remained customers at the end of the period.
+#' The numerator is sum of all the ARRs of customers whose ARR increased from the beginning
+#' of the period to the end fo the period.
+Expansion <- function(data)
 {
-    calculateRatio(data, ratio = ratio, volume = TRUE, components = "expansion",
+    calculateRatio(data, ratio = TRUE, volume = TRUE, components = "expansion",
                    name = "Expansion")
 }
 
+#' \code{NewRecurringRevenueGrowth}
+#' 
+#' The growth (as a percentage) in sales.
+#' @inherit CustomerChurn
+#' @importFrom flipTime Period AsDate
+#' @details Calculated as any sale in a period made
+#' to a customer who was not a customer at the beginning
+#' of the period. This includes resurrections.
+#' Where the period has been set to something other than
+#' "year" the results are annualized (e.g., monthly data
+#' is multiplier by 12).
+#' 
+#' Note that when the period is changed, this can
+#' affect the average (e.g., the trend line), as
+#' for example, yearly data will be weighted towards
+#' data with bigger baseline sales.  XXX
+NewRecurringRevenueGrowth <- function(data)
+{
+    calculateRatio(data, ratio = TRUE, volume = TRUE, components = "new",
+                   name = "New Recurring Revenue Growth")
+}
+
+#' \code{UnderlyingRecurringRevenueGrowth}
+#' 
+#' The percentage xxx.
+#' @inherit CustomerChurn
+#' @importFrom flipTime Period AsDate
+#' @details Calculated based on all the customer immediately prior to the end of the
+#' previous period.
+UnderlyingRecurringRevenueGrowth <- function(data)
+{
+    sumsOfRatios(data, include.new = TRUE, "Underlying Recurring Revenue Growth")
+}
 
 #' \code{AverageRecurringRevenue}
 #' 
@@ -143,9 +182,57 @@ calculateRatio <- function(data, ratio, components, volume, name)
 {
     calc <- calculate(data, components, volume)
     stat <- if (ratio) calc$numerator / calc$denominator else calc$numerator
-    if (components == "retention")
-        stat <- 1 - stat
     class.name <- if (singleSeries(data)) "OneDimensionalWithTrend"  else "Heatmap" 
     createOutput(stat, class.name, calc, name)
 }    
 
+sumsOfRatios <- function(data, include.new, name)
+{
+    e <- calculateRatio(data, ratio = TRUE, volume = TRUE, components = "expansion",
+                        name)
+    c <- calculateRatio(data, ratio  = TRUE, volume = TRUE, components = "contraction",
+                        "INTERMEDIATE CALCULATION")
+    r <- calculateRatio(data, ratio = TRUE, volume = TRUE, components = "retention",
+                        "INTERMEDIATE CALCULATION")
+    expansion <- Numerator(e) / Denominator(e)
+    contraction <- Numerator(c) / Denominator(c)
+    retention <- Numerator(r) / Denominator(r)
+    stat <- SumMatchingNames(retention, expansion, -contraction)
+    ed <- Detail(e)
+    cd <- Detail(c)
+    rd <- Detail(r)
+    if (is.vector(ed))
+        detail <- list(Expansion = ed, Contraction = cd, Retention = rd)
+    else
+    {
+        ed$Metric <- rep("Expansion", nrow(ed)) # dealing with 0 case
+        cd$Metric <- rep("Contraction", nrow(cd)) # dealing with 0 case
+        rd$Metric <- rep("Retention", nrow(rd)) # dealing with 0 case
+        detail <- rbind(ed, cd, rd)
+        
+    }
+    if (include.new)
+    {
+        n <- calculateRatio(data, ratio = TRUE, volume = TRUE, components = "new",
+                            "INTERMEDIATE CALCULATION")
+        new <- Numerator(n) / Denominator(n)
+        stat <- SumMatchingNames(stat, new -1)
+        nd <- Detail(n)
+        if (is.vector(ed))
+            detail[["New"]] <- nd
+        else
+        {
+            nd$Metric <- rep("New", nrow(nd)) # dealing with 0 case
+            detail <- rbind(nd, detail)
+            
+        }
+    }
+    attributes(stat) <- attributes(e)[!names(attributes(e)) %in% c("dimnames", "dim")]
+    attr(stat, "numerator") <- NULL
+    attr(stat, "components") <- c(if (include.new) "new" else NULL,
+                                  "expansion", "retention", "contraction")
+    if (is.data.frame(detail))
+        detail <- detail[order(detail$Period), ]
+    attr(stat, "detail") <- detail
+    stat
+}

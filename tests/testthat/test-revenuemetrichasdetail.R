@@ -18,3 +18,11 @@ for (fun in metric.functions)
         dtl = RevenueMetric(FUN = fun, output = "Detail", value=d$AUD,from=d$ValidFrom,to=d$ValidTo, id = d$name, by = "quarter", subscription.length = "year")#, cohort.by = cohort.by, days.to.count = day)
         expect_false(class(tbl)[1] == class(dtl)[1])
     })
+
+test_that(paste("Checking Detail function",
+                fun),
+          {
+              tbl = RevenueMetric(FUN = metric.functions[1], output = "Table", value=d$AUD,from=d$ValidFrom,to=d$ValidTo, id = d$name, by = "quarter", subscription.length = "year")#, cohort.by = cohort.by)#, days.to.count = day)
+              detail = RevenueMetric(FUN = metric.functions[1], output = "Detail", value=d$AUD,from=d$ValidFrom,to=d$ValidTo, id = d$name, by = "quarter", subscription.length = "year")#, cohort.by = cohort.by)#, days.to.count = day)
+              expect_equivalent(Detail(tbl), detail)
+          })

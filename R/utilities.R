@@ -1,3 +1,33 @@
+SumMatchingNames <- function(...)
+{
+    lst <- list(...)
+    sm <- lst[[1]]
+    for (i in 2:length(lst))
+    {
+        sm <- if (is.vector(sm))
+            sumMatchingNames.Vector(sm, lst[[i]])
+        else 
+            sumMatchingNames.Matrix(sm, lst[[i]])
+        
+    }
+    sm
+}
+
+
+sumMatchingNames.Matrix <- function(a, b)
+{
+    rn <- intersect(rownames(a), rownames(b))
+    cn <- intersect(colnames(a), colnames(b))
+    a[rn, cn] + b[rn, cn]
+}
+
+sumMatchingNames.Vector <- function(a, b)
+{
+    nm <- intersect(names(a), names(b))
+    a[nm] + b[nm]
+}
+
+
 aggregateByNames <- function(x, FUN = sum)
 {
     x <- aggregate(x, list(names(x)), FUN = FUN)
@@ -7,6 +37,16 @@ aggregateByNames <- function(x, FUN = sum)
 }
 
 
+sumBy <- function(x, by)
+{
+    statisticBy(x, by)
+}
+
+statisticBy <- function(x, by, FUN = sum)
+{
+    tapply(x, list(by), FUN)
+}
+    
 properCase <- function(x)
 {
     paste0(toupper(substr(x, 1, 1)), tolower(substring(x, 2)))

@@ -93,7 +93,7 @@ test_that("Fake invoice calculations",
               expect_equal(s["2018"], c("2018" = 1 - 0.09090909), tol = 0.0000001)
               s1 <- RevenueMetric(FUN = "NetRecurringRevenueRetention", output =out, value = d$Value , from = d$From, to = d$To, #end = as.Date("2020/06/30"), 
                                   id = d$Name, by = by, mergers = id.m)
-              expect_equal(s1["2018"], c("2018" = 1 - 0.09090909), tol = 0.0000001)
+              expect_equal(s1["2018"], c("2018" = 1- 0.09090909), tol = 0.0000001)
               
               s <- RevenueMetric(FUN = "GrowthAccounting", output = out,value = d$Value , from = d$From, to = d$To,
                                  id = d$Name, by = by, mergers = NULL)
@@ -139,38 +139,38 @@ test_that("No customers churn in 2014", {
                                                                                                   "Organization 768"), class = "factor"))
     s <- RevenueMetric(FUN = "CustomerChurn", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                        id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 0.130719), tol = 0.000001)
+    expect_equal(s["2014"], c("2014" = 0.13114754 ), tol = 0.000001)
     s1 <- RevenueMetric(FUN = "CustomerChurn", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                         id = q$name, by = by, mergers = id.m)
-    expect_equal(s1["2014"], c("2014" = 0.003745318), tol = 0.000001)
+    expect_equal(s1["2014"], c("2014" = 0.003759398 ), tol = 0.000001)
     
     sc <- RevenueMetric(FUN = "RecurringRevenueChurn", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                        id = q$name, by = by, mergers = NULL)
-    expect_equal(sc["2014"], c("2014" = 0.085982292 ), tol = 0.000001)
+    expect_equal(sc["2014"], c("2014" = 0.08624760  ), tol = 0.000001)
     s0 <- RevenueMetric(FUN = "RecurringRevenueChurn", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                         id = q$name, by = by, mergers = id.m)
-    expect_equal(s0["2014"], c("2014" = 0.035502778), tol = 0.000001)
+    expect_equal(s0["2014"], c("2014" = 0.03561232), tol = 0.000001)
     
     s <- RevenueMetric(FUN = "CustomerRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                        id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 0.8692810 ), tol = 0.000001)
+    expect_equal(s["2014"], c("2014" = 0.8688525 ), tol = 0.000001)
     s1 <- RevenueMetric(FUN = "CustomerRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                         id = q$name, by = by, mergers = id.m)
-    expect_equal(s1["2014"], c("2014" = 0.9962547), tol = 0.000001)
+    expect_equal(s1["2014"], c("2014" = 0.9962406), tol = 0.000001)
     
     s <- RevenueMetric(FUN = "RecurringRevenueRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                      id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 0.9140177), tol = 0.00001)
+    expect_equal(s["2014"], c("2014" = 0.9137524), tol = 0.00001)
     s1 <- RevenueMetric(FUN = "RecurringRevenueRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                       id = q$name, by = by, mergers = id.m)
-    expect_equal(s1["2014"], c("2014" = .9644972), tol = 0.000001)
+    expect_equal(s1["2014"], c("2014" = 0.9643877), tol = 0.000001)
     
     s <- RevenueMetric(FUN = "NetRecurringRevenueRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                      id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 1.0597001), tol = 0.00001)
+    expect_equal(s["2014"], c("2014" = 1.058812), tol = 0.00001)
     s2 <- RevenueMetric(FUN = "NetRecurringRevenueRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                       id = q$name, by = by, mergers = id.m)
-    expect_equal(s2["2014"], c("2014" = 1.0764145), tol = 0.000001)
+    expect_equal(s2["2014"], c("2014" = 1.075586 ), tol = 0.000001)
     
     s <- RevenueMetric(FUN = "Expansion", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                      id = q$name, by = by, mergers = NULL)
@@ -181,10 +181,10 @@ test_that("No customers churn in 2014", {
     
     s <- RevenueMetric(FUN = "Contraction", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                      id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 0.20177806), tol = 0.00001)
-    s4 <- RevenueMetric(FUN = "Contraction", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
+    expect_equal(s["2014"], c("2014" = 0.2024007 ), tol = 0.00001)
+    s4 <- RevenueMetric(FUN = "Contraction", output = out, value = q$AUD , from  = q$ValidFrom, to = q$ValidTo,
                       id = q$name, by = by, mergers = id.m)
-    expect_equal(s4["2014"], c("2014" = 0.23298422), tol = 0.000001)
+    expect_equal(s4["2014"], c("2014" = 0.2337031), tol = 0.000001)
     z = s2 - (s1 - s4 + s3)
     expect_equal(mean(z, na.rm = TRUE), 0)
     expect_equal(sd(z, na.rm = TRUE), 0)
