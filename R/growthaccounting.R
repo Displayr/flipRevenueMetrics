@@ -43,7 +43,7 @@ GrowthAccounting <- function(data, small = 0.1)
             i  == i 
         }
         dt <- nextPeriodStart(data, i)
-        invoice <- customerAtPeriodEnd(data, dt) #Can be made more efficent by not passing in data
+        invoice <- customerAt(data, dt) #Can be made more efficent by not passing in data
         rr.by.id <- sumBy(rr[invoice], id[invoice])
         
         merger.info <- mergerInfo(data, previousDate(data, dt), dt)

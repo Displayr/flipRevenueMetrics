@@ -4,12 +4,10 @@
 \alias{Expansion}
 \title{\code{Expansion}}
 \usage{
-Expansion(data, ratio = TRUE)
+Expansion(data)
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
-
-\item{ratio}{If \code{TRUE}, the statistic is returned as a ratio.}
 }
 \value{
 A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding"}, or,
@@ -25,6 +23,8 @@ The percentage of customers whose recurring revenue increased relative to the pr
 period.
 }
 \details{
-Calculated based on all the customer immediately prior to the end of the
-previous period.
+The denominator is the annual recurring revenue of custoomers who were
+customers at the beginning of the period and remained customers at the end of the period.
+The numerator is sum of all the ARRs of customers whose ARR increased from the beginning
+of the period to the end fo the period.
 }

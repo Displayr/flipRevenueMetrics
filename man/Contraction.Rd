@@ -4,12 +4,10 @@
 \alias{Contraction}
 \title{\code{Contraction}}
 \usage{
-Contraction(data, ratio = TRUE)
+Contraction(data)
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
-
-\item{ratio}{If \code{TRUE}, the statistic is returned as a ratio.}
 }
 \value{
 A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding"}, or,

@@ -104,7 +104,7 @@ startPeriod <- function(data, components)
 #     cohort.ids[[period.name]]
 # }
 
-customerAtPeriodEnd <- function(data, period.date)
+customerAt <- function(data, period.date)
 {
     period.date > data$from  & period.date <= data$to
 }

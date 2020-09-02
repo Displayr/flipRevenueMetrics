@@ -209,6 +209,8 @@ test_that("No customers churn in 2014", {
     expect_equal(as.numeric(diff(rr)), as.numeric(colSums(ss1)))
           })
 
+
+
 test_that("Mergers and profiling", {
 
     data(q.invoice.lines.short)
@@ -219,10 +221,42 @@ test_that("Mergers and profiling", {
     expect_error(RevenueMetric(FUN = "NumberofCustomers", output = "Table", value = d$AUD, from = d$ValidFrom, to = d$ValidTo,
                                id = d$name, by = by, mergers = id.m, profiling = data.frame(d$currency)),
                  NA)
-
+    
+    data(q.invoice.lines)
+    q <- q.invoice.lines
+    unique.ids = unique(q$name)
+    by = "year"
+    out= "Table" 
+    # Treating anybody that churned in 2014 as a merger
+    z = aggregate(q$ValidTo, list(q$name), max)
+    ids.churned.2014 <- z[z[, 2] < as.Date("2015-01-01") & z[, 2] >= as.Date("2014-01-01"), 1]
+    ids.churned.2014 <- ids.churned.2014
+    ids.alive.2015 <- z[z[, 2] >= as.Date("2015-01-01"), 1]
+    id.m <- data.frame(id = ids.churned.2014,
+                       id.to = structure(c(32L, 7L, 16L, 15L, 11L, 41L, 8L, 36L, 40L, 4L, 37L, 
+                                           5L, 23L, 20L, 13L, 3L, 10L, 29L, 26L, 28L, 18L, 25L, 38L, 22L, 
+                                           1L, 27L, 45L, 14L, 33L, 35L, 12L, 6L, 46L, 24L, 31L, 30L, 44L, 
+                                           9L, 42L, 34L, 2L, 21L, 43L, 17L, 39L, 19L), .Label = c("Organization 119", 
+                                                                                                  "Organization 130", "Organization 163", "Organization 17", "Organization 175", 
+                                                                                                  "Organization 187", "Organization 19", "Organization 209", "Organization 212", 
+                                                                                                  "Organization 227", "Organization 235", "Organization 243", "Organization 253", 
+                                                                                                  "Organization 282", "Organization 301", "Organization 334", "Organization 336", 
+                                                                                                  "Organization 362", "Organization 389", "Organization 397", "Organization 420", 
+                                                                                                  "Organization 446", "Organization 449", "Organization 461", "Organization 467", 
+                                                                                                  "Organization 474", "Organization 475", "Organization 521", "Organization 524", 
+                                                                                                  "Organization 529", "Organization 531", "Organization 535", "Organization 581", 
+                                                                                                  "Organization 593", "Organization 599", "Organization 606", "Organization 63", 
+                                                                                                  "Organization 681", "Organization 684", "Organization 685", "Organization 686", 
+                                                                                                  "Organization 693", "Organization 705", "Organization 746", "Organization 751", 
+                                                                                                  "Organization 768"), class = "factor"))
+    
+    expect_error(RevenueMetric(FUN = "RecurringRevenueChurn", output = "Table", value = d$AUD, from = d$ValidFrom, to = d$ValidTo,
+                               id = d$name, by = by, mergers = id.m, profiling = data.frame(d$country_cat)),
+                 NA)
+    
 })
 
-test_that("Mergers and subet", {
+test_that("Mergers and subset", {
 
     by = "year"
     data(q.invoice.lines.short)

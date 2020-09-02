@@ -49,7 +49,9 @@ newCusts <- function(data, period.start, next.period.start)
 {
     u <- subscriptionUnit(data)
  #   print(c("prev", as.character(period.start - u), as.character(next.period.start - u)))
-    dateVariableInWindow(data$subscribed.from, period.start - u, next.period.start - u)
+    dateVariableInWindow(data$subscribed.from,
+                         period.start - u, 
+                         period.start + byUnit(data) - u)
 }
 
 calculateRatioNumbers <- function(data, start.date, next.start.date, id.to.renew, id.churned)

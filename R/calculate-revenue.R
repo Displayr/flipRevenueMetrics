@@ -1,7 +1,7 @@
 revenueCalculation <- function(in.cohort, period.start, data)
 {
     next.period.start <- nextDate(data, period.start) 
-    m <- customerAtPeriodEnd(data, next.period.start) #attr(data, "by.dates")nextDate(data, period.start)
+    m <- customerAt(data, next.period.start) #attr(data, "by.dates")nextDate(data, period.start)
     m <- if (newCohort(data)) 
         m & dateVariableInWindow(data$subscribed.from, period.start, next.period.start)
     else # Cohorts or None

@@ -4,12 +4,10 @@
 \alias{NetRecurringRevenueRetention}
 \title{\code{NetRecurringRevenueRetention}}
 \usage{
-NetRecurringRevenueRetention(data, ratio = TRUE)
+NetRecurringRevenueRetention(data)
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
-
-\item{ratio}{If \code{TRUE}, the statistic is returned as a ratio.}
 }
 \value{
 A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding"}, or,

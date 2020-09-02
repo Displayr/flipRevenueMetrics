@@ -24,8 +24,16 @@ A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding
 Lost revenue due to churned customers as a percentage of total recurring revenue.
 }
 \details{
-The calculation is based on all customers priorimmedidately prior to the 
-end of the period. Note that this definition is not merely the recurrning revenue-weighted
+The calculation is based on all customers prior immedidately prior to the 
+end of the period who had all of their licenses due to renew in that period.
+Note that this definition is not merely the recurrning revenue-weighted
 equivalent of [CustomerChurn()], as [CustomerChurn()] is based on customers that could
-have churned at any stage in the period.
+have churned at any stage in the period.  (Maybe not true anymore...)
+
+In the final period, where \code{cohort.type} is set to \code{"New"}, the numerator and denominator
+are based on people that could have reviewed in that period, and who first purchased in the 
+corresponding period one subscription period previously. For example, if the final period
+is 1 January to 13 February (the \code{end})) of 2020, then the analysis is based on people
+who first puchased from 1 January to 31 Deceber 2019 and who were due to renewe in the period 
+1 January to 13 February 202.
 }

@@ -4,12 +4,10 @@
 \alias{NewRecurringRevenueGrowth}
 \title{\code{NewRecurringRevenueGrowth}}
 \usage{
-NewRecurringRevenueGrowth(data, ratio = TRUE)
+NewRecurringRevenueGrowth(data)
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
-
-\item{ratio}{If \code{TRUE}, the statistic is returned as a ratio.}
 }
 \value{
 A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding"}, or,
@@ -21,9 +19,18 @@ A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding
   }
 }
 \description{
-The percentage xxx.
+The growth (as a percentage) in sales.
 }
 \details{
-Calculated based on all the customer immediately prior to the end of the
-previous period.
+Calculated as any sale in a period made
+to a customer who was not a customer at the beginning
+of the period. This includes resurrections.
+Where the period has been set to something other than
+"year" the results are annualized (e.g., monthly data
+is multiplier by 12).
+
+Note that when the period is changed, this can
+affect the average (e.g., the trend line), as
+for example, yearly data will be weighted towards
+data with bigger baseline sales.  XXX
 }

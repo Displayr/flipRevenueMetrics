@@ -193,7 +193,7 @@ previousDate <- function(data, date)
 nextPeriodStart <- function(data, i)
 {
     # Dealing with situation where last period is first day only of the month
-    i1 <- min(nPeriods(data), i + 1)
+    i1 <- min(length(attr(data, "by.dates")), i + 1)
     periodStart(data, i1)
 }
 

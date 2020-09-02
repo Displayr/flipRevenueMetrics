@@ -11,6 +11,13 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
     period.end <- nextDate(data, period.start)
     invoice.end <- customerAtTime(data, period.end, in.cohort)
     invoice.start <- customerAtTime(data, period.start, in.cohort)
+    if (newCohort(data))
+    {
+        new <- newCusts(data, period.start, period.end)
+        invoice.end <- invoice.end & new
+        invoice.start <- invoice.start & new
+    }
+    
 #    invoice.end <- invoice.end & to.renew
 #    invoice.start <- invoice.start & to.renew
     
@@ -25,6 +32,12 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
     id.end <- names(rr.end.by.id)
     id.start <- names(rr.start.by.id)
     retention.id <- retentionID(id.start, id.end, id, to.renew)
+    if (period.start == as.Date("2016-01-01"))
+    {
+        period.end = period.start
+        
+        
+    }
     detail <- switch(components,
                   "new" = rr.end.by.id[setdiff(id.end, id.start)],
                   "contraction" = contraction(rr.start.by.id, rr.end.by.id),
@@ -62,9 +75,7 @@ retentionID <- function(id.start, id.end, id, to.renew)
 
 customerAtTime <- function(data, date, in.cohort)
 {
-    customer <- customerAtPeriodEnd(data, date)
-    if (newCohort(data))
-        in.cohort <- newCusts(data, date, date + byUnit(data))
+    customer <- customerAt(data, date)
     andSubsetIfItExists(customer, in.cohort)
 }
 
