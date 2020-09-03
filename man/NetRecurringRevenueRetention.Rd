@@ -4,12 +4,10 @@
 \alias{NetRecurringRevenueRetention}
 \title{\code{NetRecurringRevenueRetention}}
 \usage{
-NetRecurringRevenueRetention(data, ratio = TRUE)
+NetRecurringRevenueRetention(data)
 }
 \arguments{
 \item{data}{A \code{MetricData} object.}
-
-\item{ratio}{If \code{TRUE}, the statistic is returned as a ratio.}
 }
 \value{
 A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding"}, or,
@@ -21,7 +19,8 @@ A named vector if \code{cohort.type} is set to \code{"None"} or \code{"Preceding
   }
 }
 \description{
-The change in the recurring revenue over time. A positive value inducates
+The change in the recurring revenue over time. A positive value indicates
+that the company is growing even without adding any new sales.
 that [Expansion()] + [Contraction()] > [RecurringRevenueChurn()].
 }
 \details{

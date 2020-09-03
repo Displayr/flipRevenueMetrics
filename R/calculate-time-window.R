@@ -1,4 +1,4 @@
-timeWindowCalculation <- function(in.cohort, period.start, data)
+timeWindowCalculation <- function(in.cohort, period.start, components, data)
 {
     from <- data$from
     to <- data$to
@@ -10,7 +10,7 @@ timeWindowCalculation <- function(in.cohort, period.start, data)
     #    next.dt <- if (cohort.type != "None") subscription.dts[i + 1] else min(start.dt + subscription.unit, attr(data, "end"))
     
 #    print(c("cur", as.character(period.start), as.character(next.period.start)))
-    to.renew <- dateVariableInWindow(data$to, period.start, next.period.start)
+    to.renew <- toRenew(to, from, id, period.start, next.period.start)
     if (newCohort(data))
         in.cohort <- newCusts(data, period.start, next.period.start)
     to.renew <- andSubsetIfItExists(to.renew, in.cohort)
@@ -21,18 +21,37 @@ timeWindowCalculation <- function(in.cohort, period.start, data)
     subscribed.in.period <- andSubsetIfItExists(subscribed.in.period, in.cohort)
     id.subscribed.in.period <- unique(id[subscribed.in.period])
     
-    id.churned <- setdiff(id.to.renew, id.subscribed.in.period)
-    
+    ids <- if (components == "churn")
+        setdiff(id.to.renew, id.subscribed.in.period)
+    else # retention
+        intersect(id.to.renew, id.subscribed.in.period)
+
     #Taking mergers ito account
-    calculateRatioNumbers(data, period.start, next.period.start, id.to.renew, id.churned)
+    calculateRatioNumbers(data, period.start, next.period.start, id.to.renew, ids)
 }
 
+
+
+toRenew <- function(to, from, id, period.start, period.end)
+{
+    id %in% toRenewID(to, from, id, period.start, period.end)
+}
+
+
+toRenewID <- function(to, from, id, period.start, period.end)
+{
+    in.window <- dateVariableInWindow(to, period.start, period.end)
+    crossing.window <- from < period.start & period.end < to
+    setdiff(id[in.window], id[crossing.window]) 
+}
 
 newCusts <- function(data, period.start, next.period.start)
 {
     u <- subscriptionUnit(data)
  #   print(c("prev", as.character(period.start - u), as.character(next.period.start - u)))
-    dateVariableInWindow(data$subscribed.from, period.start - u, next.period.start - u)
+    dateVariableInWindow(data$subscribed.from,
+                         period.start - u, 
+                         period.start + byUnit(data) - u)
 }
 
 calculateRatioNumbers <- function(data, start.date, next.start.date, id.to.renew, id.churned)

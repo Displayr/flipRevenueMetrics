@@ -44,11 +44,11 @@ test_that(paste("stackMatrices "),{
                       start = as.Date("2014-01-01"),
                       profiling = p.country)
     expect_equal(s, structure(c(0.0632014124792544, NaN, 0.377708171934232, NaN, 
-                                0.0564391440379688, NaN, 0, 0.13040103723447, NaN, 0.101021116909557, 
-                                0.106950377529656, 0.279268871980707, 0.212107272450097, 0.0931273683099599, 
-                                0.283940699716319, 0.101524315774963, 0.131601580716929, 0.173559359588234
-    ), .Dim = c(9L, 2L), .Dimnames = list(c("Australia 2014", "Australia 2015", 
-                                            "United Kingdom 2014", "United Kingdom 2015", "Other 2014", "Other 2015", 
-                                            "New Zealand 2014", "United States 2014", "United States 2015"
-    ), c("2015", "2016"))))
+                                          0.0564391440379688, NaN, 0, 0.13040103723447, NaN, 0.203038015936136, 
+                                          0.0904112723467829, 0, 0.224546681181527, 0.91316311663968, 0.277940416868016, 
+                                          0.666666666666667, 0.161819416727558, 0.173608215638123), .Dim = c(9L, 
+                                                                                                             2L), .Dimnames = list(c("Australia 2014", "Australia 2015", "United Kingdom 2014", 
+                                                                                                                                     "United Kingdom 2015", "Other 2014", "Other 2015", "New Zealand 2014", 
+                                                                                                                                     "United States 2014", "United States 2015"), c("2015", "2016"
+                                                                                                                                     ))))
 })

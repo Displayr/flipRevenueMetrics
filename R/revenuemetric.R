@@ -372,6 +372,7 @@ removeAttributesAndClass <- function(x)
                 "n.retained",
                 "n.churned",
                 "churn",
+                "retention",
                 "cohort.size",
                 "subscription.length",
                 "y.title",
@@ -403,13 +404,6 @@ createOutput <- function(x, class.name, calculation, name)
     attr(x, "denominator") <- calculation$denominator
     attr(x, "subscription.length") <- s.l <- calculation$subscription.length
     attr(x, "y.title") <- paste0(if (newCohort(x)) "New " else "", name)
-    # attr(x, "y.title") <- paste(switch(s.l,
-    #                                    week = "Weekly",
-    #                                    month = "Monthly",
-    #                                    quarter = "Quarterly",
-    #                                    year = "Annual"),
-    #                          #   paste0(if (calculation$cohort.type == "Preceding ") "(Preceding INSERT DATE) " else "",
-    #                             name)
     class(x) <- c(class.name, "RevenueMetric", class(x))
     x    
 }    
@@ -451,17 +445,17 @@ canPlot <- function(x)
     TRUE
 }
 
-#' 
-#' #' Detail
-#' #' 
-#' #' @param x A RevenueMetric object  
-#' #' @description Creates a detailed description of the input data used to create the object.
-#' Detail <- function(x)
-#' {
-#'     UseMethod("Tab", x)
-#' }
-#' 
-#' Detail.default <- function(x, ...)
-#' {
-#'     attr(x, "detail")
-#' }
+#' Detail
+#'
+#' @param x A RevenueMetric object
+#' @description Creates a detailed description of the input data used to create the object.
+#' @export
+Detail <- function(x)
+{
+    UseMethod("Detail", x)
+}
+
+Detail.default <- function(x, ...)
+{
+    attr(x, "detail")
+}

@@ -93,7 +93,7 @@ test_that("Fake invoice calculations",
               expect_equal(s["2018"], c("2018" = 1 - 0.09090909), tol = 0.0000001)
               s1 <- RevenueMetric(FUN = "NetRecurringRevenueRetention", output =out, value = d$Value , from = d$From, to = d$To, #end = as.Date("2020/06/30"), 
                                   id = d$Name, by = by, mergers = id.m)
-              expect_equal(s1["2018"], c("2018" = 1 - 0.09090909), tol = 0.0000001)
+              expect_equal(s1["2018"], c("2018" = 1- 0.09090909), tol = 0.0000001)
               
               s <- RevenueMetric(FUN = "GrowthAccounting", output = out,value = d$Value , from = d$From, to = d$To,
                                  id = d$Name, by = by, mergers = NULL)
@@ -139,38 +139,38 @@ test_that("No customers churn in 2014", {
                                                                                                   "Organization 768"), class = "factor"))
     s <- RevenueMetric(FUN = "CustomerChurn", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                        id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 0.130719), tol = 0.000001)
+    expect_equal(s["2014"], c("2014" = 0.13114754 ), tol = 0.000001)
     s1 <- RevenueMetric(FUN = "CustomerChurn", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                         id = q$name, by = by, mergers = id.m)
-    expect_equal(s1["2014"], c("2014" = 0.003745318), tol = 0.000001)
+    expect_equal(s1["2014"], c("2014" = 0.003759398 ), tol = 0.000001)
     
     sc <- RevenueMetric(FUN = "RecurringRevenueChurn", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                        id = q$name, by = by, mergers = NULL)
-    expect_equal(sc["2014"], c("2014" = 0.085982292 ), tol = 0.000001)
+    expect_equal(sc["2014"], c("2014" = 0.08624760  ), tol = 0.000001)
     s0 <- RevenueMetric(FUN = "RecurringRevenueChurn", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                         id = q$name, by = by, mergers = id.m)
-    expect_equal(s0["2014"], c("2014" = 0.035502778), tol = 0.000001)
+    expect_equal(s0["2014"], c("2014" = 0.03561232), tol = 0.000001)
     
     s <- RevenueMetric(FUN = "CustomerRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                        id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 0.8692810 ), tol = 0.000001)
+    expect_equal(s["2014"], c("2014" = 0.8688525 ), tol = 0.000001)
     s1 <- RevenueMetric(FUN = "CustomerRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                         id = q$name, by = by, mergers = id.m)
-    expect_equal(s1["2014"], c("2014" = 0.9962547), tol = 0.000001)
+    expect_equal(s1["2014"], c("2014" = 0.9962406), tol = 0.000001)
     
     s <- RevenueMetric(FUN = "RecurringRevenueRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                      id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 0.9140177), tol = 0.00001)
+    expect_equal(s["2014"], c("2014" = 0.9137524), tol = 0.00001)
     s1 <- RevenueMetric(FUN = "RecurringRevenueRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                       id = q$name, by = by, mergers = id.m)
-    expect_equal(s1["2014"], c("2014" = .9644972), tol = 0.000001)
+    expect_equal(s1["2014"], c("2014" = 0.9643877), tol = 0.000001)
     
     s <- RevenueMetric(FUN = "NetRecurringRevenueRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                      id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 1.0597001), tol = 0.00001)
+    expect_equal(s["2014"], c("2014" = 1.058812), tol = 0.00001)
     s2 <- RevenueMetric(FUN = "NetRecurringRevenueRetention", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                       id = q$name, by = by, mergers = id.m)
-    expect_equal(s2["2014"], c("2014" = 1.0764145), tol = 0.000001)
+    expect_equal(s2["2014"], c("2014" = 1.075586 ), tol = 0.000001)
     
     s <- RevenueMetric(FUN = "Expansion", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                      id = q$name, by = by, mergers = NULL)
@@ -181,10 +181,10 @@ test_that("No customers churn in 2014", {
     
     s <- RevenueMetric(FUN = "Contraction", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
                      id = q$name, by = by, mergers = NULL)
-    expect_equal(s["2014"], c("2014" = 0.20177806), tol = 0.00001)
-    s4 <- RevenueMetric(FUN = "Contraction", output = out, value = q$AUD , from = q$ValidFrom, to = q$ValidTo,
+    expect_equal(s["2014"], c("2014" = 0.2024007 ), tol = 0.00001)
+    s4 <- RevenueMetric(FUN = "Contraction", output = out, value = q$AUD , from  = q$ValidFrom, to = q$ValidTo,
                       id = q$name, by = by, mergers = id.m)
-    expect_equal(s4["2014"], c("2014" = 0.23298422), tol = 0.000001)
+    expect_equal(s4["2014"], c("2014" = 0.2337031), tol = 0.000001)
     z = s2 - (s1 - s4 + s3)
     expect_equal(mean(z, na.rm = TRUE), 0)
     expect_equal(sd(z, na.rm = TRUE), 0)
@@ -209,6 +209,8 @@ test_that("No customers churn in 2014", {
     expect_equal(as.numeric(diff(rr)), as.numeric(colSums(ss1)))
           })
 
+
+
 test_that("Mergers and profiling", {
 
     data(q.invoice.lines.short)
@@ -219,10 +221,42 @@ test_that("Mergers and profiling", {
     expect_error(RevenueMetric(FUN = "NumberofCustomers", output = "Table", value = d$AUD, from = d$ValidFrom, to = d$ValidTo,
                                id = d$name, by = by, mergers = id.m, profiling = data.frame(d$currency)),
                  NA)
-
+    
+    data(q.invoice.lines)
+    q <- q.invoice.lines
+    unique.ids = unique(q$name)
+    by = "year"
+    out= "Table" 
+    # Treating anybody that churned in 2014 as a merger
+    z = aggregate(q$ValidTo, list(q$name), max)
+    ids.churned.2014 <- z[z[, 2] < as.Date("2015-01-01") & z[, 2] >= as.Date("2014-01-01"), 1]
+    ids.churned.2014 <- ids.churned.2014
+    ids.alive.2015 <- z[z[, 2] >= as.Date("2015-01-01"), 1]
+    id.m <- data.frame(id = ids.churned.2014,
+                       id.to = structure(c(32L, 7L, 16L, 15L, 11L, 41L, 8L, 36L, 40L, 4L, 37L, 
+                                           5L, 23L, 20L, 13L, 3L, 10L, 29L, 26L, 28L, 18L, 25L, 38L, 22L, 
+                                           1L, 27L, 45L, 14L, 33L, 35L, 12L, 6L, 46L, 24L, 31L, 30L, 44L, 
+                                           9L, 42L, 34L, 2L, 21L, 43L, 17L, 39L, 19L), .Label = c("Organization 119", 
+                                                                                                  "Organization 130", "Organization 163", "Organization 17", "Organization 175", 
+                                                                                                  "Organization 187", "Organization 19", "Organization 209", "Organization 212", 
+                                                                                                  "Organization 227", "Organization 235", "Organization 243", "Organization 253", 
+                                                                                                  "Organization 282", "Organization 301", "Organization 334", "Organization 336", 
+                                                                                                  "Organization 362", "Organization 389", "Organization 397", "Organization 420", 
+                                                                                                  "Organization 446", "Organization 449", "Organization 461", "Organization 467", 
+                                                                                                  "Organization 474", "Organization 475", "Organization 521", "Organization 524", 
+                                                                                                  "Organization 529", "Organization 531", "Organization 535", "Organization 581", 
+                                                                                                  "Organization 593", "Organization 599", "Organization 606", "Organization 63", 
+                                                                                                  "Organization 681", "Organization 684", "Organization 685", "Organization 686", 
+                                                                                                  "Organization 693", "Organization 705", "Organization 746", "Organization 751", 
+                                                                                                  "Organization 768"), class = "factor"))
+    
+    expect_error(RevenueMetric(FUN = "RecurringRevenueChurn", output = "Table", value = d$AUD, from = d$ValidFrom, to = d$ValidTo,
+                               id = d$name, by = by, mergers = id.m, profiling = data.frame(d$country_cat)),
+                 NA)
+    
 })
 
-test_that("Mergers and subet", {
+test_that("Mergers and subset", {
 
     by = "year"
     data(q.invoice.lines.short)

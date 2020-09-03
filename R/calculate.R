@@ -57,7 +57,7 @@ doCalculations <- function(in.cohort, period.start, components, volume, data)
         return(revenueCalculation(in.cohort, period.start, data))
     if (volume)
         return(comparingTwoPointsInTime(in.cohort, period.start, data, components))
-    timeWindowCalculation(in.cohort, period.start, data)
+    timeWindowCalculation(in.cohort, period.start, components, data)
 }
 
 
@@ -104,7 +104,7 @@ startPeriod <- function(data, components)
 #     cohort.ids[[period.name]]
 # }
 
-customerAtPeriodEnd <- function(data, period.date)
+customerAt <- function(data, period.date)
 {
     period.date > data$from  & period.date <= data$to
 }
@@ -117,7 +117,7 @@ checkComponents <- function(components)
                            "contraction", 
                            "churn", 
                            "retention", 
-                           "net retention", 
+                           "new", 
                            "customers"))
         stop("Unknown components: ", paste(components, separate = ","))
 }            

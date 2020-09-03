@@ -14,7 +14,7 @@ numberOrNewCustomers <- function(data, period.start)
     if (newCohort(data))
         return(newCustomers(data, period.start)) 
     boundary.date <- nextDate(data, period.start)
-    customerAtPeriodEnd(data, boundary.date)
+    customerAt(data, boundary.date)
 }
 
 newCustomers <- function(data, period.start)

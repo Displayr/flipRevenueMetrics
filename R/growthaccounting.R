@@ -31,21 +31,22 @@ GrowthAccounting <- function(data, small = 0.1)
     # Storing results of loop
     metrics <- c("New", "Resurrection", "Major Expansion", "Minor Expansion", "Contraction", "Churn")
     counts <- accounting <- matrix(0, 6, nPeriods(data), dimnames = list(metrics, periodNames(data)))
-    names(dimnames(accounting)) <- c("Metric", "Date") 
+    names(dimnames(accounting)) <- c("Metric", "Period") 
     n <- nrow(data) * nPeriods(data)
     str <- rep("", n)
-    detail <- data.frame(Date = str, Metric = str, Name = str, Change = rep(NA, n), stringsAsFactors = FALSE)
+    detail <- data.frame(Period = str, Metric = str, Name = str, Change = rep(NA, n), stringsAsFactors = FALSE)
     counter <- 0
     for (i in 1:nPeriods(data))
     {
+        if (i == nPeriods(data))
+        {
+            i  == i 
+        }
         dt <- nextPeriodStart(data, i)
-        invoice <- customerAtPeriodEnd(data, dt) #Can be made more efficent by not passing in data
-        #id <- idsReflectingMergers(data, dt)
-        rr.by.id <- tapply(rr[invoice], list(id[invoice]), sum)
+        invoice <- customerAt(data, dt) #Can be made more efficent by not passing in data
+        rr.by.id <- sumBy(rr[invoice], id[invoice])
         
         merger.info <- mergerInfo(data, previousDate(data, dt), dt)
-                                  
-#                                  previousDate(ddt, nextDate(data, dt))
         if (thereAreMergers(merger.info))
         {
             
@@ -62,16 +63,6 @@ GrowthAccounting <- function(data, small = 0.1)
         ids.resurrection <- ids[ids %in% ids.ever.customers & !ids %in% ids.previous]
         ids.churn <- ids.previous[!ids.previous %in% ids]
         ids.existing <- ids[ids %in% ids.previous]
-# if (dt == as.Date("2014-01-01"))
-# {
-#   print(mean(ids.existing %in% ids))
-#   print(mean(names(rr.by.id.previous) %in% ids))
-#   print(mean(names(rr.by.id.previous[ids.existing]) %in% ids))
-# #  print(mean(names(rr.by.id) %in% ids))
-#               print(mean(rr.by.id[ids.existing] %in% ids))
-#               print(sum(rr.by.id))
-#               print(sum(rr.by.id.previous))
-# }
         rr.previous.by.id <- rr.by.id.previous[ids.existing]
         rr.change.by.id <- rr.by.id[ids.existing] - rr.previous.by.id
         expansion <- rr.change.by.id > 0
@@ -83,22 +74,14 @@ GrowthAccounting <- function(data, small = 0.1)
                                 "Minor Expansion" = rr.change.by.id[minor],
                                 Contraction = rr.change.by.id[rr.change.by.id < 0],
                                 Churn = -rr.by.id.previous[ids.churn])
-                  #        Churn = -rr.by.id.previous[ids.churn])
-
         accounting[, i] <- sapply(rr.metric.by.id, sum)
         counts[, i] <- cnts <- sapply(rr.metric.by.id, length)
         
-        # id.tmp <- changingMergedIDs(data, dt, id)
-        # if (any(id != id.tmp))
-        # {
-        #     rr.by.id <- rr.by.id.previous <- tapply(rr[invoice], list(id.tmp[invoice]), sum)
-        #     ids.previous <- ids <- names(rr.by.id.previous)
-        # }
         lngth <- sum(cnts)
         if (lngth > 0)
         {
             rws <- counter + (1:lngth)
-            detail$Date[rws] <- rep(periodName(data, i), lngth)
+            detail$Period[rws] <- rep(periodName(data, i), lngth)
             rr.metric.by.id.vector <- unlist(unname(rr.metric.by.id), use.names = TRUE)
             detail$Name[rws] <- names(rr.metric.by.id.vector)
             detail$Change[rws] <- rr.metric.by.id.vector
@@ -113,8 +96,9 @@ GrowthAccounting <- function(data, small = 0.1)
     }
     # Dropping the first period
     detail <- detail[1:counter, ] #Right-sizing the data frame
-    detail <- detail[detail$Date != colnames(accounting)[1], ]
-    detail <- detail[AsDate(detail$Date) >= attr(data, "start") & AsDate(detail$Date) <= attr(data, "end"), ]
+    detail <- detail[detail$Period != colnames(accounting)[1], ]
+    dts <- AsDate(detail$Period)
+    detail <- detail[dts >= attr(data, "start") & dts <= attr(data, "end"), ]
     out <- list(detail = detail,
                 numerator = accounting[, -1, drop = FALSE],
                 denominator = counts[, -1, drop = FALSE],
@@ -144,6 +128,8 @@ uniqueReplaceWithMergedIDs <- function(x, merger.info)
 
 replaceNamesWithMergedIDs <- function(x, merger.info)
 {
+    if (length(x) == 0)
+        return(x)
     names(x) <- replaceWithMergedIDs(names(x), merger.info)
     aggregateByNames(x)
 }
@@ -194,7 +180,7 @@ plot.GrowthAccounting <- function(x, ...)
         m <- metrics[i]
         #    hover.text = paste("$", FormatAsReal(y.values))
         det <- detail[detail$Metric == m, ]
-        dd <- tapply(det$Name, list(det$Date), function(x) 
+        dd <- tapply(det$Name, list(det$Period), function(x) 
         {
             l <- length(x)
             if (l== 0)

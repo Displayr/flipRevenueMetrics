@@ -3,8 +3,8 @@ library(lubridate)
 library(flipTime)
 data(q.invoice.lines)
 d <- q.invoice.lines
-end <- ISOdate(2016, 2, 15, tz = tz(q.invoice.lines$ValidFrom))
-start <- ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom))
+end <- as.Date(ISOdate(2016, 2, 15, tz = tz(q.invoice.lines$ValidFrom)))
+start <- as.Date(ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom)))
 
 by = "year"
 sy = RevenueMetric("RecurringRevenue", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
@@ -35,25 +35,27 @@ test_that("Recurring Revenue",
 test_that("Recurring Revenue Churn",
           {
               by = "year"
-              s = RevenueMetric("RecurringRevenueChurn", cohort.type = "None", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              expect_equal(as.numeric(s[-1:-2]), c(0, 0.00503686058558867, 0.131656082941708, 0.0738085730159674, 
-                                            0.0512936476901212, 0.0859822919426476, 0.142475132527322, 0.103565887))
-              expect_equal(as.numeric(sy[2:(length(sy)-2)]), as.numeric(attr(s, "denominator")[3:(length(s)-1)]))
+              s = RevenueMetric("RecurringRevenueChurn", cohort.type = "None", output = "Table",  value=d$AUD, 
+                                from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by, end = end)
+              expect_equal(as.numeric(s), c(NaN, NaN, 0, 0.00506078035633471, 0.131656082941708, 0.0738852391711553, 
+                                                   0.0513380955805887, 0.0862475956915368, 0.142475132527322, 0.0202550541168643))
+              # Recurring revenue must be greater than or equal to numerator due to some companies 
+              # not being available for renewal.
+              expect_true(all(sy[2:(length(sy)-2)] / Denominator(s)[3:(length(s)-1)] >= 0))
 
-              sr = RevenueMetric("RecurringRevenueRetention", cohort.type = "Calendar", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              sr = RevenueMetric("RecurringRevenueRetention", cohort.type = "Calendar", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by, end = end)
               ss = colSums(Numerator(sr), na.rm = TRUE) / colSums(Denominator(sr), na.rm = TRUE)
-              expect_equivalent(ss, s[-1:-2])
+              expect_equivalent(1 - ss, s[-1:-2])
 
-              s2 = RevenueMetric("RecurringRevenueChurn", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              sss2 <- diag(Numerator(sr))
+              s2 = RevenueMetric("RecurringRevenueChurn", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by, end = end)
+              sss2 <- diag(Denominator(sr)) - diag(Numerator(sr))
               k <- length(sss2)
-              # Removing last element for reasons described in documentation of RevenueMetric
-              expect_equal(as.numeric(sss2[-k]), as.numeric(Numerator(s2)[-1:-2][-k]))
-              expect_equal(as.numeric(diag(Denominator(sr))[-k]), as.numeric(Denominator(s2)[-1:-2][-k]))
-              expect_equal(1 - as.numeric(diag(sr))[-k], as.numeric(s2)[-1:-2][-k])
+              expect_equal(as.numeric(sss2), as.numeric(Numerator(s2)[-1:-2]))
+              expect_equal(as.numeric(diag(Denominator(sr))), as.numeric(Denominator(s2)[-1:-2]))
+              expect_equal(1 - as.numeric(diag(sr)), as.numeric(s2)[-1:-2])
               
               by = "month"
-              s = RevenueMetric("RecurringRevenueChurn", cohort.type = "New", output = "Plot",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              s = RevenueMetric("RecurringRevenueChurn", cohort.type = "New", output = "Plot",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by, end = end)
               sss2 <- diag(Numerator(sr))
               k <- length(sss2)
               
@@ -90,19 +92,35 @@ test_that("Customer Churn and Retention",
           {
               by = "year"
               s.none = RevenueMetric("CustomerChurn", cohort.type = "None", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              expect_equal(as.numeric(s.none[-1:-2]), c(0, 0.0344827586206896, 0.0973451327433629, 0.118343195266272, 
-                                            0.118421052631579, 0.130718954248366, 0.241299303944316, 0.123076923076923))
-              
+              expect_equal(as.numeric(s.none[-1:-2]), c(0, 0.0344827586206897, 0.0973451327433628, 0.118343195266272, 
+                                                        0.118421052631579, 0.131147540983607, 0.241299303944316, 0.104712041884817))
               s = RevenueMetric("CustomerRetention", cohort.type = "Calendar", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
-              expect_equal(s[2, -1], c(`2010` = 0.978260869565217, `2011` = 0.891304347826087, 
-                                     `2012` = 0.923076923076923, `2013` = 0.945945945945946, `2014` = 1, 
-                                     `2015` = 0.916666666666667, `2016` = 1))
+              expect_equal(s[2, -1], c(`2010` = 0.978260869565217, `2011` = 0.891304347826087, `2012` = 0.923076923076923, 
+                                       `2013` = 0.945945945945946, `2014` = 1, `2015` = 0.916666666666667, 
+                                       `2016` = 1))
 
               ss = RevenueMetric("CustomerChurn", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
               expect_equal(as.numeric(ss[-1:-2]),c(0, 0.0217391304347826, 0.111111111111111, 0.123287671232877, 
-                                           0.111111111111111, 0.09, 0.389221556886228, 0.06779661))                                 
+                                                   0.111111111111111, 0.0909090909090909, 0.389221556886228, 0.0344827586206897))             
+              
+              by = "month"
+              s = RevenueMetric("CustomerRetention", cohort.type = "None", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              s1 = RevenueMetric("CustomerChurn", cohort.type = "None", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              expect_true(sd(s + s1, na.rm = TRUE) == 0 & mean(s + s1, na.rm = TRUE) == 1)
 
-
+              s = RevenueMetric("CustomerRetention", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              s1 = RevenueMetric("CustomerChurn", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              expect_true(sd(s + s1, na.rm = TRUE) == 0 & mean(s + s1, na.rm = TRUE) == 1)
+              
+              s = RevenueMetric("RecurringRevenueRetention", cohort.type = "None", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              s1 = RevenueMetric("RecurringRevenueChurn", cohort.type = "None", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              expect_true(sd(s + s1, na.rm = TRUE) <= 0.00000001 & mean(s + s1, na.rm = TRUE) == 1)
+              
+              s = RevenueMetric("RecurringRevenueRetention", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              s1 = RevenueMetric("RecurringRevenueChurn", cohort.type = "New", output = "Table",  value=d$AUD, from=d$ValidFrom, to=d$ValidTo, id = d$name,  by = by)
+              expect_true(sd(s + s1, na.rm = TRUE) <= 0.00000001 & mean(s + s1, na.rm = TRUE) == 1)
+              expect_equal(s["2013-10"], c("2013-10" = .9457478))
+              expect_equal(s1["2013-10"], c("2013-10" = 1 - .9457478))
           }
 )
 
