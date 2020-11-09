@@ -2,6 +2,7 @@ context("Revenue Metric")
 data(q.invoice.lines)
 d <- q.invoice.lines
 library(lubridate)
+library(verbs)
 end <- ISOdate(2016, 2, 15, tz = tz(q.invoice.lines$ValidFrom))
 start <- ISOdate(2012, 7, 1, tz = tz(q.invoice.lines$ValidFrom))
 
@@ -10,7 +11,7 @@ for (by in c("week", "month", "quarter"))
       rr = RevenueMetric("RecurringRevenue", output = "Table",  cohort.type = "None", value = d$AUD, from = d$ValidFrom, to = d$ValidTo, id = d$name,  by = by)
       ga  = RevenueMetric("GrowthAccounting", output = "Table",  value = d$AUD, from = d$ValidFrom, to = d$ValidTo, id = d$name,  by = by)
       aga = cumsum(colSums(ga))
-      expect_equivalent(as.numeric(tail(aga, length(rr) - 1)), as.numeric(rr)[-1])
+      expect_equivalent(as.numeric(Last(aga, length(rr) - 1)), as.numeric(rr)[-1])
   })
 
 data(q.invoice.lines.short)
