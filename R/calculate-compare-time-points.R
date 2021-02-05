@@ -1,4 +1,5 @@
 #' @importFrom flipTime Period
+#' @importFrom verbs Sum
 comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
 {
     # We compare points in time by looking at the statistic of interest at thee end of the periiod,
@@ -45,15 +46,15 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
                   "churn" = rr.start.by.id[setdiff(id.start, id.end)],
                   "retention" = rr.start.by.id[retention.id])
     den <- if (components %in% c("churn", "retention", "contraction"))
-                       sum(rr[to.renew & invoice.start])
+                       Sum(rr[to.renew & invoice.start], remove.missing = FALSE)
     else
     {
         subscription.length.correction <- byUnit(data) / subscriptionUnit(data)
         final.period.correction <- finalPeriodCorrection(data, period.start, period.end)
-        sum(rr[invoice.start]) * final.period.correction * subscription.length.correction
+        Sum(rr[invoice.start], remove.missing = FALSE) * final.period.correction * subscription.length.correction
     }
     list(denominator = den, 
-         numerator = sum(detail),
+         numerator = Sum(detail, remove.missing = FALSE),
          detail = detail)
 }
 
