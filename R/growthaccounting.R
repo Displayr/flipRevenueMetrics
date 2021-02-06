@@ -27,7 +27,10 @@ GrowthAccounting <- function(data, small = 0.1)
     ids.ever.customers <- unique(id[from <= previous.date])
     invoice.previous <- from <= previous.date & to > previous.date 
     ids.previous <- unique(id[invoice.previous])
-    rr.by.id.previous <- if(Sum(invoice.previous) == 0, remove.missing = FALSE) rep(0, 0) else tapply(rr[invoice.previous], list(id[invoice.previous]), sum)
+    if (Sum(invoice.previous == 0, remove.missing = FALSE)) 
+        rr.by.id.previous <- rep(0, 0)
+    else 
+        rr.by.id.previous <- tapply(rr[invoice.previous], list(id[invoice.previous]), Sum, remove.missing = FALSE)
     
     # Storing results of loop
     metrics <- c("New", "Resurrection", "Major Expansion", "Minor Expansion", "Contraction", "Churn")
