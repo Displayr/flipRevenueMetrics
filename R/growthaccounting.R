@@ -11,6 +11,7 @@
 #' @importFrom flipTime AsDate Period
 #' @importFrom flipStatistics Table
 #' @importFrom lubridate floor_date years ceiling_date
+#' @importFrom verbs Sum
 GrowthAccounting <- function(data, small = 0.1)
 {
     if (cohortType(data) != "None")
@@ -26,7 +27,10 @@ GrowthAccounting <- function(data, small = 0.1)
     ids.ever.customers <- unique(id[from <= previous.date])
     invoice.previous <- from <= previous.date & to > previous.date 
     ids.previous <- unique(id[invoice.previous])
-    rr.by.id.previous <- if(sum(invoice.previous) == 0) rep(0, 0) else tapply(rr[invoice.previous], list(id[invoice.previous]), sum)
+    if (Sum(invoice.previous == 0, remove.missing = FALSE)) 
+        rr.by.id.previous <- rep(0, 0)
+    else 
+        rr.by.id.previous <- tapply(rr[invoice.previous], list(id[invoice.previous]), Sum, remove.missing = FALSE)
     
     # Storing results of loop
     metrics <- c("New", "Resurrection", "Major Expansion", "Minor Expansion", "Contraction", "Churn")
@@ -77,7 +81,7 @@ GrowthAccounting <- function(data, small = 0.1)
         accounting[, i] <- sapply(rr.metric.by.id, sum)
         counts[, i] <- cnts <- sapply(rr.metric.by.id, length)
         
-        lngth <- sum(cnts)
+        lngth <- Sum(cnts, remove.missing = FALSE)
         if (lngth > 0)
         {
             rws <- counter + (1:lngth)

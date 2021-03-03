@@ -309,14 +309,14 @@ yLim.default <- function(x, ...)
     range(x, na.rm = TRUE)
 }
 
-
+#' @importFrom verbs Sum
 createFilters <- function(profiling, subset, id)
 {
     if (is.null(subset))
         subset <- rep(TRUE, length(id))
     else if (any(is.na(subset)))
         subset[is.na(subset)] <- FALSE
-    if (sum(subset, na.rm = TRUE) == 0)
+    if (Sum(subset) == 0)
         stop("All data has been filtered out.")
     if (is.null(profiling))
         return(list(subset))

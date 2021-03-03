@@ -25,9 +25,10 @@ tidyNumeratorAndDenominator <- function(numerator, denominator)#, mergers, by, v
     list(denominator = denominator, numerator = numerator)
 }
 
+#' @importFrom verbs SumRows
 zeroRowsAtTopAndBottom <- function(x)
 {
-    rs <- rowSums(x, na.rm = TRUE)
+    rs <- SumRows(x)
     cumsum(rs) > 0 & rev(cumsum(rev(rs))) > 0
 }
 
@@ -69,6 +70,7 @@ sapplyStatistic <- function(x, statistic)
     } )
 }
 
+#' @importFrom verbs Sum
 tidyDetail <- function(volume, numerator, denominator, detail, components, data)
 {
     
@@ -80,7 +82,7 @@ tidyDetail <- function(volume, numerator, denominator, detail, components, data)
     subscription.matrix <- matrix(cn,  length(rn), length(cn))
     churned <- unlist(unlist(detail))
     n <- length(churned)
-    rep.by <- if(sum(numerator, na.rm = TRUE) == n) numerator else {
+    rep.by <- if(Sum(numerator) == n) numerator else {
         if (sum(denominator, na.rm = TRUE) == n) denominator else NULL }
     if (is.null(rep.by))
         return(churned)

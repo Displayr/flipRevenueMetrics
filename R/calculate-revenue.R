@@ -1,3 +1,4 @@
+#' @importFrom verbs Sum
 revenueCalculation <- function(in.cohort, period.start, data)
 {
     next.period.start <- nextDate(data, period.start) 
@@ -8,7 +9,7 @@ revenueCalculation <- function(in.cohort, period.start, data)
         andSubsetIfItExists(m, in.cohort)
     value <- data$recurring.value[m]
     ids <- data$id[m]
-    list(numerator = sum(value), 
+    list(numerator = Sum(value, remove.missing = FALSE), 
          denominator = nUnique(ids),
          detail = data.frame(id = as.character(ids), 
                              value = value, 
