@@ -27,6 +27,7 @@ Imports:
     stats,
     verbs
 Remotes:
+    Displayr/plotly,
     Displayr/flipFormat,
     Displayr/flipStatistics,
     Displayr/flipStandardCharts,
