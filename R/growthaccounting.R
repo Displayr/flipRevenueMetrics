@@ -27,7 +27,7 @@ GrowthAccounting <- function(data, small = 0.1)
     ids.ever.customers <- unique(id[from <= previous.date])
     invoice.previous <- from <= previous.date & to > previous.date 
     ids.previous <- unique(id[invoice.previous])
-    if (Sum(invoice.previous == 0, remove.missing = FALSE)) 
+    if (sum(invoice.previous == 0)) 
         rr.by.id.previous <- rep(0, 0)
     else 
         rr.by.id.previous <- tapply(rr[invoice.previous], list(id[invoice.previous]), Sum, remove.missing = FALSE)
@@ -81,7 +81,7 @@ GrowthAccounting <- function(data, small = 0.1)
         accounting[, i] <- sapply(rr.metric.by.id, sum)
         counts[, i] <- cnts <- sapply(rr.metric.by.id, length)
         
-        lngth <- Sum(cnts, remove.missing = FALSE)
+        lngth <- sum(cnts)
         if (lngth > 0)
         {
             rws <- counter + (1:lngth)

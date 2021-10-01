@@ -46,15 +46,15 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
                   "churn" = rr.start.by.id[setdiff(id.start, id.end)],
                   "retention" = rr.start.by.id[retention.id])
     den <- if (components %in% c("churn", "retention", "contraction"))
-                       Sum(rr[to.renew & invoice.start], remove.missing = FALSE)
+                       sum(rr[to.renew & invoice.start])
     else
     {
         subscription.length.correction <- byUnit(data) / subscriptionUnit(data)
         final.period.correction <- finalPeriodCorrection(data, period.start, period.end)
-        Sum(rr[invoice.start], remove.missing = FALSE) * final.period.correction * subscription.length.correction
+        sum(rr[invoice.start])) * final.period.correction * subscription.length.correction
     }
     list(denominator = den, 
-         numerator = Sum(detail, remove.missing = FALSE),
+         numerator = sum(detail),
          detail = detail)
 }
 

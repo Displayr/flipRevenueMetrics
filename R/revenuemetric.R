@@ -316,7 +316,7 @@ createFilters <- function(profiling, subset, id)
         subset <- rep(TRUE, length(id))
     else if (any(is.na(subset)))
         subset[is.na(subset)] <- FALSE
-    if (Sum(subset) == 0)
+    if (sum(subset, na.rm = TRUE) == 0)
         stop("All data has been filtered out.")
     if (is.null(profiling))
         return(list(subset))

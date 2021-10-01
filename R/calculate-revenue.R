@@ -9,7 +9,7 @@ revenueCalculation <- function(in.cohort, period.start, data)
         andSubsetIfItExists(m, in.cohort)
     value <- data$recurring.value[m]
     ids <- data$id[m]
-    list(numerator = Sum(value, remove.missing = FALSE), 
+    list(numerator = sum(value), 
          denominator = nUnique(ids),
          detail = data.frame(id = as.character(ids), 
                              value = value, 
