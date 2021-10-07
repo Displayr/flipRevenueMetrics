@@ -1,4 +1,4 @@
-#' @importFrom verbs Sum
+#' @importFrom verbs Sum SumEmptyHandling
 revenueCalculation <- function(in.cohort, period.start, data)
 {
     next.period.start <- nextDate(data, period.start) 
@@ -9,7 +9,9 @@ revenueCalculation <- function(in.cohort, period.start, data)
         andSubsetIfItExists(m, in.cohort)
     value <- data$recurring.value[m]
     ids <- data$id[m]
-    list(numerator = Sum(value, remove.missing = FALSE), 
+    # SumEmptyHandling used as numerator should be zero
+    # if value is length zero
+    list(numerator = SumEmptyHandling(value, remove.missing = FALSE), 
          denominator = nUnique(ids),
          detail = data.frame(id = as.character(ids), 
                              value = value, 

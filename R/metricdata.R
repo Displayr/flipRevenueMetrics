@@ -296,7 +296,7 @@ checkVariableForLengthAndMissingData <- function(x, n)
         stop("'" , deparse(substitute(x)), "' contains ", deparse(substitute(x)), " observations, but 'value' contains ", n, ".")
 }
 
-#' @importFrom verbs Sum
+#' @importFrom verbs SumEmptyHandling
 processMergers <- function(id, to, by, mergers)
 {   
     checkIDmerges(id, mergers)
@@ -305,7 +305,7 @@ processMergers <- function(id, to, by, mergers)
         return(NULL)
     mergers$date <- rep(as.Date("2999-12-31"), NROW(mergers)) # Lazy way of dealing with situation where churn doesn't occur
     m <- id %in% mergers$id
-    if (Sum(m, remove.missing = FALSE) == 0)
+    if (SumEmptyHandling(m, remove.missing = FALSE) == 0)
         return(NULL)
     ag <- aggregate(to[m], list(id[m]), FUN = max)
     m <- match(mergers$id, ag[, 1])
