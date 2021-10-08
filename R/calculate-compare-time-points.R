@@ -1,5 +1,5 @@
 #' @importFrom flipTime Period
-#' @importFrom verbs Sum
+#' @importFrom verbs Sum SumEmptyHandling
 comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
 {
     # We compare points in time by looking at the statistic of interest at thee end of the periiod,
@@ -45,16 +45,20 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
                   "expansion" = expansion(rr.start.by.id, rr.end.by.id),
                   "churn" = rr.start.by.id[setdiff(id.start, id.end)],
                   "retention" = rr.start.by.id[retention.id])
+    # SumEmptyHandling used as rr[] can be of length zero
+    # Should the denominator ever be zero?????
     den <- if (components %in% c("churn", "retention", "contraction"))
-                       Sum(rr[to.renew & invoice.start], remove.missing = FALSE)
+                       SumEmptyHandling(rr[to.renew & invoice.start], remove.missing = FALSE)
     else
     {
         subscription.length.correction <- byUnit(data) / subscriptionUnit(data)
         final.period.correction <- finalPeriodCorrection(data, period.start, period.end)
-        Sum(rr[invoice.start], remove.missing = FALSE) * final.period.correction * subscription.length.correction
+        SumEmptyHandling(rr[invoice.start], remove.missing = FALSE) * final.period.correction * subscription.length.correction
     }
+    # SumEmptyHandling used to ensure result is zero when
+    # detail is empty.
     list(denominator = den, 
-         numerator = Sum(detail, remove.missing = FALSE),
+         numerator = SumEmptyHandling(detail, remove.missing = FALSE),
          detail = detail)
 }
 

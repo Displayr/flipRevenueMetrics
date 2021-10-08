@@ -11,7 +11,7 @@
 #' @importFrom flipTime AsDate Period
 #' @importFrom flipStatistics Table
 #' @importFrom lubridate floor_date years ceiling_date
-#' @importFrom verbs Sum
+#' @importFrom verbs Sum SumEmptyHandling
 GrowthAccounting <- function(data, small = 0.1)
 {
     if (cohortType(data) != "None")
@@ -27,7 +27,7 @@ GrowthAccounting <- function(data, small = 0.1)
     ids.ever.customers <- unique(id[from <= previous.date])
     invoice.previous <- from <= previous.date & to > previous.date 
     ids.previous <- unique(id[invoice.previous])
-    if (Sum(invoice.previous == 0, remove.missing = FALSE)) 
+    if (SumEmptyHandling(invoice.previous, remove.missing = FALSE) == 0) 
         rr.by.id.previous <- rep(0, 0)
     else 
         rr.by.id.previous <- tapply(rr[invoice.previous], list(id[invoice.previous]), Sum, remove.missing = FALSE)
@@ -81,7 +81,7 @@ GrowthAccounting <- function(data, small = 0.1)
         accounting[, i] <- sapply(rr.metric.by.id, sum)
         counts[, i] <- cnts <- sapply(rr.metric.by.id, length)
         
-        lngth <- Sum(cnts, remove.missing = FALSE)
+        lngth <- SumEmptyHandling(cnts, remove.missing = FALSE)
         if (lngth > 0)
         {
             rws <- counter + (1:lngth)
