@@ -6,7 +6,7 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
     # compared to the end of the preceding period. The period.start.date is the actual beginning
     # of the peeriod. The period.end.boundary is the beginning of the following period.
     # That is, in terms of mathematical notation for intervals: [period)
-    
+
     # Can be made a lot faster by having the loop inside the function so calculations
     # can be re-used from pepriod to period
     period.end <- nextDate(data, period.start)
@@ -18,15 +18,15 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
         invoice.end <- invoice.end & new
         invoice.start <- invoice.start & new
     }
-    
+
 #    invoice.end <- invoice.end & to.renew
 #    invoice.start <- invoice.start & to.renew
-    
+
     id <- idsReflectingMergers(data, period.start)
     #to.renew.id <- toRenewID(data$to, data$from, id, period.start, period.end)
     to.renew <- toRenew(data$to, data$from, id, period.start, period.end)
     #to.renew <- to.renew.id %in% to.renew.id
-    
+
     rr <- data$recurring.value
     rr.end.by.id <- sumBy(rr[invoice.end], id[invoice.end])
     rr.start.by.id <- sumBy(rr[invoice.start], id[invoice.start])
@@ -36,8 +36,8 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
     if (period.start == as.Date("2016-01-01"))
     {
         period.end = period.start
-        
-        
+
+
     }
     detail <- switch(components,
                   "new" = rr.end.by.id[setdiff(id.end, id.start)],
@@ -57,13 +57,13 @@ comparingTwoPointsInTime <- function(in.cohort, period.start, data, components)
     }
     # SumEmptyHandling used to ensure result is zero when
     # detail is empty.
-    list(denominator = den, 
+    list(denominator = den,
          numerator = SumEmptyHandling(detail, remove.missing = FALSE),
          detail = detail)
 }
 
 
-#' @importFrom flipTime Periods 
+#' @importFrom flipTime Periods
 finalPeriodCorrection <- function(data, period.start, period.end)
 {
     if (period.end != lastDate(data))
@@ -94,23 +94,23 @@ differences <- function(x, y)
 expansion <- function(x, y)
 {
     d <- differences(x, y)
-    d[d > 0]    
+    d[d > 0]
 }
 
 contraction <- function(x, y)
 {
     d <- differences(x, y)
-    -d[d < 0]    
+    -d[d < 0]
 }
 
-# 
+#
 # currentCustomers <- function(in.cohort, period.start, data)
 # {
 #     period.boundary <- nextDate(data, period.start)
 #     m <- customerAtPeriodEnd(data, period.boundary)
 #     andSubsetIfItExists(m, in.cohort)
 # }
-# 
+#
 # earlierCustomers <- function(in.cohort, period.start, data)
 # {
 #     period.boundary <- nextDate(data, period.start)
@@ -118,22 +118,22 @@ contraction <- function(x, y)
 #     earlier.boundary <- period.boundary - unit
 #     m <- customerAtPeriodEnd(data, earlier.boundary)
 #     if (newCohort(data)) # Should only occur when is.null(in.cohort)
-#         in.cohort <- dateVariableInWindow(data$subscribed.from, 
-#                                           earlier.boundary - unit, 
+#         in.cohort <- dateVariableInWindow(data$subscribed.from,
+#                                           earlier.boundary - unit,
 #                                           earlier.boundary)
 #         #print(paste("new", earlier.boundary - unit, earlier.boundary))
 #     andSubsetIfItExists(m, in.cohort)
 # }
-# # 
+# #
 # # expansionOrContraction <- function(components, current, earlier, period.start,  value, id)
 # # {
 # #     rr.change.by.id <- changeInRecurringRevenueByID(current, earlier, value, id)
-# #     if (components == "contraction") 
+# #     if (components == "contraction")
 # #         return(-rr.change.by.id[rr.change.by.id < 0])
 # #     rr.change.by.id[rr.change.by.id > 0]
-# #     
+# #
 # # }
-# 
+#
 idsReflectingMergers <- function(data, period.start)
 {
     changingMergedIDs(data, period.start, data$id)
@@ -149,7 +149,7 @@ changingMergedIDs <- function(data, period.start, id)
     id[m] <- merger.info$to.id[mtch[m]]
     id
 }
-# 
+#
 # changeInRecurringRevenueByID <- function(current, earlier, value, id)
 # {
 #     id.earlier <- unique(id[earlier])
@@ -160,12 +160,12 @@ changingMergedIDs <- function(data, period.start, id)
 #     rr.earlier <- recurringRevenueByID(earlier, retained, value, id)
 #     rr.current - rr.earlier
 # }
-# 
-# 
+#
+#
 # recurringRevenueByID <- function(x, y, value, id)
 # {
 #     subset <- x & y
 #     tapply(value[subset],
-#            list(id[subset]), 
+#            list(id[subset]),
 #            sum)
 # }
