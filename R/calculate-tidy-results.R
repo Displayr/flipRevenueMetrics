@@ -15,7 +15,7 @@ tidyResults <- function(results, volume, components, data)
 tidyNumeratorAndDenominator <- function(numerator, denominator)#, mergers, by, volume, rr)
 {
     if (!is.vector(numerator))
-    {    
+    {
         # Removing zero rows and columns
         rf <- zeroRowsAtTopAndBottom(denominator)
         cf <- zeroRowsAtTopAndBottom(t(denominator))
@@ -25,17 +25,17 @@ tidyNumeratorAndDenominator <- function(numerator, denominator)#, mergers, by, v
     list(denominator = denominator, numerator = numerator)
 }
 
-#' @importFrom verbs SumRows
+#' @importFrom verbs SumEachRow
 zeroRowsAtTopAndBottom <- function(x)
 {
-    rs <- SumRows(x)
+    rs <- SumEachRow(x)
     cumsum(rs) > 0 & rev(cumsum(rev(rs))) > 0
 }
 
 deListDetails <- function(results, is.matrix)
 {
     if (!is.matrix)
-        return(lapply(results, function(x) x[["detail"]]))        
+        return(lapply(results, function(x) x[["detail"]]))
     lapply(results, function(x) lapply(x, function(x) x[["detail"]]))
 }
 
@@ -43,7 +43,7 @@ deListDetails <- function(results, is.matrix)
 deList <- function(results, statistic, is.matrix)
 {
     if (is.matrix)
-        return(convertToMatrix(results, statistic))        
+        return(convertToMatrix(results, statistic))
     sapplyStatistic(results, statistic)
 }
 
@@ -73,7 +73,7 @@ sapplyStatistic <- function(x, statistic)
 #' @importFrom verbs Sum
 tidyDetail <- function(volume, numerator, denominator, detail, components, data)
 {
-    
+
     if (singleSeries(data))# & components != "churn" & (volume | components == "number of customers"))
        return(bindListAsDataFrame(detail))
     rn <- if (is.matrix(denominator)) rownames(denominator) else names(denominator)
@@ -96,14 +96,14 @@ tidyDetail <- function(volume, numerator, denominator, detail, components, data)
 
 
 
-#' @importFrom dplyr bind_rows 
+#' @importFrom dplyr bind_rows
 bindListAsDataFrame <- function(x)
 {
     if (is.vector(x[[1]]) | is.array(x[[1]]))
         return(listOfVectorsAsDataFrame(x))
     if (is.data.frame(x[[1]]))
     {
-        out <- bind_rows(x) 
+        out <- bind_rows(x)
         out$zz <- namesAsVariable(x)
         names(out) <- c("ID", "Value", "Period")
         return(out[, c(3, 1, 2)])
@@ -133,7 +133,7 @@ vectorHasNoNames <- function(x)
     all(sapply(x, FUN = function(x) is.null(names(x))))
 }
 
-#' 
+#'
 #' #' @importFrom flipTables Cbind
 #' asMatrix <- function(list.of.lists, FUN, fill.with = 0)
 #' {
@@ -141,4 +141,4 @@ vectorHasNoNames <- function(x)
 #'     m <- t(do.call("Cbind", x)) #Using t() to hack around DS-3041
 #'     m[is.na(m)] <- fill.with
 #'     m
-#' }    
+#' }
