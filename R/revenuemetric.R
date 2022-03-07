@@ -136,9 +136,9 @@ RevenueMetric <- function(FUN = "Acquisition",
                   Table = chart.data,
                   Detail = createDetails(out, start, end))
     if (output == "Plot") {
-        attr(out, "ChartData") <- if (requiresHeatmap(out) & length(out) > 1) NULL else chart.data
+        attr(out, "ChartData") <- if (requiresHeatmap(out) & length(out) > 1) NULL else as.numeric(chart.data)
         attr(out, "ChartType") <- "Column Clustered"
-        
+
     }
     out
 }
