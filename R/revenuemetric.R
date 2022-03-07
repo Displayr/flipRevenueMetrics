@@ -130,10 +130,14 @@ RevenueMetric <- function(FUN = "Acquisition",
     out <- out[sapply(out, function(x) NROW(x) > 0 )] # Removing any empty strings
     if (length(out) == 0)
         return(NULL)
+    chart.data <- createTable(out, start, end)
     out <- switch(output,
                   Plot = createPlots(out, start, end, y.min, y.max),
-                  Table = createTable(out, start, end),
+                  Table = chart.data,
                   Detail = createDetails(out, start, end))
+    if (output == "Plot") {
+        attr(out, "ChartData") <- if (requiresHeatmap(out) & length(out) > 1) NULL else chart.data
+    }
     out
 }
 
