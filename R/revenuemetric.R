@@ -116,6 +116,7 @@ RevenueMetric <- function(FUN = "Acquisition",
             if (!is.null(metric))
             {
                 out[[i]] <- metric
+                print(class(metric))
                 r <- yLim(metric)
                 if (!is.na(r[1]))
                 {
@@ -131,14 +132,27 @@ RevenueMetric <- function(FUN = "Acquisition",
     if (length(out) == 0)
         return(NULL)
     chart.data <- createTable(out, start, end)
+    y.title = attr(out, "y.title")
+    if ("OneDimensionalWithoutTrend" %in% class(out)) {
+        chart.type = "Area"
+    } else if ("GrowthAccounting" %in% class(out)) {
+        chart.type = "Column Stacked"
+    } else {
+        chart.type = "Column Clustered"
+    }
     out <- switch(output,
                   Plot = createPlots(out, start, end, y.min, y.max),
                   Table = chart.data,
                   Detail = createDetails(out, start, end))
     if (output == "Plot") {
         attr(out, "ChartData") <- if (requiresHeatmap(out) & length(out) > 1) NULL else as.numeric(chart.data)
-        attr(out, "ChartType") <- "Column Clustered"
-
+        attr(out, "ChartType") <- chart.type
+        x.title = switch(by, 
+                         day = "Day", 
+                         month = "Month", 
+                         quarter = "Quarter", 
+                         year = "Year")
+        attr(out, "ChartLabels") = list("PrimaryAxisTitle" = x.title, "ValueAxisTitle" = y.title)
     }
     out
 }
