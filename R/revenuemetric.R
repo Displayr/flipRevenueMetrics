@@ -116,7 +116,6 @@ RevenueMetric <- function(FUN = "Acquisition",
             if (!is.null(metric))
             {
                 out[[i]] <- metric
-                print(class(metric))
                 r <- yLim(metric)
                 if (!is.na(r[1]))
                 {
@@ -127,19 +126,22 @@ RevenueMetric <- function(FUN = "Acquisition",
         }
     }
     names(out) <- names(filters)
-    out <- lapply(out, filterRange, start, end)
-    out <- out[sapply(out, function(x) NROW(x) > 0 )] # Removing any empty strings
-    if (length(out) == 0)
-        return(NULL)
-    chart.data <- createTable(out, start, end)
-    y.title = attr(out, "y.title")
-    if ("OneDimensionalWithoutTrend" %in% class(out)) {
+    # Collect information for setting chart attribute data.
+    # Info will be lost after creating plots
+    y.title = attr(out[[1]], "y.title")
+    if ("OneDimensionalWithoutTrend" %in% class(out[[1]])) {
         chart.type = "Area"
-    } else if ("GrowthAccounting" %in% class(out)) {
+    } else if ("GrowthAccounting" %in% class(out[[1]])) {
         chart.type = "Column Stacked"
     } else {
         chart.type = "Column Clustered"
     }
+    out <- lapply(out, filterRange, start, end)
+    out <- out[sapply(out, function(x) NROW(x) > 0 )] # Removing any empty strings
+    if (length(out) == 0)
+        return(NULL)
+
+    chart.data <- createTable(out, start, end)
     out <- switch(output,
                   Plot = createPlots(out, start, end, y.min, y.max),
                   Table = chart.data,
