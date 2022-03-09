@@ -147,7 +147,7 @@ RevenueMetric <- function(FUN = "Acquisition",
                   Table = chart.data,
                   Detail = createDetails(out, start, end))
     if (output == "Plot") {
-        attr(out, "ChartData") <- if (requiresHeatmap(out) & length(out) > 1) NULL else as.numeric(chart.data)
+        attr(out, "ChartData") <- if (requiresHeatmap(out) & length(out) > 1) NULL else as.matrix(chart.data)
         attr(out, "ChartType") <- chart.type
         x.title = switch(by, 
                          day = "Day", 
