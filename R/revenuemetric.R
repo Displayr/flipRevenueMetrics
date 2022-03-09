@@ -161,11 +161,19 @@ RevenueMetric <- function(FUN = "Acquisition",
                           "NumberofCustomers", 
                           "AverageRecurringRevenue")
         chart.settings = list()
-        chart.settings$ShowDataLabels = FALSE
         chart.settings$ShowLegend = n.series > 1 | chart.type == "Column Stacked"
         chart.settings$ValueAxis = list(NumberFormat = if (FUN %in% numeric.types) "General" else "0%",
                                         ShowTitle = TRUE)
         chart.settings$PrimaryAxis = list(ShowTitle = TRUE, LabelPosition = "Low")
+        chart.settings$TemplateSeries = list()
+        chart.settings$TemplateSeries[[1]] = list(ShowDataLabels = FALSE)
+        if (is.matrix(chart.data)) {
+            for (j in seq_len(ncol(chart.data))) {
+                chart.settings$TemplateSeries[[j]] = list(ShowDataLabels = FALSE)
+            }       
+        }
+        
+
         attr(out, "ChartSettings") <- chart.settings
         x.title = switch(by, 
                          day = "Day", 
