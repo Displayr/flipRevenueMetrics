@@ -129,10 +129,12 @@ RevenueMetric <- function(FUN = "Acquisition",
     # Collect information for setting chart attribute data.
     # Info will be lost after creating plots
     y.title = attr(out[[1]], "y.title")
+    transpose.chart.data = FALSE
     if ("OneDimensionalWithoutTrend" %in% class(out[[1]])) {
         chart.type = "Area"
     } else if ("GrowthAccounting" %in% class(out[[1]])) {
         chart.type = "Column Stacked"
+        transpose.chart.data = TRUE
     } else {
         chart.type = "Column Clustered"
     }
@@ -147,6 +149,8 @@ RevenueMetric <- function(FUN = "Acquisition",
                   Table = chart.data,
                   Detail = createDetails(out, start, end))
     if (output == "Plot") {
+        if (transpose.chart.data)
+            chart.data = t(chart.data)
         attr(out, "ChartData") <- if (requiresHeatmap(out) & length(out) > 1) NULL else as.matrix(chart.data)
         attr(out, "ChartType") <- chart.type
         x.title = switch(by, 
