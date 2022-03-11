@@ -156,6 +156,8 @@ RevenueMetric <- function(FUN = "Acquisition",
 }
 
 addAttributesToRevenueMetricPlot <- function(plot, chart.data, chart.type, FUN, by, transpose, y.title, n.series) {
+     
+    chart.data <- as.matrix(chart.data)
     if (transpose){
         chart.data <- t(chart.data)
     }
@@ -163,17 +165,18 @@ addAttributesToRevenueMetricPlot <- function(plot, chart.data, chart.type, FUN, 
               "RecurringRevenue", 
               "NumberofCustomers", 
               "AverageRecurringRevenue")
-    if (! FUN %in% numeric.types) {
+    is.numeric.type <- FUN %in% numeric.types
+    if (! is.numeric.type) {
         chart.data <- chart.data * 100
         attr(chart.data, "statistic") <- "%"
     }
 
-    attr(plot, "ChartData") <- if (requiresHeatmap(plot) & length(plot) > 1) NULL else as.matrix(chart.data)
+    attr(plot, "ChartData") <- if (requiresHeatmap(plot) & length(plot) > 1) NULL else chart.data
     attr(plot, "ChartType") <- chart.type
 
     chart.settings <- list()
     chart.settings$ShowLegend <- n.series > 1 | chart.type == "Column Stacked"
-    chart.settings$ValueAxis <- list(NumberFormat = if (FUN %in% numeric.types) "General" else "0.0%",
+    chart.settings$ValueAxis <- list(NumberFormat = if (is.numeric.type) "General" else "0.0%",
                                     ShowTitle = TRUE)
     chart.settings$PrimaryAxis <- list(ShowTitle = TRUE, LabelPosition = "Low")
     chart.settings$TemplateSeries <- list()
