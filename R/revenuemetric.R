@@ -171,7 +171,7 @@ addAttributesToRevenueMetricPlot <- function(plot, chart.data, chart.type, FUN, 
         attr(chart.data, "statistic") <- "%"
     }
 
-    attr(plot, "ChartData") <- if (requiresHeatmap(plot) & length(plot) > 1) NULL else chart.data
+    attr(plot, "ChartData") <- chart.data
     attr(plot, "ChartType") <- chart.type
 
     chart.settings <- list()
