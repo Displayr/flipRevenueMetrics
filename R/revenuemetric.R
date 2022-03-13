@@ -126,15 +126,76 @@ RevenueMetric <- function(FUN = "Acquisition",
         }
     }
     names(out) <- names(filters)
+    # Collect information for setting chart attribute data.
+    # Info will be lost after creating plots
+    y.title <- attr(out[[1]], "y.title")
+    n.series <- length(out)
+    transpose.chart.data <- FALSE
+    if ("OneDimensionalWithoutTrend" %in% class(out[[1]])) {
+        chart.type <- "Area"
+    } else if ("GrowthAccounting" %in% class(out[[1]])) {
+        chart.type <- "Column Stacked"
+        transpose.chart.data <- TRUE
+    } else {
+        chart.type <- "Column Clustered"
+    }
     out <- lapply(out, filterRange, start, end)
     out <- out[sapply(out, function(x) NROW(x) > 0 )] # Removing any empty strings
     if (length(out) == 0)
         return(NULL)
+
+    chart.data <- createTable(out, start, end)
     out <- switch(output,
                   Plot = createPlots(out, start, end, y.min, y.max),
-                  Table = createTable(out, start, end),
+                  Table = chart.data,
                   Detail = createDetails(out, start, end))
+    if (output == "Plot") {
+        out <- addAttributesToRevenueMetricPlot(out, chart.data, chart.type, FUN, by, transpose.chart.data, y.title, n.series)
+    }
     out
+}
+
+addAttributesToRevenueMetricPlot <- function(plot, chart.data, chart.type, FUN, by, transpose, y.title, n.series) {
+     
+    chart.data <- as.matrix(chart.data)
+    if (transpose){
+        chart.data <- t(chart.data)
+    }
+    numeric.types <- c("GrowthAccounting", 
+              "RecurringRevenue", 
+              "NumberofCustomers", 
+              "AverageRecurringRevenue")
+    is.numeric.type <- FUN %in% numeric.types
+    if (! is.numeric.type) {
+        chart.data <- chart.data * 100
+        attr(chart.data, "statistic") <- "%"
+    }
+
+    attr(plot, "ChartData") <- chart.data
+    attr(plot, "ChartType") <- chart.type
+
+    chart.settings <- list()
+    chart.settings$ShowLegend <- n.series > 1 | chart.type == "Column Stacked"
+    chart.settings$ValueAxis <- list(NumberFormat = if (is.numeric.type) "General" else "0.0%",
+                                    ShowTitle = TRUE)
+    chart.settings$PrimaryAxis <- list(ShowTitle = TRUE, LabelPosition = "Low")
+    chart.settings$TemplateSeries <- list()
+    chart.settings$TemplateSeries[[1]] <- list(ShowDataLabels = FALSE)
+    if (is.matrix(chart.data)) {
+        for (j in seq_len(ncol(chart.data))) {
+            chart.settings$TemplateSeries[[j]] <- list(ShowDataLabels = FALSE)
+        }       
+    }
+    
+
+    attr(plot, "ChartSettings") <- chart.settings
+    x.title <- switch(by, 
+                     day = "Day", 
+                     month = "Month", 
+                     quarter = "Quarter", 
+                     year = "Year")
+    attr(plot, "ChartLabels") <- list("PrimaryAxisTitle" = x.title, "ValueAxisTitle" = y.title)
+    return(plot)
 }
 
 checkOutputArgument <- function(output)

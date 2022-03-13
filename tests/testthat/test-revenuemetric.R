@@ -32,6 +32,7 @@ for (fun in metric.functions)
                                   cohort.type = cohort.type, 
                                   value = d$AUD, from = d$ValidFrom, to = d$ValidTo, id = d$name, by = by)
                 expect_error(print(s), NA)
+                expect_true(!is.null(attr(s, "ChartData")))
               }
     )
 
