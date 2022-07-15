@@ -213,6 +213,7 @@ plot.GrowthAccounting <- function(x, ...)
             ),      
             marker = list(color = colors[i]),
             name = metrics[eval(i)],
+            textposition = "none",
             type = "bar")
     }
     p <- config(p, displayModeBar = FALSE)
