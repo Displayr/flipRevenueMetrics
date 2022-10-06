@@ -73,6 +73,7 @@ calculateRatioNumbers <- function(data, start.date, next.start.date, id.to.renew
 mergerInfo <- function(data, start.date, next.start.date)
 {
     mergers <- attr(data, "mergers")
+    mergers <- mergers[!is.na(mergers$date), ]
     in.period <- mergers$date >= start.date & mergers$date < next.start.date
     later.periods <- mergers$date <= start.date #Must be a smarter way...
     relevant <- in.period | later.periods    
